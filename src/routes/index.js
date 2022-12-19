@@ -7,6 +7,10 @@ router.get("/", (req, res) => {
   res.render('sign-in')
 })
 
+router.get("/sign-in", (req, res) => {
+  res.render('sign-in')
+})
+
 router.get("/sign-up", (req, res) => {
   res.render('sign-up')
 })
@@ -25,6 +29,10 @@ router.get("/board", (req, res) => {
 
 router.get("/tables", (req, res) => {
   res.render('tables')
+})
+
+router.get("/profile", (req, res) => {
+  res.render('profile')
 })
 
 module.exports = router;
