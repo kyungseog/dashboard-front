@@ -1,25 +1,92 @@
 'use strict'
 
-var ctx = document.getElementById("profile-chart-line").getContext("2d");
+var ctx = document.getElementById("chart-bars").getContext("2d");
 
-var gradientStroke1 = ctx.createLinearGradient(0, 230, 0, 50);
+new Chart(ctx, {
+  type: "bar",
+  data: {
+    labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    datasets: [{
+      label: "Sales",
+      tension: 0.4,
+      borderWidth: 0,
+      borderRadius: 4,
+      borderSkipped: false,
+      backgroundColor: "#fff",
+      data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
+      maxBarThickness: 6
+    }, ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index',
+    },
+    scales: {
+      y: {
+        grid: {
+          drawBorder: false,
+          display: false,
+          drawOnChartArea: false,
+          drawTicks: false,
+        },
+        ticks: {
+          suggestedMin: 0,
+          suggestedMax: 500,
+          beginAtZero: true,
+          padding: 15,
+          font: {
+            size: 14,
+            family: "Open Sans",
+            style: 'normal',
+            lineHeight: 2
+          },
+          color: "#fff"
+        },
+      },
+      x: {
+        grid: {
+          drawBorder: false,
+          display: false,
+          drawOnChartArea: false,
+          drawTicks: false
+        },
+        ticks: {
+          display: false
+        },
+      },
+    },
+  },
+});
+
+
+var ctx2 = document.getElementById("chart-line").getContext("2d");
+
+var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
 
 gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
 gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
 gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
 
-var gradientStroke2 = ctx.createLinearGradient(0, 230, 0, 50);
+var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
 
 gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
 gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
 gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
 
-new Chart(ctx, {
+new Chart(ctx2, {
   type: "line",
   data: {
-    labels: ["11:00", "11:10", "11:20", "11:30", "11:40", "11:50", "12:00", "12:10", "12:20"],
+    labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     datasets: [{
-        label: "orders",
+        label: "Mobile apps",
         tension: 0.4,
         borderWidth: 0,
         pointRadius: 0,
@@ -32,7 +99,7 @@ new Chart(ctx, {
 
       },
       {
-        label: "sales",
+        label: "Websites",
         tension: 0.4,
         borderWidth: 0,
         pointRadius: 0,
