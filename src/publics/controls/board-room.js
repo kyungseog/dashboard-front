@@ -1,9 +1,6 @@
 "use strict";
 
-let roombutton = document.querySelector('#roombutton');
 let roomTable = document.querySelector('#room')
-
-roombutton.addEventListener('click', roomsStatus);
 
 async function room() {
   fetch("http://localhost:3000/room", {

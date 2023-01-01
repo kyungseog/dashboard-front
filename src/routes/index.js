@@ -11,12 +11,16 @@ router.get("/sign-in", (req, res) => {
   res.render('sign-in')
 })
 
-router.get("/sign-up", (req, res) => {
-  res.render('sign-up')
+// router.get("/sign-up", (req, res) => {
+//   res.render('sign-up')
+// })
+
+router.get("/korea", (req, res) => {
+  res.render('korea')
 })
 
-router.get("/dashboard", (req, res) => {
-  res.render('dashboard')
+router.get("/japan", (req, res) => {
+  res.render('japan')
 })
 
 router.get("/live", (req, res) => {
@@ -33,6 +37,10 @@ router.get("/tables", (req, res) => {
 
 router.get("/profile", (req, res) => {
   res.render('profile')
+})
+
+router.get("/billing", (req, res) => {
+  res.render('billing')
 })
 
 module.exports = router;

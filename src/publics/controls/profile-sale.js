@@ -17,7 +17,7 @@ const brandHtml = `
     <td class="align-middle text-center text-sm"><span class="text-danger text-xs font-weight-bold"> -4,000 </span></td>
   </tr>`
 
-const itemHtml = `<div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
+const itemHtml = `<div class="col-xl-2 col-md-4 mb-xl-0 mb-4">
 <div class="card card-blog card-plain">
   <div class="position-relative">
     <a class="d-block shadow-xl border-radius-xl">
@@ -32,14 +32,11 @@ const itemHtml = `<div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
       </h5>
     </a>
     <p class="mb-4 text-sm">
-      판매수량 50개, 실판매가 2백만원, 공헌이익 -2백만원
+      판매수량 50개<br>실판매가 2백만원<br>공헌이익 -2백만원
     </p>
-    <div class="d-flex align-items-center justify-content-between">
-      <button type="button" class="btn btn-outline-primary btn-sm mb-0">View Detail</button>
-    </div>
   </div>
 </div>
 </div>`
 
 brandsData.innerHTML = brandHtml + brandHtml + brandHtml + brandHtml+ brandHtml+brandHtml;
-itemsData.innerHTML = itemHtml + itemHtml + itemHtml + itemHtml;
+itemsData.innerHTML = itemHtml + itemHtml + itemHtml + itemHtml+ itemHtml + itemHtml;

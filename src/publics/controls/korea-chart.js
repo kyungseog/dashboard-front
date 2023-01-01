@@ -2,20 +2,37 @@
 
 var ctx = document.getElementById("chart-bars").getContext("2d");
 
+const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const thisYearTemperature = [[-3, 2], [-5, 1], [0, 3], [-8, -2], [0, 4], [-3, 5], [2, 8]];
+const beforYearTemperature = [[-3, 2], [-5, 1], [0, 3], [-8, -2], [0, 4], [-3, 5], [2, 8]];
+const colorCode = ["#696969","#696969","#696969","#696969","#fff","#696969","#696969"];
+
 new Chart(ctx, {
   type: "bar",
   data: {
-    labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    datasets: [{
-      label: "Sales",
-      tension: 0.4,
-      borderWidth: 0,
-      borderRadius: 4,
-      borderSkipped: false,
-      backgroundColor: "#fff",
-      data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
-      maxBarThickness: 6
-    }, ],
+    labels: dayLabels,
+    datasets: [
+      {
+        label: "Y2022",
+        tension: 0.4,
+        borderWidth: 0,
+        borderRadius: 4,
+        borderSkipped: false,
+        backgroundColor: "#696969",
+        data: beforYearTemperature,
+        maxBarThickness: 6
+      },
+      {
+        label: "Y2023",
+        tension: 0.4,
+        borderWidth: 0,
+        borderRadius: 4,
+        borderSkipped: false,
+        backgroundColor: "#fff",
+        data: thisYearTemperature,
+        maxBarThickness: 6
+      },
+    ],
   },
   options: {
     responsive: true,
@@ -38,12 +55,12 @@ new Chart(ctx, {
           drawTicks: false,
         },
         ticks: {
-          suggestedMin: 0,
-          suggestedMax: 500,
+          suggestedMin: -20,
+          suggestedMax: 20,
           beginAtZero: true,
-          padding: 15,
+          padding: 5,
           font: {
-            size: 14,
+            size: 12,
             family: "Open Sans",
             style: 'normal',
             lineHeight: 2
@@ -59,7 +76,8 @@ new Chart(ctx, {
           drawTicks: false
         },
         ticks: {
-          display: false
+          display: true,
+          color: colorCode,
         },
       },
     },
@@ -73,20 +91,20 @@ var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
 
 gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
 gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
-gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
+gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); 
 
 var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
 
 gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
 gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
-gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
+gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)');
 
 new Chart(ctx2, {
   type: "line",
   data: {
-    labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    labels: ["12/23", "12/24", "12/25", "12/26", "12/27", "12/28", "12/29", "12/30", "12/31", "1/1"],
     datasets: [{
-        label: "Mobile apps",
+        label: "Y2023",
         tension: 0.4,
         borderWidth: 0,
         pointRadius: 0,
@@ -94,12 +112,12 @@ new Chart(ctx2, {
         borderWidth: 3,
         backgroundColor: gradientStroke1,
         fill: true,
-        data: [50, 40, 300, 220, 500, 250, 400, 230, 500],
+        data: [500, 400, 300, 220, 500, 250, 400, 230, 500, 450],
         maxBarThickness: 6
 
       },
       {
-        label: "Websites",
+        label: "Y2022",
         tension: 0.4,
         borderWidth: 0,
         pointRadius: 0,
@@ -107,7 +125,7 @@ new Chart(ctx2, {
         borderWidth: 3,
         backgroundColor: gradientStroke2,
         fill: true,
-        data: [30, 90, 40, 140, 290, 290, 340, 230, 400],
+        data: [300, 90, 400, 140, 290, 290, 340, 230, 400, 350],
         maxBarThickness: 6
       },
     ],
