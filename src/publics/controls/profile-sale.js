@@ -1,5 +1,3 @@
-'use strict'
-
 const brandsData = document.getElementById("profile_brands_data");
 const itemsData = document.getElementById("profile_items_data");
 
