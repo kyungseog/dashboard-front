@@ -1,3 +1,13 @@
+async function getWeather() {
+  fetch("http://localhost:3000/weather/2023-01-10", {
+    method: "GET"
+  })
+  .then((res) => res.json())
+  .then((res) => {
+  })
+}
+
+
 const ctx = document.getElementById("korea-weather-chart").getContext("2d");
 
 const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
