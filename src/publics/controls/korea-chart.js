@@ -1,6 +1,4 @@
-'use strict'
-
-var ctx = document.getElementById("chart-bars").getContext("2d");
+const ctx = document.getElementById("korea-weather-chart").getContext("2d");
 
 const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const thisYearTemperature = [[-3, 2], [-5, 1], [0, 3], [-8, -2], [0, 4], [-3, 5], [2, 8]];
@@ -85,7 +83,7 @@ new Chart(ctx, {
 });
 
 
-var ctx2 = document.getElementById("chart-line").getContext("2d");
+var ctx2 = document.getElementById("korea-sales-chart").getContext("2d");
 
 var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
 
