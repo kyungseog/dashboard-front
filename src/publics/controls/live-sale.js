@@ -64,7 +64,8 @@ async function getSales(brand_id, start_date, end_date) {
   .then((res) => res.json())
   .then((res) => {
     console.log(res);
-    // const productsData = document.getElementById("products_data");
+    const productsData = document.getElementById("products_data");
+    
     // function ProductHtml(img,brand,product,quantity,sales,margin) {
     //   return `<div class="col-xl-2 col-md-4 mb-xl-0 mb-4">
     //   <div class="card card-blog card-plain">
@@ -83,7 +84,7 @@ async function getSales(brand_id, start_date, end_date) {
     //   </div>
     // </div>`}
 
-    // productsData.innerHTML = productHtml + productHtml + productHtml + productHtml + productHtml + productHtml;
+    // productsData.innerHTML = productHtml;
 
 
 
