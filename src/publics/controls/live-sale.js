@@ -1,3 +1,5 @@
+const e = require("express");
+
 const DateTime = luxon.DateTime;
 
 (async function getLives() {
@@ -64,7 +66,21 @@ async function getSales(brand_id, start_date, end_date) {
   .then((res) => res.json())
   .then((res) => {
     console.log(res);
+    const orderData = res.filter( el => el.status_id == '' || el.status_id == '' || el.status_id == '' || el.status_id == '' );
+    const salePrice = orderData.reduce((acc, cur) => acc + cur.sale_price);
+    const discountPrice = orderData.reduce((acc, cur) => acc + cur.discount_price);
+    const quantity = orderData.reduce((acc, cur) => acc + cur.quantity);
+    const set = new Set(orderData.map( r => r.id ));
+    const countId = [...set].length;
+
+    const liveOrderCount = document.getElementById("live-order-count");
+    const liveSales = document.getElementById("live-sales");
+    const liveDiscount = document.getElementById("live-discount");
+    const liveEarning = document.getElementById("live-earning");
     const productsData = document.getElementById("products_data");
+
+    liveOrderCount.innerText = countId;
+    liveSales.innerText = Math.round((salePrice - discountPrice) / 1000).toLocaleString('ko-KR') + "K";
     
     // function ProductHtml(img,brand,product,quantity,sales,margin) {
     //   return `<div class="col-xl-2 col-md-4 mb-xl-0 mb-4">
