@@ -1,16 +1,27 @@
-'use strict'
+const DateTime = luxon.DateTime;
 
 const brandsData = document.getElementById("dashboard_brands_data");
 const itemsData = document.getElementById("dashboard_items_data");
 
-async function room() {
-  fetch("http://localhost:3000/room", {
+(async function sales() {
+  fetch("http://localhost:3000/korea/sales?today=2023-01-18&type=1", {
     method: "GET"
   })
+  .then((res) => res.json())
   .then((res) => {
-    console.log(res);
+    const koreaSales = document.getElementById("korea-sales");
+    const koreaOrderCount = document.getElementById("korea-order-count");
+
+    koreaSales.innerHTML = `${Number(res.sales_price).toLocaleString('ko-KR')} 원
+      <span class="text-success text-sm font-weight-bolder">
+        +55%
+      </span>`
+    koreaOrderCount.innerHTML = `${Number(res.order_count).toLocaleString('ko-KR')} 건
+    <span class="text-success text-sm font-weight-bolder">
+      +5%
+    </span>`
   })
-}
+})();
 
 const brandHtml = `
   <tr>
