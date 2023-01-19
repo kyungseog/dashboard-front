@@ -1,3 +1,5 @@
+import { utility } from "./utility";
+
 const DateTime = luxon.DateTime;
 
 async function fetchData(URL, method) {
@@ -58,34 +60,42 @@ async function brandSales() {
     brandHtml = brandHtml + html;
   }
   brandsData.innerHTML = brandHtml;
+};
+
+async function productSales() {
+  const URL = `http://localhost:3000/korea/product-sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
+  const data = await fetchData(URL, "GET");
+
+  const productsData = document.getElementById("korea-products-data");
+
+  let productHtml = '';
+  for(let i = 0; i < data.length; i++) {
+    const salePrice = Math.round(data[i].sales_price/1000).toLocaleString('ko-KR');
+    const calculateMargin = data[i].sales_price;
+    const margin = Math.round(calculateMargin/1000).toLocaleString('ko-KR');
+
+    let html = `
+      <tr>
+      <td>
+        <div class="d-flex px-2 py-1">
+          <div><img src="${data[i].image}" class="avatar avatar-sm me-3" alt="xd"></div>
+          <div class="d-flex flex-column justify-content-center"><h6 class="mb-0 text-sm">${data[i].product_name}</h6></div>
+        </div>
+      </td>
+      <td>
+        <span class="text-xs font-weight-bold"> ${data[i].brand_name} </span>
+      </td>
+      <td class="align-middle text-center text-sm">
+        <span class="text-xs font-weight-bold"> ${data[i].quantity} </span>
+      </td>
+      <td class="align-middle text-center text-sm">
+        <span class="text-xs font-weight-bold"> ${salePrice} </span>
+      </td>
+      <td class="align-middle text-center text-sm">
+        <span class="text-xs font-weight-bold"> 13% </span>
+      </td>
+    </tr>`
+    productHtml = productHtml + html;
+  }
+  productsData.innerHTML = productHtml;
 }
-
-const itemsData = document.getElementById("dashboard_items_data");
-const itemHtml = `
-  <tr>
-    <td>
-      <div class="d-flex px-2 py-1">
-        <div>
-          <img src="https://moomootr4389.cdn-nhncommerce.com/data/goods/22/10/43/1000012656/1000012656_main_092.webp" class="avatar avatar-sm me-3" alt="xd">
-        </div>
-        <div class="d-flex flex-column justify-content-center">
-          <h6 class="mb-0 text-sm">제품명 블라블라</h6>
-        </div>
-      </div>
-    </td>
-    <td>
-      <span class="text-xs font-weight-bold"> 무무즈 에센셜 </span>
-    </td>
-    <td class="align-middle text-center text-sm">
-      <span class="text-xs font-weight-bold"> 15 </span>
-    </td>
-    <td class="align-middle text-center text-sm">
-      <span class="text-xs font-weight-bold"> 1,000 </span>
-    </td>
-    <td class="align-middle text-center text-sm">
-      <span class="text-xs font-weight-bold"> 13% </span>
-    </td>
-  </tr>`
-
-
-itemsData.innerHTML = itemHtml + itemHtml + itemHtml + itemHtml + itemHtml + itemHtml;

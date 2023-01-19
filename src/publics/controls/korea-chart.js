@@ -1,12 +1,14 @@
+import { utility } from "./utility";
+
 const DateTime = luxon.DateTime;
 let koreaSalesChart;
-let weatherChart;
+let koreaWeatherChart;
 
-async function fetchData(URL, method) {
-  const response = await fetch(URL, {method: method});
-  const data = await response.json()
-  return data;
-}
+// async function fetchData(URL, method) {
+//   const response = await fetch(URL, {method: method});
+//   const data = await response.json()
+//   return data;
+// }
 
 (function startFunction() {
   salesData();
@@ -16,8 +18,8 @@ async function salesData() {
   const thisYearURL = `http://localhost:3000/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=10`;
   const beforeYearURL = `http://localhost:3000/korea/sales?today=${DateTime.now().minus({ years: 1 }).toFormat('yyyy-LL-dd')}&type=10`;
 
-  const thisYeardata = await fetchData(thisYearURL, "GET");
-  const beforeYeardata = await fetchData(beforeYearURL, "GET");
+  const thisYeardata = await utility.fetchData(thisYearURL, "GET");
+  const beforeYeardata = await utility.fetchData(beforeYearURL, "GET");
   const thisYearSalesData = thisYeardata.map( r => Math.round(r.sales_price/10000) );
   const beforeYearSalesData = beforeYeardata.map( r => Math.round(r.sales_price/10000) );
 
@@ -132,29 +134,39 @@ async function salesChart( labelData, thisYearLabel, beforeYearLabel, thisYearSa
   });
 };
 
-async function getWeather() {
+async function weatherData() {
   const thisYearURL = `http://localhost:3000/korea/weather/${DateTime.now().toFormat('yyyy-LL-dd')}`;
   const beforeYearURL = `http://localhost:3000/korea/weather/${DateTime.now().minus({ years: 1 }).toFormat('yyyy-LL-dd')}`;
 
   const thisYearData = await fetchData(thisYearURL, "GET");
-  const beforYearData = await fetchData(beforeYearURL, "GET");
+  const beforeYearData = await fetchData(beforeYearURL, "GET");
+  const thisYearTemp = thisYearData.map( r => [r.min, r.max] );
+  const beforeYearTemp = beforeYearData.map( r => [r.min, r.max] );
 
+  const labelData = thisYearData.map( r => DateTime.fromISO(r.payment_date).toFormat('LL/dd') );
+  const thisYearLabel = "Y" + DateTime.now().toFormat('yyyy');
+  const beforeYearLabel = "Y" + DateTime.now().minus({ years: 1 }).toFormat('yyyy');
+
+  weatherChart( thisYearTemp, beforeYearTemp, labelData, thisYearLabel, beforeYearLabel );
+};
+
+async function weatherChart( thisYearTemp, beforeYearTemp, labelData, thisYearLabel, beforeYearLabel ) {
   const ctx = document.getElementById("korea-weather-chart").getContext("2d");
 
-  const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const thisYearTemperature = [[-3, 2], [-5, 1], [0, 3], [-8, -2], [0, 4], [-3, 5], [2, 8]];
-  const beforYearTemperature = [[-3, 2], [-5, 1], [0, 3], [-8, -2], [0, 4], [-3, 5], [2, 8]];
+  const dayLabels = labelData;
+  const thisYearTemperature = thisYearTemp;
+  const beforYearTemperature = beforeYearTemp;
   const colorCode = ["#696969","#696969","#696969","#696969","#fff","#696969","#696969"];
 
-  if(weatherChart) { weatherChart.destroy() };
+  if(koreaWeatherChart) { koreaWeatherChart.destroy() };
 
-  weatherChart = new Chart(ctx, {
+  koreaWeatherChart = new Chart(ctx, {
     type: "bar",
     data: {
       labels: dayLabels,
       datasets: [
         {
-          label: "Y2022",
+          label: beforeYearLabel,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 4,
@@ -164,7 +176,7 @@ async function getWeather() {
           maxBarThickness: 6
         },
         {
-          label: "Y2023",
+          label: thisYearLabel,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 4,
