@@ -1,44 +1,66 @@
 const DateTime = luxon.DateTime;
 
-const brandsData = document.getElementById("dashboard_brands_data");
-const itemsData = document.getElementById("dashboard_items_data");
+async function fetchData(URL, method) {
+  const response = await fetch(URL, {method: method});
+  const data = await response.json()
+  return data;
+}
 
-(async function sales() {
-  fetch("http://localhost:3000/korea/sales?today=2023-01-18&type=1", {
-    method: "GET"
-  })
-  .then((res) => res.json())
-  .then((res) => {
-    const koreaSales = document.getElementById("korea-sales");
-    const koreaOrderCount = document.getElementById("korea-order-count");
+(function startFunction() {
+  sales();
+  brandSales();
+})()
 
-    koreaSales.innerHTML = `${Number(res.sales_price).toLocaleString('ko-KR')} 원
-      <span class="text-success text-sm font-weight-bolder">
-        +55%
-      </span>`
-    koreaOrderCount.innerHTML = `${Number(res.order_count).toLocaleString('ko-KR')} 건
+async function sales() {
+  const URL = `http://localhost:3000/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
+  const data = await fetchData(URL, "GET");
+
+  const koreaSales = document.getElementById("korea-sales");
+  const koreaOrderCount = document.getElementById("korea-order-count");
+
+  koreaSales.innerHTML = `${Number(data.sales_price).toLocaleString('ko-KR')} 원
     <span class="text-success text-sm font-weight-bolder">
-      +5%
+      +55%
     </span>`
-  })
-})();
+  koreaOrderCount.innerHTML = `${Number(data.order_count).toLocaleString('ko-KR')} 건
+  <span class="text-success text-sm font-weight-bolder">
+    +5%
+  </span>`
+};
 
-const brandHtml = `
-  <tr>
-    <td>
-      <div class="d-flex px-2 py-1">
-        <div class="d-flex flex-column justify-content-center">
-          <h6 class="mb-0 text-sm">무무즈에센셜</h6>
-        </div>
-      </div>
-    </td>
-    <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> 2,500 </span></td>
-    <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> 1,500 </span></td>
-    <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> 14,000 </span></td>
-    <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> 18,000 </span></td>
-    <td class="align-middle text-center text-sm"><span class="text-danger text-xs font-weight-bold"> -4,000 </span></td>
-  </tr>`
+async function brandSales() {
+  const URL = `http://localhost:3000/korea/brand-sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
+  const data = await fetchData(URL, "GET");
 
+  const brandsData = document.getElementById("korea-brands-data");
+
+  let brandHtml = '';
+  for(let i = 0; i < data.length; i++) {
+    const salePrice = Math.round(data[i].sales_price/1000).toLocaleString('ko-KR');
+    const calculateMargin = data[i].sales_price;
+    const margin = Math.round(calculateMargin/1000).toLocaleString('ko-KR');
+
+    let html = `
+      <tr>
+        <td>
+          <div class="d-flex px-2 py-1">
+            <div class="d-flex flex-column justify-content-center">
+              <h6 class="mb-0 text-sm">${data[i].brand_name}</h6>
+            </div>
+          </div>
+        </td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${data[i].order_count} </span></td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${data[i].quantity} </span></td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${salePrice} </span></td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> 000 </span></td>
+        <td class="align-middle text-center text-sm"><span class="${calculateMargin >= 0 ? 'text-success' : 'text-danger'} text-xs font-weight-bold"> ${margin} </span></td>
+      </tr>`
+    brandHtml = brandHtml + html;
+  }
+  brandsData.innerHTML = brandHtml;
+}
+
+const itemsData = document.getElementById("dashboard_items_data");
 const itemHtml = `
   <tr>
     <td>
@@ -65,5 +87,5 @@ const itemHtml = `
     </td>
   </tr>`
 
-brandsData.innerHTML = brandHtml + brandHtml + brandHtml + brandHtml + brandHtml + brandHtml;
+
 itemsData.innerHTML = itemHtml + itemHtml + itemHtml + itemHtml + itemHtml + itemHtml;
