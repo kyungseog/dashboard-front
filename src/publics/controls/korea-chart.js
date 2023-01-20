@@ -1,14 +1,12 @@
-import { utility } from "./utility";
-
 const DateTime = luxon.DateTime;
 let koreaSalesChart;
 let koreaWeatherChart;
 
-// async function fetchData(URL, method) {
-//   const response = await fetch(URL, {method: method});
-//   const data = await response.json()
-//   return data;
-// }
+async function fetchData(URL, method) {
+  const response = await fetch(URL, {method: method});
+  const data = await response.json()
+  return data;
+}
 
 (function startFunction() {
   salesData();
@@ -18,8 +16,8 @@ async function salesData() {
   const thisYearURL = `http://localhost:3000/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=10`;
   const beforeYearURL = `http://localhost:3000/korea/sales?today=${DateTime.now().minus({ years: 1 }).toFormat('yyyy-LL-dd')}&type=10`;
 
-  const thisYeardata = await utility.fetchData(thisYearURL, "GET");
-  const beforeYeardata = await utility.fetchData(beforeYearURL, "GET");
+  const thisYeardata = await fetchData(thisYearURL, "GET");
+  const beforeYeardata = await fetchData(beforeYearURL, "GET");
   const thisYearSalesData = thisYeardata.map( r => Math.round(r.sales_price/10000) );
   const beforeYearSalesData = beforeYeardata.map( r => Math.round(r.sales_price/10000) );
 

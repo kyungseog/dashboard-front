@@ -1,5 +1,3 @@
-import { utility } from "./utility";
-
 const DateTime = luxon.DateTime;
 
 async function fetchData(URL, method) {
@@ -11,23 +9,39 @@ async function fetchData(URL, method) {
 (function startFunction() {
   sales();
   brandSales();
+  productSales();
 })()
 
 async function sales() {
   const URL = `http://localhost:3000/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
   const data = await fetchData(URL, "GET");
 
+  const dateType = Number(DateTime.now().day)
+  const monthURL = `http://localhost:3000/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=${dateType - 1}`;
+  const monthSalesData = await fetchData(monthURL, "GET");
+ 
+  const monthSales = Math.round(monthSalesData.reduce( (acc, cur) => acc + Number(cur.sales_price), 0 ) / 1000);
+
   const koreaSales = document.getElementById("korea-sales");
   const koreaOrderCount = document.getElementById("korea-order-count");
+  const koreaMonthlySales = document.getElementById("korea-monthly-sales");
 
-  koreaSales.innerHTML = `${Number(data.sales_price).toLocaleString('ko-KR')} 원
-    <span class="text-success text-sm font-weight-bolder">
-      +55%
+  const salesRatio = Math.round(data[1].sales_price / data[0].sales_price * 100) - 100;
+  const orderCountRatio = Math.round(data[1].order_count / data[0].order_count * 100) - 100;
+
+  koreaSales.innerHTML = `${Number(Math.round(data[1].sales_price / 1000)).toLocaleString('ko-KR')} 천원
+    <span class="${salesRatio > 0 ? 'text-success' : 'text-danger'} text-sm font-weight-bolder">
+      ${ salesRatio > 0 ? "+" + salesRatio : salesRatio }%
     </span>`
-  koreaOrderCount.innerHTML = `${Number(data.order_count).toLocaleString('ko-KR')} 건
-  <span class="text-success text-sm font-weight-bolder">
-    +5%
+  koreaOrderCount.innerHTML = `${Number(data[1].order_count).toLocaleString('ko-KR')} 건
+    <span class="${orderCountRatio > 0 ? 'text-success' : 'text-danger'} text-sm font-weight-bolder">
+      ${ orderCountRatio > 0 ? "+" + orderCountRatio : orderCountRatio }%
+    </span>`
+  koreaMonthlySales.innerHTML = `${Number(monthSales).toLocaleString('ko-KR')} 천원
+  <span class="${orderCountRatio > 0 ? 'text-success' : 'text-danger'} text-sm font-weight-bolder">
+    ${ orderCountRatio > 0 ? "+" + orderCountRatio : orderCountRatio }%
   </span>`
+  
 };
 
 async function brandSales() {
@@ -39,7 +53,8 @@ async function brandSales() {
   let brandHtml = '';
   for(let i = 0; i < data.length; i++) {
     const salePrice = Math.round(data[i].sales_price/1000).toLocaleString('ko-KR');
-    const calculateMargin = data[i].sales_price;
+    const cost = Math.round((Number(data[i].cost) + Number(data[i].pg_cost))/1000).toLocaleString('ko-KR');
+    const calculateMargin = data[i].sales_price  - data[i].cost - data[i].pg_cost;
     const margin = Math.round(calculateMargin/1000).toLocaleString('ko-KR');
 
     let html = `
@@ -54,7 +69,7 @@ async function brandSales() {
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${data[i].order_count} </span></td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${data[i].quantity} </span></td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${salePrice} </span></td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> 000 </span></td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${cost} </span></td>
         <td class="align-middle text-center text-sm"><span class="${calculateMargin >= 0 ? 'text-success' : 'text-danger'} text-xs font-weight-bold"> ${margin} </span></td>
       </tr>`
     brandHtml = brandHtml + html;
@@ -75,23 +90,25 @@ async function productSales() {
     const margin = Math.round(calculateMargin/1000).toLocaleString('ko-KR');
 
     let html = `
-      <tr>
-      <td>
+      <tr class="d-flex">
+      <td class="col-4">
         <div class="d-flex px-2 py-1">
           <div><img src="${data[i].image}" class="avatar avatar-sm me-3" alt="xd"></div>
-          <div class="d-flex flex-column justify-content-center"><h6 class="mb-0 text-sm">${data[i].product_name}</h6></div>
+          <div class="d-flex flex-column justify-content-center text-truncate">
+            <h6 class="mb-0 text-sm">${data[i].product_name}</h6>
+          </div>
         </div>
       </td>
-      <td>
+      <td class="align-middle text-center text-sm col-2">
         <span class="text-xs font-weight-bold"> ${data[i].brand_name} </span>
       </td>
-      <td class="align-middle text-center text-sm">
+      <td class="align-middle text-center text-sm col-2">
         <span class="text-xs font-weight-bold"> ${data[i].quantity} </span>
       </td>
-      <td class="align-middle text-center text-sm">
+      <td class="align-middle text-center text-sm col-2">
         <span class="text-xs font-weight-bold"> ${salePrice} </span>
       </td>
-      <td class="align-middle text-center text-sm">
+      <td class="align-middle text-center text-sm col-2">
         <span class="text-xs font-weight-bold"> 13% </span>
       </td>
     </tr>`

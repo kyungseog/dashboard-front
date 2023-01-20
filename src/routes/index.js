@@ -19,6 +19,10 @@ router.get("/korea", (req, res) => {
   res.render('korea')
 })
 
+router.get("/korea/brand", (req, res) => {
+  res.render('korea-brand')
+})
+
 router.get("/japan", (req, res) => {
   res.render('japan')
 })
