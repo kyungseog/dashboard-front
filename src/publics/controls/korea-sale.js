@@ -1,10 +1,5 @@
+import util from "./utility.js"
 const DateTime = luxon.DateTime;
-
-async function fetchData(URL, method) {
-  const response = await fetch(URL, {method: method});
-  const data = await response.json()
-  return data;
-}
 
 (function startFunction() {
   sales();
@@ -13,12 +8,12 @@ async function fetchData(URL, method) {
 })()
 
 async function sales() {
-  const URL = `http://localhost:3000/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
-  const data = await fetchData(URL, "GET");
+  const URL = `${util.host}/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
+  const data = await util.fetchData(URL, "GET");
 
   const dateType = Number(DateTime.now().day)
   const monthURL = `http://localhost:3000/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=${dateType - 1}`;
-  const monthSalesData = await fetchData(monthURL, "GET");
+  const monthSalesData = await util.fetchData(monthURL, "GET");
  
   const monthSales = Math.round(monthSalesData.reduce( (acc, cur) => acc + Number(cur.sales_price), 0 ) / 1000);
 
@@ -41,12 +36,11 @@ async function sales() {
   <span class="${orderCountRatio > 0 ? 'text-success' : 'text-danger'} text-sm font-weight-bolder">
     ${ orderCountRatio > 0 ? "+" + orderCountRatio : orderCountRatio }%
   </span>`
-  
 };
 
 async function brandSales() {
   const URL = `http://localhost:3000/korea/brand-sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
-  const data = await fetchData(URL, "GET");
+  const data = await util.fetchData(URL, "GET");
 
   const brandsData = document.getElementById("korea-brands-data");
 
@@ -79,7 +73,7 @@ async function brandSales() {
 
 async function productSales() {
   const URL = `http://localhost:3000/korea/product-sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
-  const data = await fetchData(URL, "GET");
+  const data = await util.fetchData(URL, "GET");
 
   const productsData = document.getElementById("korea-products-data");
 
@@ -115,4 +109,4 @@ async function productSales() {
     productHtml = productHtml + html;
   }
   productsData.innerHTML = productHtml;
-}
+};

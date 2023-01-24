@@ -1,9 +1,10 @@
+import util from "./utility.js"
 const DateTime = luxon.DateTime;
 let liveTimeChart;
 
 (async function getLives() {
   const start_date = DateTime.now().toFormat('yyyy-LL-dd') + " 11:00:00";
-  fetch(`http://localhost:3000/live-commerces/${start_date}`, {
+  fetch(`/live-commerces/${start_date}`, {
     method: "GET"
   })
   .then((res) => res.json())
