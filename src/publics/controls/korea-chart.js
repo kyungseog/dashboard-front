@@ -1,20 +1,15 @@
+import util from "./utility.js"
 const DateTime = luxon.DateTime;
 let koreaSalesChart;
 let koreaWeatherChart;
-
-async function fetchData(URL, method) {
-  const response = await fetch(URL, {method: method});
-  const data = await response.json()
-  return data;
-}
 
 (function startFunction() {
   salesData();
 })();
 
 async function salesData() {
-  const thisYearURL = `http://localhost:3000/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=10`;
-  const beforeYearURL = `http://localhost:3000/korea/sales?today=${DateTime.now().minus({ years: 1 }).toFormat('yyyy-LL-dd')}&type=10`;
+  const thisYearURL = `${util.host}/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=10`;
+  const beforeYearURL = `${util.host}/korea/sales?today=${DateTime.now().minus({ years: 1 }).toFormat('yyyy-LL-dd')}&type=10`;
 
   const thisYeardata = await fetchData(thisYearURL, "GET");
   const beforeYeardata = await fetchData(beforeYearURL, "GET");

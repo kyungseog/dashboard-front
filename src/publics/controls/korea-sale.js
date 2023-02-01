@@ -12,7 +12,7 @@ async function sales() {
   const data = await util.fetchData(URL, "GET");
 
   const dateType = Number(DateTime.now().day)
-  const monthURL = `http://localhost:3000/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=${dateType - 1}`;
+  const monthURL = `${util.host}/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=${dateType - 1}`;
   const monthSalesData = await util.fetchData(monthURL, "GET");
  
   const monthSales = Math.round(monthSalesData.reduce( (acc, cur) => acc + Number(cur.sales_price), 0 ) / 1000);
