@@ -8,38 +8,20 @@ const DateTime = luxon.DateTime;
 })()
 
 async function sales() {
-  const URL = `${util.host}/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
+  const URL = `${util.host}/korea/sales`;
   const data = await util.fetchData(URL, "GET");
 
-  const dateType = Number(DateTime.now().day)
-  const monthURL = `${util.host}/korea/sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=${dateType - 1}`;
-  const monthSalesData = await util.fetchData(monthURL, "GET");
- 
-  const monthSales = Math.round(monthSalesData.reduce( (acc, cur) => acc + Number(cur.sales_price), 0 ) / 1000);
-
-  const koreaSales = document.getElementById("korea-sales");
   const koreaOrderCount = document.getElementById("korea-order-count");
+  const koreaSales = document.getElementById("korea-sales");
   const koreaMonthlySales = document.getElementById("korea-monthly-sales");
 
-  const salesRatio = Math.round(data[1].sales_price / data[0].sales_price * 100) - 100;
-  const orderCountRatio = Math.round(data[1].order_count / data[0].order_count * 100) - 100;
-
-  koreaSales.innerHTML = `${Number(Math.round(data[1].sales_price / 1000)).toLocaleString('ko-KR')} 천원
-    <span class="${salesRatio > 0 ? 'text-success' : 'text-danger'} text-sm font-weight-bolder">
-      ${ salesRatio > 0 ? "+" + salesRatio : salesRatio }%
-    </span>`
-  koreaOrderCount.innerHTML = `${Number(data[1].order_count).toLocaleString('ko-KR')} 건
-    <span class="${orderCountRatio > 0 ? 'text-success' : 'text-danger'} text-sm font-weight-bolder">
-      ${ orderCountRatio > 0 ? "+" + orderCountRatio : orderCountRatio }%
-    </span>`
-  koreaMonthlySales.innerHTML = `${Number(monthSales).toLocaleString('ko-KR')} 천원
-  <span class="${orderCountRatio > 0 ? 'text-success' : 'text-danger'} text-sm font-weight-bolder">
-    ${ orderCountRatio > 0 ? "+" + orderCountRatio : orderCountRatio }%
-  </span>`
+  koreaOrderCount.innerHTML = `${Number(data[0][0].order_count).toLocaleString('ko-KR')} 건`
+  koreaSales.innerHTML = `${Number(Math.round(data[0][0].sales_price / 1000)).toLocaleString('ko-KR')} 천원`
+  koreaMonthlySales.innerHTML = `${Number(Math.round(data[1].sales_price / 1000000)).toLocaleString('ko-KR')} 백만원`
 };
 
 async function brandSales() {
-  const URL = `http://localhost:3000/korea/brand-sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
+  const URL = `${util.host}/korea/brand-sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
   const data = await util.fetchData(URL, "GET");
 
   const brandsData = document.getElementById("korea-brands-data");
