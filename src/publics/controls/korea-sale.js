@@ -4,7 +4,7 @@ const DateTime = luxon.DateTime;
 (function startFunction() {
   sales();
   brandSales();
-  productSales();
+  productSales('today');
 })()
 
 async function sales() {
@@ -21,31 +21,33 @@ async function sales() {
 };
 
 async function brandSales() {
-  const URL = `${util.host}/korea/brand-sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
+  const URL = `${util.host}/korea/brand-sales`;
   const data = await util.fetchData(URL, "GET");
 
   const brandsData = document.getElementById("korea-brands-data");
 
   let brandHtml = '';
-  for(let i = 0; i < data.length; i++) {
-    const salePrice = Math.round(data[i].sales_price/1000).toLocaleString('ko-KR');
-    const cost = Math.round((Number(data[i].cost) + Number(data[i].pg_cost))/1000).toLocaleString('ko-KR');
-    const calculateMargin = data[i].sales_price  - data[i].cost - data[i].pg_cost;
+  for(let i = 0; i < data[1].length; i++) {
+    const salePrice = Math.round(data[1][i].sales_price/1000).toLocaleString('ko-KR');
+    const expense = Math.round((Number(data[1][i].expense) + Number(data[1][i].pg_expense))/1000).toLocaleString('ko-KR');
+    const marketing = data[0].filter( r => r.brand_id == data[1][i].brand_id );
+    const marketingFee = marketing == undefined || marketing == null ? 0 : Math.round(marketing[0].cost / 1000).toLocaleString('ko-KR');
+    const calculateMargin = data[1][i].brand_type == 'consignment' ? data[1][i].commission  - data[1][i].expense - data[1][i].pg_expense - marketing[0].cost : data[1][i].sales_price  - data[1][i].expense - data[1][i].pg_expense - marketing[0].cost;
     const margin = Math.round(calculateMargin/1000).toLocaleString('ko-KR');
-
     let html = `
       <tr>
         <td>
           <div class="d-flex px-2 py-1">
             <div class="d-flex flex-column justify-content-center">
-              <h6 class="mb-0 text-sm">${data[i].brand_name}</h6>
+              <h6 class="mb-0 text-sm">${data[1][i].brand_name}</h6>
             </div>
           </div>
         </td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${data[i].order_count} </span></td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${data[i].quantity} </span></td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${data[1][i].order_count} </span></td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${data[1][i].quantity} </span></td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${salePrice} </span></td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${cost} </span></td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${expense} </span></td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${marketingFee} </span></td>
         <td class="align-middle text-center text-sm"><span class="${calculateMargin >= 0 ? 'text-success' : 'text-danger'} text-xs font-weight-bold"> ${margin} </span></td>
       </tr>`
     brandHtml = brandHtml + html;
@@ -53,8 +55,8 @@ async function brandSales() {
   brandsData.innerHTML = brandHtml;
 };
 
-async function productSales() {
-  const URL = `http://localhost:3000/korea/product-sales?today=${DateTime.now().toFormat('yyyy-LL-dd')}&type=1`;
+async function productSales(dateText) {
+  const URL = `${util.host}/korea/product-sales/${dateText}`;
   const data = await util.fetchData(URL, "GET");
 
   const productsData = document.getElementById("korea-products-data");
@@ -62,7 +64,8 @@ async function productSales() {
   let productHtml = '';
   for(let i = 0; i < data.length; i++) {
     const salePrice = Math.round(data[i].sales_price/1000).toLocaleString('ko-KR');
-    const calculateMargin = data[i].sales_price;
+    const expense = Math.round((Number(data[i].expense) + Number(data[i].pg_expense))/1000).toLocaleString('ko-KR');
+    const calculateMargin = data[i].brand_type == 'consignment' ? data[i].commission  - data[i].expense - data[i].pg_expense : data[i].sales_price  - data[i].expense - data[i].pg_expense;
     const margin = Math.round(calculateMargin/1000).toLocaleString('ko-KR');
 
     let html = `
@@ -85,7 +88,10 @@ async function productSales() {
         <span class="text-xs font-weight-bold"> ${salePrice} </span>
       </td>
       <td class="align-middle text-center text-sm col-2">
-        <span class="text-xs font-weight-bold"> 13% </span>
+        <span class="text-xs font-weight-bold"> ${expense} </span>
+      </td>
+      <td class="align-middle text-center text-sm col-2">
+        <span class="text-xs font-weight-bold"> ${margin} </span>
       </td>
     </tr>`
     productHtml = productHtml + html;

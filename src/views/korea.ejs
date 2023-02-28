@@ -153,7 +153,7 @@
               <span class="mask bg-gradient-dark"></span>
               <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
                 <h5 class="text-white font-weight-bolder mb-4 pt-2">향후 7일간의 예상 날씨에요</h5>
-                <p class="text-white mb-4">비 또는 눈이 올 확률이 50% 이상인 날들이 있어요</p>
+                <!-- <p class="text-white mb-4">비 또는 눈이 올 확률이 50% 이상인 날들이 있어요</p> -->
                 <div class="bg-gradient-dark border-radius-lg py-3 pe-1 mb-3">
                   <div class="chart">
                     <canvas id="korea-weather-chart" class="chart-canvas" height="170"></canvas>
@@ -167,20 +167,8 @@
           <div class="card h-100">
             <div class="card-header pb-0">
               <div class="row">
-                <div class="col-lg-10 col-10">
-                  <h6>실판매가 매출이 높은 브랜드들이에요</h6>
-                </div>
-                <div class="col-lg-2 col-2 my-auto text-end">
-                  <div class="dropdown float-lg-end pe-4">
-                    <a class="cursor-pointer" id="dropdownTable" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="fa fa-ellipsis-v text-secondary"></i>
-                    </a>
-                    <ul class="dropdown-menu px-2 py-3 ms-sm-n4 ms-n5" aria-labelledby="dropdownTable">
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">today</a></li>
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">last 7 days</a></li>
-                      <li><a class="dropdown-item border-radius-md" href="javascript:;">last 14 days</a></li>
-                    </ul>
-                  </div>
+                <div class="col-lg-12 col-12">
+                  <h6>어제 브랜드별로 이렇게 팔았어요</h6>
                 </div>
               </div>
             </div>
@@ -194,6 +182,7 @@
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">판매수량(pcs)</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">실판매가(천원)</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">직접비용(천원)</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">직접마케팅(천원)</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">공헌이익(천원)</th>
                     </tr>
                   </thead>
@@ -461,7 +450,8 @@
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 col-2">브랜드</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 col-2">판매수량(pcs)</th>
                       <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 col-2">실판매가(천원)</th>
-                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 col-2">매출이익율</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 col-2">직접비용(천원)</th>
+                      <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 col-2">공헌이익</th>
                     </tr>
                   </thead>
                   <tbody id="korea-products-data"></tbody>

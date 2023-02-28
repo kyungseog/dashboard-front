@@ -134,7 +134,7 @@ async function salesChart( labelData, thisYearSales, beforeYearSales ) {
 async function weatherData() {
   const URL = `${util.host}/weather/seoul`;
   const data = await util.fetchData(URL, "GET");
-  console.log(data);
+
   const thisYearTemp = data[0].map( r => [r.Weather_temperature_min, r.Weather_temperature_max] );
   const beforeYearTemp = data[1].map( r => [r.Weather_temperature_min, r.Weather_temperature_max] );
 
