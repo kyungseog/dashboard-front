@@ -20,11 +20,23 @@ router.get("/korea", (req, res) => {
 })
 
 router.get("/korea/brand", (req, res) => {
+  res.render('korea-brand')
+})
+
+router.get("/korea/brand/:id", (req, res) => {
   res.render('korea-brand-detail')
 })
 
 router.get("/korea/marketing", (req, res) => {
-  res.render('korea-marketing-detail')
+  res.render('korea-marketing')
+})
+
+router.get("/korea/partner", (req, res) => {
+  res.render('korea-partner')
+})
+
+router.get("/korea/user", (req, res) => {
+  res.render('korea-user')
 })
 
 router.get("/japan", (req, res) => {
@@ -45,10 +57,6 @@ router.get("/tables", (req, res) => {
 
 router.get("/profile", (req, res) => {
   res.render('profile')
-})
-
-router.get("/billing", (req, res) => {
-  res.render('billing')
 })
 
 module.exports = router;

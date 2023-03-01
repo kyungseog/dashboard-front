@@ -2,13 +2,11 @@ import util from "./utility.js"
 const DateTime = luxon.DateTime;
 
 (function startFunction() {
-  const URL = window.location.href;
-  const brandId = (URL.substring(URL.indexOf('/',URL.indexOf('brand'))+1));
-  brandSales(brandId, 'yesterday');
+  brandSales('yesterday');
 })()
 
-async function brandSales(brandId, dateText) {
-  const URL = `${util.host}/korea/brand-sales-detail/${brandId}/${dateText}`;
+async function brandSales(dateText) {
+  const URL = `${util.host}/korea/brand-sales/${dateText}`;
   const data = await util.fetchData(URL, "GET");
 
   const brandsData = document.getElementById("korea-brands-data");

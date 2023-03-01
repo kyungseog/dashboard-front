@@ -2,7 +2,7 @@
 
 const managerData = document.getElementById("boardManagers");
 
-(async function managers() {
+async function managers() {
   fetch("http://localhost:3000/manager", {
     method: "GET"
   })
@@ -26,4 +26,4 @@ const managerData = document.getElementById("boardManagers");
   </div>`;
   managerData.innerHTML = managerHtml + managerHtml + managerHtml + managerHtml + managerHtml + managerHtml; 
   })
-})()
+}

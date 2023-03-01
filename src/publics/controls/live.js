@@ -4,7 +4,7 @@ let liveTimeChart;
 
 (async function getLives() {
   const start_date = DateTime.now().toFormat('yyyy-LL-dd') + " 11:00:00";
-  fetch(`/live-commerces/${start_date}`, {
+  fetch(`${util.host}/live-commerces/${start_date}`, {
     method: "GET"
   })
   .then((res) => res.json())
@@ -63,7 +63,7 @@ let liveTimeChart;
 })();
 
 async function getSales(brand_id, start_date, end_date) {
-  fetch(`http://localhost:3000/live-commerces/sales?brand_id=${brand_id}&start_datetime=${start_date}:00&end_datetime=${end_date}`, {
+  fetch(`${util.host}/live-commerces/sales?brand_id=${brand_id}&start_datetime=${start_date}:00&end_datetime=${end_date}`, {
     method: "GET"
   })
   .then((res) => res.json())
