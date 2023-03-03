@@ -32,7 +32,7 @@ async function brandSales(dateText) {
 
   let brandHtml = '';
   for(let i = 0; i < data[1].length; i++) {
-    const expense = Number(data[1][i].mileage) + Number(data[1][i].order_coupon) + Number(data[1][i].product_coupon) + Number(data[1][i].pg_expense);
+    const expense = Number(data[1][i].cost) + Number(data[1][i].mileage) + Number(data[1][i].order_coupon) + Number(data[1][i].product_coupon) + Number(data[1][i].pg_expense);
     const marketing = data[0].filter( r => r.brand_id == data[1][i].brand_id );
     const marketingFee = marketing[0] == undefined || marketing[0] == null ? 0 : Number(marketing[0].cost);
     const calculateMargin = data[1][i].brand_type == 'consignment' ? data[1][i].commission - expense - marketingFee : data[1][i].sales_price - expense - marketingFee;
@@ -68,10 +68,10 @@ async function productSales(dateText) {
 
   let productHtml = '';
   for(let i = 0; i < data.length; i++) {
-    const salePrice = Math.round(data[i].sales_price/1000).toLocaleString('ko-KR');
-    const expense = Math.round((Number(data[i].expense) + Number(data[i].pg_expense))/1000).toLocaleString('ko-KR');
-    const calculateMargin = data[i].brand_type == 'consignment' ? data[i].commission  - data[i].expense - data[i].pg_expense : data[i].sales_price  - data[i].expense - data[i].pg_expense;
-    const margin = Math.round(calculateMargin/1000).toLocaleString('ko-KR');
+    const salePrice = Math.round(data[i].sales_price / 1000).toLocaleString('ko-KR');
+    const expense = Number(data[i].cost) + Number(data[i].expense) + Number(data[i].pg_expense);
+    const calculateMargin = data[i].brand_type == 'consignment' ? data[i].commission  - expense : data[i].sales_price  - expense;
+    const margin = Math.round(calculateMargin / 1000).toLocaleString('ko-KR');
 
     let html = `
       <tr>
@@ -87,13 +87,13 @@ async function productSales(dateText) {
           <span class="text-xs font-weight-bold"> ${data[i].brand_name} </span>
         </td>
         <td class="align-middle text-center text-sm col-2">
-          <span class="text-xs font-weight-bold"> ${data[i].quantity} </span>
+          <span class="text-xs font-weight-bold"> ${Number(data[i].quantity).toLocaleString('ko-KR')} </span>
         </td>
         <td class="align-middle text-center text-sm col-2">
           <span class="text-xs font-weight-bold"> ${salePrice} </span>
         </td>
         <td class="align-middle text-center text-sm col-2">
-          <span class="text-xs font-weight-bold"> ${expense} </span>
+          <span class="text-xs font-weight-bold"> ${Math.round(expense / 1000).toLocaleString('ko-KR')} </span>
         </td>
         <td class="align-middle text-center text-sm col-2">
           <span class="text-xs font-weight-bold"> ${margin} </span>
