@@ -1,32 +1,15 @@
 import util from "./utility.js"
 const DateTime = luxon.DateTime;
 
-const dateList = document.querySelectorAll('.dropdown-menu .dropdown-item');
-for (let list of dateList) {
-  list.addEventListener("click", () => brandSales(list.innerText));
-};
-
 (function startFunction() {
-  brandSales('yesterday');
+  // brandSales('yesterday');
 })()
 
 async function brandSales(dateText) {
-  
   const URL = `${util.host}/korea/brand-sales/${dateText}`;
   const data = await util.fetchData(URL, "GET");
 
   const brandsData = document.getElementById("korea-brands-data");
-  const title = document.getElementById("title");
-
-  if (dateText == 'today') {
-    title.innerHTML = `전체 브랜드 <span class="text-danger">오늘</span> 현황이에요`
-  } else if (dateText == 'yesterday') {
-    title.innerHTML = `전체 브랜드 <span class="text-danger">어제</span> 현황이에요`
-  } else if (dateText == 'last_7_days') {
-    title.innerHTML = `전체 브랜드 <span class="text-danger">7일동안</span> 현황이에요`
-  } else if (dateText == 'last_14_days') {
-    title.innerHTML = `전체 브랜드 <span class="text-danger">14일동안</span> 현황이에요`
-  };
 
   let brandHtml = '';
   for(let i = 0; i < data[1].length; i++) {

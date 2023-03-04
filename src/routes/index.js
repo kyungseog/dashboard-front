@@ -32,7 +32,11 @@ router.get("/korea/marketing", (req, res) => {
 })
 
 router.get("/korea/partner", (req, res) => {
-  res.render('korea-partner')
+  res.render('partner')
+})
+
+router.get("/korea/partner/:id", (req, res) => {
+  res.render('partner-detail')
 })
 
 router.get("/korea/user", (req, res) => {
@@ -55,8 +59,8 @@ router.get("/tables", (req, res) => {
   res.render('tables')
 })
 
-router.get("/profile", (req, res) => {
-  res.render('profile')
+router.get("/squad", (req, res) => {
+  res.render('squad')
 })
 
 module.exports = router;
