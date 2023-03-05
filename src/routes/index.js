@@ -39,6 +39,10 @@ router.get("/korea/partner/:id", (req, res) => {
   res.render('partner-detail')
 })
 
+router.get("/korea/product", (req, res) => {
+  res.render('korea-product')
+})
+
 router.get("/korea/user", (req, res) => {
   res.render('korea-user')
 })

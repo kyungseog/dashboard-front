@@ -17,12 +17,5 @@ const utility = {
     6: 'Sun'
   },
 
-  marketingChannel: {
-    Meta: 'fa-meta',
-    Google: 'fa-google',
-    Naver: 'fa-n',
-    Kakao: 'fa-k',
-  },
-
 }
 export default utility;
