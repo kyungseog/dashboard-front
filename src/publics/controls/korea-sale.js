@@ -508,13 +508,35 @@ async function sqaudData() {
   const URL = `${util.host}/korea/squad-sales`;
   const data = await util.fetchData(URL, "GET");
 
-  const consignment = data[0].filter( r => r.KoreaBudget_squad == '위탁SQ')
-  const consignSale = consignment[0].KoreaBudget_sale_sales;
-  console.log(consignSale)
-  squadChart();
+  const squadIdList = data[0].map ( r => r.budget_squad_id );
+  const squadNameList = data[0].map ( r => r.budget_squad_name );
+
+  let budgetObj = {};
+  for(let squad of squadIdList) {
+    const dataArray = data[0].filter( r => r.budget_squad_id == squad);
+    const budgetSales = Math.round(dataArray[0].budget_sale_sales / 1000000)
+    const budgetMargin = Math.round(dataArray[0].budget_margin / 1000000);
+    budgetObj[squad] = [budgetSales, budgetMargin];
+  };
+
+  let actualObj = {};
+  for(let squad of squadNameList) {
+    const dataArray = data[1].filter( r => r.squad == squad);
+    const actualSales = Math.round(dataArray[0].sales_price / 1000000);
+    const expense = 0;
+    const marketingArray = data[2].filter( r => r.squad == squad );
+    const marketingFee = marketingArray[0].cost;
+    const margin = dataArray[0].sales_price - expense - marketingFee;
+    const actualMargin = Math.round(margin / 1000000);
+    actualObj[squad] = [actualSales, actualMargin];
+  };
+
+  console.log(actualObj)
+
+  squadChart(budgetObj, actualObj);
 };
 
-async function squadChart() {
+async function squadChart(budget, actual) {
   const scalesData = {
     y: {
       grid: {
@@ -568,7 +590,7 @@ async function squadChart() {
       datasets: [
         {
           label: "예산",
-          data: [3000, 100],
+          data: budget.consignment,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
@@ -612,7 +634,7 @@ async function squadChart() {
       datasets: [
         {
           label: "예산",
-          data: [3000, 100],
+          data: budget.strategic,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
@@ -656,7 +678,7 @@ async function squadChart() {
       datasets: [
         {
           label: "예산",
-          data: [3000, 100],
+          data: budget.buying,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
@@ -700,7 +722,7 @@ async function squadChart() {
       datasets: [
         {
           label: "예산",
-          data: [3000, 100],
+          data: budget.essential,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
