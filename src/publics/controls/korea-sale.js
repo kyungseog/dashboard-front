@@ -10,14 +10,14 @@ let essentialChart;
 
 (function startFunction() {
   sales();
+  salesChartData();
   brandSales('yesterday');
   productSales('yesterday');
   partnerSales('yesterday');
   marketing();
   users();
   userSaleType();
-  salesData();
-  weatherData();
+  weatherChartData();
   sqaudData()
 })()
 
@@ -164,13 +164,13 @@ async function marketing() {
 
   for(let i = 0; i < data[0].length; i++) {
     const channel = data[0][i].channel;
-    if(channel == 'Meta') {
+    if(channel == 'meta') {
       koreaMarketingMeta.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString('ko-KR')} 천원`
-    } else if(channel == 'Naver') {
+    } else if(channel == 'naver') {
       koreaMarketingNaver.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString('ko-KR')} 천원`
-    } else if(channel == 'Kakao') {
+    } else if(channel == 'kakao') {
       koreaMarketingKakao.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString('ko-KR')} 천원`
-    } else if(channel == 'Google') {
+    } else if(channel == 'google') {
       koreaMarketingGoogle.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString('ko-KR')} 천원`
     } 
   }
@@ -233,10 +233,10 @@ async function userSaleType() {
   const data = await util.fetchData(URL, "GET");
   
   const firstSale = data[0].filter( r => r.is_first == 'y' );
-  document.getElementById("korea-first-sale").innerText = `${Number(firstSale[0].user_count).toLocaleString('ko-KR')}명 / ${Math.round(Number(firstSale[0].sales_price) / 1000).toLocaleString('ko-KR')}천원`;
+  document.getElementById("korea-first-sale").innerText = `${Number(firstSale[0].user_count).toLocaleString('ko-KR')}명 / ${Math.round(Number(firstSale[0].sales_price) / 1000000).toLocaleString('ko-KR')}백만원`;
 
   const secondSale = data[0].filter( r => r.is_first == 'n' );
-  document.getElementById("korea-second-sale").innerText = `${Number(secondSale[0].user_count).toLocaleString('ko-KR')}명 / ${Math.round(Number(secondSale[0].sales_price) / 1000).toLocaleString('ko-KR')}천원`;
+  document.getElementById("korea-second-sale").innerText = `${Number(secondSale[0].user_count).toLocaleString('ko-KR')}명 / ${Math.round(Number(secondSale[0].sales_price) / 1000000).toLocaleString('ko-KR')}백만원`;
 
   const firstSaleBrand = data[1].filter( r => r.is_first == 'y' );
   const sortFirstSaleBrand = firstSaleBrand.sort( (a, b) => b.sales_price - a.sales_price );
@@ -285,7 +285,7 @@ async function userSaleType() {
   document.getElementById("korea-user-second-sale").innerHTML = secondSaleBrandHtml;
 };
 
-async function salesData() {
+async function salesChartData() {
   const URL = `${util.host}/korea/chart-sales`;
   const data = await util.fetchData(URL, "GET");
 
@@ -408,7 +408,7 @@ async function salesChart( labelData, thisYearSales, beforeYearSales ) {
   });
 };
 
-async function weatherData() {
+async function weatherChartData() {
   const URL = `${util.host}/weather/seoul`;
   const data = await util.fetchData(URL, "GET");
 
@@ -509,30 +509,34 @@ async function sqaudData() {
   const data = await util.fetchData(URL, "GET");
 
   const squadIdList = data[0].map ( r => r.budget_squad_id );
-  const squadNameList = data[0].map ( r => r.budget_squad_name );
 
   let budgetObj = {};
-  for(let squad of squadIdList) {
-    const dataArray = data[0].filter( r => r.budget_squad_id == squad);
-    const budgetSales = Math.round(dataArray[0].budget_sale_sales / 1000000)
-    const budgetMargin = Math.round(dataArray[0].budget_margin / 1000000);
-    budgetObj[squad] = [budgetSales, budgetMargin];
-  };
-
   let actualObj = {};
-  for(let squad of squadNameList) {
-    const dataArray = data[1].filter( r => r.squad == squad);
-    const actualSales = Math.round(dataArray[0].sales_price / 1000000);
-    const expense = 0;
-    const marketingArray = data[2].filter( r => r.squad == squad );
-    const marketingFee = marketingArray[0].cost;
-    const margin = dataArray[0].sales_price - expense - marketingFee;
-    const actualMargin = Math.round(margin / 1000000);
+  for(let squad of squadIdList) {
+    const budgetDataArray = data[0].filter( r => r.budget_squad_id == squad);
+    const budgetSales = Math.round(budgetDataArray[0].budget_sale_sales / 1000000)
+    const budgetMargin = Math.round(budgetDataArray[0].budget_margin / 1000000);
+    budgetObj[squad] = [budgetSales, budgetMargin];
+
+    const actualDataArray = data[1].filter( r => r.squad_id == squad);
+    let actualSales = 0;
+    let actualMargin = 0;
+    if(actualDataArray.length != 0) {
+      actualSales = Math.round(Number(actualDataArray[0].sales_price) / 1000000);
+      const cost =  Number(actualDataArray[0].cost);
+      const expense = Number(actualDataArray[0].mileage) + Number(actualDataArray[0].order_coupon) + Number(actualDataArray[0].product_coupon) + Number(actualDataArray[0].pg_expense);
+      const marketingArray = data[2].filter( r => r.squad_id == squad );
+      const marketingFee = Number(marketingArray[0].cost);
+      let margin = 0;
+      if(squad == 'consignment' || squad == 'strategic') {
+        margin = actualDataArray[0].commission - expense - marketingFee;
+      } else {
+        margin = actualDataArray[0].sales_price - cost - expense - marketingFee;
+      }
+      actualMargin = Math.round(margin / 1000000);
+    }
     actualObj[squad] = [actualSales, actualMargin];
   };
-
-  console.log(actualObj)
-
   squadChart(budgetObj, actualObj);
 };
 
@@ -578,7 +582,7 @@ async function squadChart(budget, actual) {
         },
       }
     },
-  };
+  }
 
   const consignmentctx = document.getElementById("consignment-squad-chart").getContext("2d");
   if(consignmentChart) { consignmentChart.destroy() };
@@ -598,14 +602,13 @@ async function squadChart(budget, actual) {
           backgroundColor: "#DBA39A",
         },
         {
-          label: "실적",
-          data: [4000, 200],
+          label: "추정",
+          data: actual.consignment,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
           borderSkipped: false,
           backgroundColor: "#F5EBE0",
-          
         },
       ],
     },
@@ -642,8 +645,8 @@ async function squadChart(budget, actual) {
           backgroundColor: "#DBA39A",
         },
         {
-          label: "실적",
-          data: [4000, 200],
+          label: "추정",
+          data: actual.strategic,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
@@ -686,8 +689,8 @@ async function squadChart(budget, actual) {
           backgroundColor: "#DBA39A",
         },
         {
-          label: "실적",
-          data: [4000, 200],
+          label: "추정",
+          data: actual.buying,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
@@ -730,8 +733,8 @@ async function squadChart(budget, actual) {
           backgroundColor: "#DBA39A",
         },
         {
-          label: "실적",
-          data: [4000, 200],
+          label: "추정",
+          data: actual.essential,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
