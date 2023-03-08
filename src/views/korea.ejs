@@ -268,7 +268,7 @@
                 <div class="container border-radius-lg mb-2 mt-2">
                   <div class="row" id="korea-marketing-ratio"></div>
                 </div>
-                <div class="row mb-2">
+                <div class="row mt-2">
                   <div class="col-6">
                     <div class="card mb-2">
                       <div class="card-body p-3">
@@ -341,7 +341,17 @@
                     </div>
                   </div>
                   <div class="col-6">
-
+                    <div class="table-responsive">
+                      <table class="table align-items-center mb-0">
+                        <thead>
+                          <tr>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">브랜드명</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">ROAS</th>
+                          </tr>
+                        </thead>
+                        <tbody id="korea-brand-roas"></tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
                 <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto" href="/korea/marketing">
@@ -490,13 +500,13 @@
   </main>
   <!--   Core JS Files   -->  
   <script src="../controls/korea-sale.js" type="module" defer></script>
-  <script src="../controls/korea-chart.js" type="module" defer></script>
   <script src="../assets/js/core/popper.min.js"></script>
   <script src="../assets/js/core/bootstrap.min.js"></script>
   <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
   <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="../assets/js/plugins/chartjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3.2.1/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 </body>
 
 </html>

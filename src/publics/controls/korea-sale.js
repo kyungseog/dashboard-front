@@ -175,14 +175,14 @@ async function marketing() {
     } 
   }
 
-  const koreaMarketingRatio = document.getElementById("korea-marketing-ratio");
-
   const totalMarketingFee = data[1].map( r => Number(r.cost) ).reduce( (acc, cur) => acc + cur, 0 );
-  const directMaketing = data[1].filter( r => r.brand_id != null ).map( r => Number(r.cost) );
+  const brandMarketing = data[1].filter( r => r.brand_id != null );
+  const directMaketing = brandMarketing.map( r => Number(r.cost) );
   const directMaketingFee = directMaketing.reduce( (acc, cur) => acc + cur, 0 );
   const indirectMaketingFee = totalMarketingFee - directMaketingFee
 
-  const directMaketingRatio = Math.round(directMaketingFee/totalMarketingFee * 100);
+  const ratio = Math.round(directMaketingFee / totalMarketingFee * 100);
+  const directMaketingRatio = ratio % 5 == 0 ? ratio : ratio + (5 - (ratio % 5));
   const indirectMaketingRatio = 100 - directMaketingRatio;
   const ratioHtml =`
     <div class="col-6 ps-0">
@@ -195,7 +195,7 @@ async function marketing() {
       </div>
       <h4 class="font-weight-bolder">${Math.round(Number(directMaketingFee/1000)).toLocaleString('ko-KR')} 천원</h4>
       <div class="progress w-75">
-        <div class="progress-bar bg-dark w-${Number(directMaketingRatio)}" role="progressbar" aria-valuenow="${Number(directMaketingRatio)}" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress-bar bg-dark w-${directMaketingRatio}" role="progressbar" aria-valuenow="${directMaketingRatio}" aria-valuemin="0" aria-valuemax="100"></div>
       </div>
     </div>
     <div class="col-6 ps-0">
@@ -208,11 +208,31 @@ async function marketing() {
       </div>
       <h4 class="font-weight-bolder">${Math.round(Number(indirectMaketingFee/1000)).toLocaleString('ko-KR')} 천원</h4>
       <div class="progress w-75">
-        <div class="progress-bar bg-dark w-${Number(indirectMaketingRatio)}" role="progressbar" aria-valuenow="${Number(indirectMaketingRatio)}" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress-bar bg-dark w-${indirectMaketingRatio}" role="progressbar" aria-valuenow="${indirectMaketingRatio}" aria-valuemin="0" aria-valuemax="100"></div>
       </div>
     </div>`
 
-  koreaMarketingRatio.innerHTML = ratioHtml;
+  document.getElementById("korea-marketing-ratio").innerHTML = ratioHtml;
+
+  const roas = brandMarketing.map( r => [r.brand_id, r.brand_name, Math.round(r.conversion / r.cost * 100)] );
+  const sortBrandRoas = roas.sort( (a, b) => b[2] - a[2] );
+  sortBrandRoas.length = 6;
+  let brandRoasHtml = '';
+  for(let i = 0; i < sortBrandRoas.length; i++) {
+    let html = `
+      <tr>
+        <td>
+          <div class="d-flex px-2 py-1">
+            <div class="d-flex flex-column justify-content-center">
+              <h6 class="mb-0 text-sm">${sortBrandRoas[i][1]}</h6>
+            </div>
+          </div>
+        </td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${sortBrandRoas[i][2]}% </span></td>
+      </tr>`
+      brandRoasHtml = brandRoasHtml + html;
+  }
+  document.getElementById("korea-brand-roas").innerHTML = brandRoasHtml;
 };
 
 async function users() {

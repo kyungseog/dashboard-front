@@ -33,7 +33,8 @@ async function brandSales(dateText) {
     const expense = Number(data[1][i].cost) + Number(data[1][i].mileage) + Number(data[1][i].order_coupon) + Number(data[1][i].product_coupon) + Number(data[1][i].pg_expense);
     const marketing = data[0].filter( r => r.brand_id == data[1][i].brand_id );
     const marketingFee = marketing[0] == undefined || marketing[0] == null ? 0 : Number(marketing[0].cost);
-    const calculateMargin = data[1][i].brand_type == 'consignment' ? data[1][i].commission - expense - marketingFee : data[1][i].sales_price - expense - marketingFee;
+    const logisticFee = data[1][i].order_count * 4800 * 0.7;
+    const calculateMargin = data[1][i].brand_type == 'consignment' ? data[1][i].commission - expense - marketingFee : data[1][i].sales_price - expense - marketingFee - logisticFee;
     const margin = Math.round(calculateMargin / 1000).toLocaleString('ko-KR');
     let html = `
       <tr ${calculateMargin >= 0 ? '' : 'class="table-danger"'}>
@@ -50,9 +51,10 @@ async function brandSales(dateText) {
         <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${Math.round(Number(data[1][i].cost) / 1000).toLocaleString('ko-KR')} </span></td>
         <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${Math.round(Number(data[1][i].product_coupon) / 1000).toLocaleString('ko-KR')} </span></td>
         <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${Math.round(Number(data[1][i].order_coupon) / 1000).toLocaleString('ko-KR')} </span></td>
-        <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${Math.round(Number(data[1][i].mileage) / 1000).toLocaleString('ko-KR')} </span></td>
+        <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${Math.round((Number(data[1][i].mileage) + Number(data[1][i].pg_expense)) / 1000).toLocaleString('ko-KR')} </span></td>
         <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${Math.round(marketingFee / 1000).toLocaleString('ko-KR')} </span></td>
-        <td class="align-middle text-center"><span class="${calculateMargin >= 0 ? 'text-success' : 'text-danger'} text-xs font-weight-bold"> ${margin} </span></td>
+        <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${data[1][i].brand_type == 'consignment' ? 0 : Math.round(logisticFee / 1000).toLocaleString('ko-KR')} </span></td>
+        <td class="align-middle text-center"><span class="${calculateMargin >= 0 ? 'text-success' : 'text-danger'} text-xs font-weight-bold"> ${margin} (${Math.round(calculateMargin / data[1][i].sales_price * 100)}%)</span></td>
       </tr>`
     brandHtml = brandHtml + html;
   }

@@ -34,13 +34,14 @@ async function productSales(dateText) {
     const expense = Number(data[i].cost) + Number(data[i].mileage) + Number(data[i].order_coupon) + Number(data[i].product_coupon) + Number(data[i].pg_expense);
     const calculateMargin = data[i].brand_type == 'consignment' ? data[i].commission - expense: data[i].sales_price - expense;
     const margin = Math.round(calculateMargin / 1000).toLocaleString('ko-KR');
+    const productName = data[i].product_name;
     let html = `
       <tr ${calculateMargin >= 0 ? '' : 'class="table-danger"'}>
         <td class="text-center">
         <div class="d-flex px-2 py-1">
           <div><img src="${data[i].image}" class="avatar avatar-sm me-3" alt="xd"></div>
           <div class="d-flex flex-column justify-content-center text-truncate">
-            <h6 class="mb-0 text-sm">${data[i].product_name}</h6>
+            <h6 class="mb-0 text-sm">${productName.length > 25 ? productName.substring(0, 24) + "..." : productName}</h6>
           </div>
         </div>
         </td>
@@ -55,7 +56,7 @@ async function productSales(dateText) {
         <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${Math.round(Number(data[i].order_coupon) / 1000).toLocaleString('ko-KR')} </span></td>
         <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${Math.round(Number(data[i].mileage) / 1000).toLocaleString('ko-KR')} </span></td>
         <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${Math.round(Number(data[i].pg_expense) / 1000).toLocaleString('ko-KR')} </span></td>
-        <td class="align-middle text-center"><span class="${calculateMargin >= 0 ? 'text-success' : 'text-danger'} text-xs font-weight-bold"> ${margin} </span></td>
+        <td class="align-middle text-center"><span class="${calculateMargin >= 0 ? 'text-success' : 'text-danger'} text-xs font-weight-bold"> ${margin} (${Math.round(calculateMargin / data[i].sales_price * 100)}%) </span></td>
       </tr>`
       productHtml = productHtml + html;
   }
