@@ -2,17 +2,21 @@ import util from "./utility.js"
 const DateTime = luxon.DateTime;
 
 const dateList = document.querySelectorAll('.dropdown-menu .dropdown-item');
+const URL = window.location.href;
+const brandId = (URL.substring(URL.indexOf('/',URL.indexOf('product'))+1));
 for (let list of dateList) {
-  list.addEventListener("click", () => productSales(list.innerText));
+  list.addEventListener("click", () => productSales(brandId, list.innerText));
 };
 
 (function startFunction() {
-  productSales('yesterday');
+  const URL = window.location.href;
+  const brandId = (URL.substring(URL.indexOf('/',URL.indexOf('product'))+1));
+  productSales(brandId, 'yesterday');
 })()
 
-async function productSales(dateText) {
+async function productSales(brandId, dateText) {
   
-  const URL = `${util.host}/korea/product-sales/${dateText}`;
+  const URL = `${util.host}/korea/product-sales/${brandId}/${dateText}`;
   const data = await util.fetchData(URL, "GET");
   data.length = 50;
 
@@ -46,7 +50,7 @@ async function productSales(dateText) {
         </div>
         </td>
         <td class="align-middle text-center">
-          <span class="text-xs font-weight-bold"><a href="/korea/partner/${data[i].brand_id}"> ${data[i].brand_name} </a></span>
+          <span class="text-xs font-weight-bold"><a href="/korea/brand/${data[i].brand_id}"> ${data[i].brand_name} </a></span>
         </td>
         <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${data[i].quantity} </span></td>
         <td class="align-middle text-center"><span class="text-xs font-weight-bold"> ${Math.round(data[i].sales_price / 1000).toLocaleString('ko-KR')} </span></td>

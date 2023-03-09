@@ -17,5 +17,9 @@ const utility = {
     6: 'Sun'
   },
 
+  chunwon: (num) => {
+    return Math.round(num / 1000).toLocaleString('ko-KR');
+  }
+
 }
 export default utility;

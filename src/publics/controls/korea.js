@@ -12,7 +12,7 @@ let essentialChart;
   sales();
   salesChartData();
   brandSales('yesterday');
-  productSales('yesterday');
+  productSales('moomooz', 'yesterday');
   partnerSales('yesterday');
   marketing();
   users();
@@ -71,8 +71,8 @@ async function brandSales(dateText) {
   brandsData.innerHTML = brandHtml;
 };
 
-async function productSales(dateText) {
-  const URL = `${util.host}/korea/product-sales/${dateText}`;
+async function productSales(brandId, dateText) {
+  const URL = `${util.host}/korea/product-sales/${brandId}/${dateText}`;
   const data = await util.fetchData(URL, "GET");
   data.length = 7;
 
@@ -136,7 +136,7 @@ async function partnerSales(dateText) {
           <div class="d-flex px-2 py-1">
             <div class="d-flex flex-column justify-content-center">
               <h6 class="mb-0 text-sm">
-                <a href="/korea/brand/${data[1][i].supplier_name}">${data[1][i].supplier_name}<a>
+                <a href="/korea/partner/${data[1][i].supplier_id}">${data[1][i].supplier_name}<a>
               </h6>
             </div>
           </div>
@@ -571,7 +571,7 @@ async function squadChart(budget, actual) {
         borderDash: [5, 5]
       },
       ticks: {
-        display: true,
+        display: false,
         padding: 10,
         color: '#b2b9bf',
         font: {
@@ -608,6 +608,7 @@ async function squadChart(budget, actual) {
   if(consignmentChart) { consignmentChart.destroy() };
 
   consignmentChart = new Chart(consignmentctx, {
+    plugins: [ChartDataLabels],
     type: "bar",
     data: {
       labels: ["실판가매출","공헌이익"],
@@ -620,6 +621,10 @@ async function squadChart(budget, actual) {
           borderRadius: 8,
           borderSkipped: false,
           backgroundColor: "#DBA39A",
+          datalabels: {
+            align: 'center',
+            anchor: 'center'
+          },
         },
         {
           label: "추정",
@@ -629,18 +634,28 @@ async function squadChart(budget, actual) {
           borderRadius: 8,
           borderSkipped: false,
           backgroundColor: "#F5EBE0",
+          datalabels: {
+            align: 'center',
+            anchor: 'center'
+          },
         },
       ],
     },
     options: {
       responsive: true,
       plugins: {
+        datalabels: {
+          color: 'white',
+          display: true,
+          font: {
+            size: 11,
+            family: "Open Sans",
+            style: 'bold',
+            lineHeight: 2
+          },
+        },
         legend: {
           display: false,
-        },
-        datalabels: {
-          color: '#b2b9bf',
-          align: 'top',
         },
       },
       scales: scalesData
@@ -651,6 +666,7 @@ async function squadChart(budget, actual) {
   if(strategicChart) { strategicChart.destroy() };
 
   strategicChart = new Chart(strategicctx, {
+    plugins: [ChartDataLabels],
     type: "bar",
     data: {
       labels: ["실판가매출","공헌이익"],
@@ -663,6 +679,10 @@ async function squadChart(budget, actual) {
           borderRadius: 8,
           borderSkipped: false,
           backgroundColor: "#DBA39A",
+          datalabels: {
+            align: 'center',
+            anchor: 'center'
+          },
         },
         {
           label: "추정",
@@ -672,19 +692,28 @@ async function squadChart(budget, actual) {
           borderRadius: 8,
           borderSkipped: false,
           backgroundColor: "#F5EBE0",
-          
+          datalabels: {
+            align: 'center',
+            anchor: 'center'
+          },
         },
       ],
     },
     options: {
       responsive: true,
       plugins: {
+        datalabels: {
+          color: 'white',
+          display: true,
+          font: {
+            size: 11,
+            family: "Open Sans",
+            style: 'bold',
+            lineHeight: 2
+          },
+        },
         legend: {
           display: false,
-        },
-        datalabels: {
-          color: '#b2b9bf',
-          align: 'top',
         },
       },
       scales: scalesData
@@ -695,6 +724,7 @@ async function squadChart(budget, actual) {
   if(buyingChart) { buyingChart.destroy() };
 
   buyingChart = new Chart(buyingctx, {
+    plugins: [ChartDataLabels],
     type: "bar",
     data: {
       labels: ["실판가매출","공헌이익"],
@@ -707,6 +737,10 @@ async function squadChart(budget, actual) {
           borderRadius: 8,
           borderSkipped: false,
           backgroundColor: "#DBA39A",
+          datalabels: {
+            align: 'center',
+            anchor: 'center'
+          },
         },
         {
           label: "추정",
@@ -716,19 +750,28 @@ async function squadChart(budget, actual) {
           borderRadius: 8,
           borderSkipped: false,
           backgroundColor: "#F5EBE0",
-          
+          datalabels: {
+            align: 'center',
+            anchor: 'center'
+          },
         },
       ],
     },
     options: {
       responsive: true,
       plugins: {
+        datalabels: {
+          color: 'white',
+          display: true,
+          font: {
+            size: 11,
+            family: "Open Sans",
+            style: 'bold',
+            lineHeight: 2
+          },
+        },
         legend: {
           display: false,
-        },
-        datalabels: {
-          color: '#b2b9bf',
-          align: 'top',
         },
       },
       scales: scalesData
@@ -739,6 +782,7 @@ async function squadChart(budget, actual) {
   if(essentialChart) { essentialChart.destroy() };
 
   essentialChart = new Chart(essentialctx, {
+    plugins: [ChartDataLabels],
     type: "bar",
     data: {
       labels: ["실판가매출","공헌이익"],
@@ -751,6 +795,10 @@ async function squadChart(budget, actual) {
           borderRadius: 8,
           borderSkipped: false,
           backgroundColor: "#DBA39A",
+          datalabels: {
+            align: 'center',
+            anchor: 'center'
+          },
         },
         {
           label: "추정",
@@ -760,19 +808,28 @@ async function squadChart(budget, actual) {
           borderRadius: 8,
           borderSkipped: false,
           backgroundColor: "#F5EBE0",
-          
+          datalabels: {
+            align: 'center',
+            anchor: 'center'
+          },
         },
       ],
     },
     options: {
       responsive: true,
       plugins: {
+        datalabels: {
+          color: 'white',
+          display: true,
+          font: {
+            size: 11,
+            family: "Open Sans",
+            style: 'bold',
+            lineHeight: 2
+          },
+        },
         legend: {
           display: false,
-        },
-        datalabels: {
-          color: '#b2b9bf',
-          align: 'top',
         },
       },
       scales: scalesData

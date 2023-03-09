@@ -39,7 +39,7 @@ router.get("/korea/partner/:id", (req, res) => {
   res.render('partner-detail')
 })
 
-router.get("/korea/product", (req, res) => {
+router.get("/korea/product/:id", (req, res) => {
   res.render('korea-product')
 })
 
@@ -63,7 +63,7 @@ router.get("/tables", (req, res) => {
   res.render('tables')
 })
 
-router.get("/squad", (req, res) => {
+router.get("/squad/:id", (req, res) => {
   res.render('squad')
 })
 
