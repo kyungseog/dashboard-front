@@ -1,79 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Korea/Brands</title>
+    <!--     Fonts and Font Awesome Icons     -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
+      rel="stylesheet"
+    />
+    <script
+      src="https://kit.fontawesome.com/b1baf8bd8e.js"
+      crossorigin="anonymous"
+    ></script>
+    <!-- CSS Files -->
+    <link
+      id="pagestyle"
+      href="../assets/css/soft-ui-dashboard.css?v=1.0.6"
+      rel="stylesheet"
+    />
+  </head>
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Korea/Brands</title>
-  <!--     Fonts and Font Awesome Icons     -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-  <script src="https://kit.fontawesome.com/b1baf8bd8e.js" crossorigin="anonymous"></script>
-  <!-- CSS Files -->
-  <link id="pagestyle" href="../assets/css/soft-ui-dashboard.css?v=1.0.6" rel="stylesheet" />
-</head>
-
-<body class="bg-gray-100">
-  <%-include('sidebar')%>
-  <main class="main-content position-relative max-height-vh-100 h-100 mt-6 border-radius-lg">
-    <div class="container-fluid py-4">
-      <div class="row mb-4">
-        <div class="card h-100">
-          <div class="card-header pb-0">
-            <div class="row">
-              <div class="col-lg-8 col-8">
-                <h6 id="title">전체 브랜드 현황이에요</h6>
+  <body class="bg-gray-100">
+    <%-include('sidebar')%>
+    <main
+      class="main-content position-relative max-height-vh-100 h-100 mt-6 border-radius-lg"
+    >
+      <div class="container-fluid py-4">
+        <div class="row mb-4">
+          <div class="card h-100">
+            <div class="card-header pb-0 mb-0 sticky-top">
+              <div class="row">
+                <div class="col-lg-8 col-md-6 col-sm-12">
+                  <h6 id="title">전체 브랜드 현황이에요</h6>
+                </div>
+                <div
+                  class="col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0 text-end"
+                >
+                  <div class="dropdown float-lg-end pe-4">
+                    <a
+                      class="btn bg-gradient-dark mb-0"
+                      id="dropdownTable"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      <i class="far fa-calendar-alt me-2"></i>기간 선택하기
+                    </a>
+                    <ul
+                      class="dropdown-menu px-2 py-3 ms-sm-n4 ms-n5"
+                      aria-labelledby="dropdownTable"
+                    >
+                      <li>
+                        <a class="dropdown-item border-radius-md">today</a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item border-radius-md">yesterday</a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item border-radius-md"
+                          >last_7_days</a
+                        >
+                      </li>
+                      <li>
+                        <a class="dropdown-item border-radius-md"
+                          >last_14_days</a
+                        >
+                      </li>
+                      <li>
+                        <a class="dropdown-item border-radius-md">custom</a>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="dropdown float-lg-end pe-4">
+                    <a
+                      class="btn mb-0"
+                      id="dropdownTable"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      <i class="fa fa-user-circle me-2"></i>MD_all
+                    </a>
+                    <ul
+                      class="dropdown-menu px-2 py-3 ms-sm-n4 ms-n5"
+                      aria-labelledby="dropdownTable"
+                    >
+                      <li>
+                        <a class="dropdown-item border-radius-md">today</a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item border-radius-md">yesterday</a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item border-radius-md"
+                          >last_7_days</a
+                        >
+                      </li>
+                      <li>
+                        <a class="dropdown-item border-radius-md"
+                          >last_14_days</a
+                        >
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
-              <div class="col-lg-4 col-4 my-auto text-end">
-                <div class="dropdown float-lg-end pe-4">
-                  <a class="btn bg-gradient-dark mb-0" id="dropdownTable" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="far fa-calendar-alt me-2"></i>기간 선택하기
-                  </a>
-                  <ul class="dropdown-menu px-2 py-3 ms-sm-n4 ms-n5" aria-labelledby="dropdownTable">
-                    <li><a class="dropdown-item border-radius-md">today</a></li>
-                    <li><a class="dropdown-item border-radius-md">yesterday</a></li>
-                    <li><a class="dropdown-item border-radius-md">last_7_days</a></li>
-                    <li><a class="dropdown-item border-radius-md">last_14_days</a></li>
-                  </ul>
+              <div class="card-body pb-0 mb-0">
+                <div class="table-responsive">
+                  <table class="table align-items-center mb-0">
+                    <thead>
+                      <tr>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                          width="10%"
+                        >
+                          브랜드
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                          width="11%"
+                        >
+                          파트너사
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                          width="7%"
+                        >
+                          주문수<br />(건)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                          width="7%"
+                        >
+                          판매수량<br />(pcs)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                          width="7%"
+                        >
+                          실판매가<br />(천원)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                          width="7%"
+                        >
+                          수수료<br />(천원)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                          width="7%"
+                        >
+                          원가<br />(천원)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                          width="7%"
+                        >
+                          쿠폰<br />(천원)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                          width="7%"
+                        >
+                          마일리지<br />(천원)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                          width="7%"
+                        >
+                          PG수수료<br />(천원)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                          width="7%"
+                        >
+                          마케팅비<br />(천원)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                          width="7%"
+                        >
+                          물류비<br />(천원)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                          width="9%"
+                        >
+                          공헌이익<br />(천원)
+                        </th>
+                      </tr>
+                    </thead>
+                  </table>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="card-body p-3">
-            <div class="table-responsive">
-              <table class="table align-items-center mb-0">
-                <thead>
-                  <tr>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">브랜드</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">파트너사</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">주문건수(건)</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">판매수량(pcs)</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">실판매가</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">수수료</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">원가</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">상품쿠폰</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">주문서쿠폰</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">마일리지/PG수수료</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">직접마케팅</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">추정물류비</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7">공헌이익</th>
-                  </tr>
-                </thead>
-                <tbody id="korea-brands-data"></tbody>
-              </table>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table align-items-center mb-0">
+                  <tbody id="korea-brands-data"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </main>
-  <!--   Core JS Files   -->
-  <script src="../controls/korea-brand.js" type="module" defer></script>
-  <script src="../assets/js/core/popper.min.js"></script>
-  <script src="../assets/js/core/bootstrap.min.js"></script>
-  <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
-  <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
-  <script src="../assets/js/plugins/chartjs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/luxon@3.2.1/build/global/luxon.min.js"></script>
-</body>
-
+    </main>
+    <!--   Core JS Files   -->
+    <script src="../controls/korea-brand.js" type="module" defer></script>
+    <script src="../assets/js/core/popper.min.js"></script>
+    <script src="../assets/js/core/bootstrap.min.js"></script>
+    <script src="../assets/js/plugins/perfect-scrollbar.min.js"></script>
+    <script src="../assets/js/plugins/smooth-scrollbar.min.js"></script>
+    <script src="../assets/js/plugins/chartjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.2.1/build/global/luxon.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.ko.min.js"></script>
+  </body>
 </html>
