@@ -33,33 +33,23 @@ async function brandSales(dateText) {
       data[1][i].brand_type == "consignment"
         ? Number(data[1][i].product_coupon)
         : Number(data[1][i].order_coupon) + Number(data[1][i].product_coupon);
-    const expense =
-      Number(data[1][i].cost) +
-      Number(data[1][i].mileage) +
-      couponFee +
-      Number(data[1][i].pg_expense);
+    const expense = Number(data[1][i].cost) + Number(data[1][i].mileage) + couponFee + Number(data[1][i].pg_expense);
     const marketing = data[0].filter((r) => r.brand_id == data[1][i].brand_id);
-    const marketingFee =
-      marketing[0] == undefined || marketing[0] == null
-        ? 0
-        : Number(marketing[0].cost);
+    const marketingFee = marketing[0] == undefined || marketing[0] == null ? 0 : Number(marketing[0].cost);
     const logisticFee = data[1][i].order_count * 4800 * 0.7;
     const calculateMargin =
       data[1][i].brand_type == "consignment"
         ? data[1][i].commission - expense - marketingFee
         : data[1][i].sales_price - expense - marketingFee - logisticFee;
-    const margin = Math.round(calculateMargin / 1000).toLocaleString("ko-KR");
     let html = `
       <tr ${calculateMargin >= 0 ? "" : 'class="table-danger"'}>
         <td class="text-center" width="10%">
-          <h6 class="mb-0 text-sm"><a href="/korea/brand/${
-            data[1][i].brand_id
-          }">${data[1][i].brand_name}<a></h6>
+          <h6 class="mb-0 text-sm"><a href="/korea/brand/${data[1][i].brand_id}">${data[1][i].brand_name}<a></h6>
         </td>
         <td class="align-middle text-center" width="11%">
-          <span class="text-xs font-weight-bold"><a href="/korea/partner/${
-            data[1][i].supplier_id
-          }"> ${data[1][i].supplier_name} </a></span>
+          <span class="text-xs font-weight-bold"><a href="/korea/partner/${data[1][i].supplier_id}"> ${
+      data[1][i].supplier_name
+    } </a></span>
         </td>
         <td class="align-middle text-center" width="7%"><span class="text-xs font-weight-bold"> ${
           data[1][i].order_count
@@ -71,25 +61,17 @@ async function brandSales(dateText) {
           data[1][i].sales_price / 1000
         ).toLocaleString("ko-KR")} </span></td>
         <td class="align-middle text-center" width="7%"><span class="text-xs font-weight-bold"> ${
-          data[1][i].brand_type == "consignment"
-            ? Math.round(Number(data[1][i].commission) / 1000).toLocaleString(
-                "ko-KR"
-              )
-            : "-"
+          data[1][i].brand_type == "consignment" ? util.chunwon(Number(data[1][i].commission)) : "-"
         } </span></td>
         <td class="align-middle text-center" width="7%"><span class="text-xs font-weight-bold"> ${
-          data[1][i].brand_type == "consignment"
-            ? "-"
-            : Math.round(Number(data[1][i].cost) / 1000).toLocaleString("ko-KR")
+          data[1][i].brand_type == "consignment" ? "-" : util.chunwon(Number(data[1][i].cost))
         } </span></td>
         <td class="align-middle text-center" width="7%">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(
-            couponFee
-          )} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(couponFee)} </span>
         </td>
-        <td class="align-middle text-center" width="7%"><span class="text-xs font-weight-bold"> ${Math.round(
-          Number(data[1][i].mileage) / 1000
-        ).toLocaleString("ko-KR")} </span></td>
+        <td class="align-middle text-center" width="7%">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(Number(data[1][i].mileage))} </span>
+        </td>
         <td class="align-middle text-center" width="7%"><span class="text-xs font-weight-bold"> ${Math.round(
           Number(data[1][i].pg_expense) / 1000
         ).toLocaleString("ko-KR")} </span></td>
@@ -97,13 +79,11 @@ async function brandSales(dateText) {
           marketingFee / 1000
         ).toLocaleString("ko-KR")} </span></td>
         <td class="align-middle text-center" width="7%"><span class="text-xs font-weight-bold"> ${
-          data[1][i].brand_type == "consignment"
-            ? 0
-            : Math.round(logisticFee / 1000).toLocaleString("ko-KR")
+          data[1][i].brand_type == "consignment" ? 0 : Math.round(logisticFee / 1000).toLocaleString("ko-KR")
         } </span></td>
         <td class="align-middle text-center" width="9%"><span class="${
           calculateMargin >= 0 ? "text-success" : "text-danger"
-        } text-xs font-weight-bold"> ${margin} (${Math.round(
+        } text-xs font-weight-bold"> ${util.chunwon(calculateMargin)} (${Math.round(
       (calculateMargin / data[1][i].sales_price) * 100
     )}%)</span></td>
       </tr>`;
