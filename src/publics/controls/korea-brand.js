@@ -1,10 +1,15 @@
 import util from "./utility.js";
 const DateTime = luxon.DateTime;
 
-const dateList = document.querySelectorAll(".dropdown-menu .dropdown-item");
+const dateList = document.querySelectorAll("#select-date .dropdown-menu .dropdown-item");
 for (let list of dateList) {
   list.addEventListener("click", () => brandSales(list.innerText));
 }
+
+const startDayPicker = document.querySelector("#datepicker1");
+const endDayPicker = document.querySelector("#datepicker2");
+const startDay = new Datepicker(startDayPicker, { format: "yyyy-mm-dd" });
+const endDay = new Datepicker(endDayPicker, { format: "yyyy-mm-dd" });
 
 (function startFunction() {
   brandSales("yesterday");
@@ -42,7 +47,7 @@ async function brandSales(dateText) {
         ? data[1][i].commission - expense - marketingFee
         : data[1][i].sales_price - expense - marketingFee - logisticFee;
     let html = `
-      <tr ${calculateMargin >= 0 ? "" : 'class="table-danger"'}>
+      <tr class="pb-0 ${calculateMargin >= 0 ? "" : "table-danger"}">
         <td class="text-center" width="10%">
           <h6 class="mb-0 text-sm"><a href="/korea/brand/${data[1][i].brand_id}">${data[1][i].brand_name}<a></h6>
         </td>
