@@ -25,19 +25,11 @@ async function sales() {
   const URL = `${util.host}/korea/sales`;
   const data = await util.fetchData(URL, "GET");
 
-  const koreaOrderCount = document.getElementById("korea-order-count");
-  const koreaSales = document.getElementById("korea-sales");
-  const koreaMonthlySales = document.getElementById("korea-monthly-sales");
-
-  koreaOrderCount.innerHTML = `${Number(data[0][0].order_count).toLocaleString(
+  document.getElementById("korea-order-count").innerHTML = `${Number(data[0][0].order_count).toLocaleString(
     "ko-KR"
   )} 건`;
-  koreaSales.innerHTML = `${Number(
-    Math.round(data[0][0].sales_price / 1000)
-  ).toLocaleString("ko-KR")} 천원`;
-  koreaMonthlySales.innerHTML = `${Number(
-    Math.round(data[1].sales_price / 1000000)
-  ).toLocaleString("ko-KR")} 백만원`;
+  document.getElementById("korea-sales").innerHTML = `${util.chunwon(data[0][0].sales_price)} 천원`;
+  document.getElementById("korea-monthly-sales").innerHTML = `${util.bmwon(data[1].sales_price)} 백만원`;
 }
 
 async function brandSales(dateText) {
@@ -49,53 +41,46 @@ async function brandSales(dateText) {
 
   let brandHtml = "";
   for (let i = 0; i < data[1].length; i++) {
-    const expense =
-      Number(data[1][i].cost) +
-      Number(data[1][i].mileage) +
-      Number(data[1][i].order_coupon) +
-      Number(data[1][i].product_coupon) +
-      Number(data[1][i].pg_expense);
+    const couponFee =
+      data[1][i].brand_type == "consignment"
+        ? Number(data[1][i].product_coupon)
+        : Number(data[1][i].order_coupon) + Number(data[1][i].product_coupon);
+    const expense = Number(data[1][i].cost) + Number(data[1][i].mileage) + couponFee + Number(data[1][i].pg_expense);
     const marketing = data[0].filter((r) => r.brand_id == data[1][i].brand_id);
-    const marketingFee =
-      marketing[0] == undefined || marketing[0] == null
-        ? 0
-        : Number(marketing[0].cost);
+    const marketingFee = marketing[0] == undefined || marketing[0] == null ? 0 : Number(marketing[0].cost);
     const calculateMargin =
       data[1][i].brand_type == "consignment"
         ? data[1][i].commission - expense - marketingFee
         : data[1][i].sales_price - expense - marketingFee;
-    const margin = Math.round(calculateMargin / 1000).toLocaleString("ko-KR");
     let html = `
       <tr>
         <td>
           <div class="d-flex px-2 py-1">
             <div class="d-flex flex-column justify-content-center">
               <h6 class="mb-0 text-sm">
-                <a href="/korea/brand/${data[1][i].brand_id}">${
-      data[1][i].brand_name
-    }<a>
+                <a href="/korea/brand/${data[1][i].brand_id}">${data[1][i].brand_name}<a>
               </h6>
             </div>
           </div>
         </td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${
-          data[1][i].order_count
-        } </span></td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${
-          data[1][i].quantity
-        } </span></td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${Math.round(
-          data[1][i].sales_price / 1000
-        ).toLocaleString("ko-KR")} </span></td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${Math.round(
-          expense / 1000
-        ).toLocaleString("ko-KR")} </span></td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${data[1][i].order_count} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${data[1][i].quantity} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(data[1][i].sales_price)} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(expense)} </span>
+        </td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${Math.round(
           marketingFee / 1000
         ).toLocaleString("ko-KR")} </span></td>
         <td class="align-middle text-center text-sm"><span class="${
           calculateMargin >= 0 ? "text-success" : "text-danger"
-        } text-xs font-weight-bold"> ${margin} </span></td>
+        } text-xs font-weight-bold"> ${util.chunwon(calculateMargin)} </span></td>
       </tr>`;
     brandHtml = brandHtml + html;
   }
@@ -111,9 +96,7 @@ async function productSales(brandId, dateText) {
 
   let productHtml = "";
   for (let i = 0; i < data.length; i++) {
-    const salePrice = Math.round(data[i].sales_price / 1000).toLocaleString(
-      "ko-KR"
-    );
+    const salePrice = Math.round(data[i].sales_price / 1000).toLocaleString("ko-KR");
     const expense =
       Number(data[i].cost) +
       Number(data[i].mileage) +
@@ -121,18 +104,14 @@ async function productSales(brandId, dateText) {
       Number(data[i].product_coupon) +
       Number(data[i].pg_expense);
     const calculateMargin =
-      data[i].brand_type == "consignment"
-        ? data[i].commission - expense
-        : data[i].sales_price - expense;
+      data[i].brand_type == "consignment" ? data[i].commission - expense : data[i].sales_price - expense;
     const margin = Math.round(calculateMargin / 1000).toLocaleString("ko-KR");
 
     let html = `
       <tr>
         <td class="col-4">
           <div class="d-flex px-2 py-1">
-            <div><img src="${
-              data[i].image
-            }" class="avatar avatar-sm me-3" alt="xd"></div>
+            <div><img src="${data[i].image}" class="avatar avatar-sm me-3" alt="xd"></div>
             <div class="d-flex flex-column justify-content-center text-truncate">
               <h6 class="mb-0 text-sm">${data[i].product_name}</h6>
             </div>
@@ -142,17 +121,13 @@ async function productSales(brandId, dateText) {
           <span class="text-xs font-weight-bold"> ${data[i].brand_name} </span>
         </td>
         <td class="align-middle text-center text-sm col-2">
-          <span class="text-xs font-weight-bold"> ${Number(
-            data[i].quantity
-          ).toLocaleString("ko-KR")} </span>
+          <span class="text-xs font-weight-bold"> ${Number(data[i].quantity).toLocaleString("ko-KR")} </span>
         </td>
         <td class="align-middle text-center text-sm col-2">
           <span class="text-xs font-weight-bold"> ${salePrice} </span>
         </td>
         <td class="align-middle text-center text-sm col-2">
-          <span class="text-xs font-weight-bold"> ${Math.round(
-            expense / 1000
-          ).toLocaleString("ko-KR")} </span>
+          <span class="text-xs font-weight-bold"> ${Math.round(expense / 1000).toLocaleString("ko-KR")} </span>
         </td>
         <td class="align-middle text-center text-sm col-2">
           <span class="${
@@ -180,13 +155,8 @@ async function partnerSales(dateText) {
       Number(data[1][i].order_coupon) +
       Number(data[1][i].product_coupon) +
       Number(data[1][i].pg_expense);
-    const marketing = data[0].filter(
-      (r) => r.supplier_id == data[1][i].supplier_id
-    );
-    const marketingFee =
-      marketing[0] == undefined || marketing[0] == null
-        ? 0
-        : Number(marketing[0].cost);
+    const marketing = data[0].filter((r) => r.supplier_id == data[1][i].supplier_id);
+    const marketingFee = marketing[0] == undefined || marketing[0] == null ? 0 : Number(marketing[0].cost);
     const calculateMargin =
       data[1][i].supplier_id == "1"
         ? data[1][i].sales_price - expense - marketingFee
@@ -198,9 +168,7 @@ async function partnerSales(dateText) {
           <div class="d-flex px-2 py-1">
             <div class="d-flex flex-column justify-content-center">
               <h6 class="mb-0 text-sm">
-                <a href="/korea/partner/${data[1][i].supplier_id}">${
-      data[1][i].supplier_name
-    }<a>
+                <a href="/korea/partner/${data[1][i].supplier_id}">${data[1][i].supplier_name}<a>
               </h6>
             </div>
           </div>
@@ -236,42 +204,29 @@ async function marketing() {
   const koreaMarketingMeta = document.getElementById("korea-marketing-meta");
   const koreaMarketingNaver = document.getElementById("korea-marketing-naver");
   const koreaMarketingKakao = document.getElementById("korea-marketing-kakao");
-  const koreaMarketingGoogle = document.getElementById(
-    "korea-marketing-google"
-  );
+  const koreaMarketingGoogle = document.getElementById("korea-marketing-google");
 
   for (let i = 0; i < data[0].length; i++) {
     const channel = data[0][i].channel;
     if (channel == "meta") {
-      koreaMarketingMeta.innerText = `${Math.round(
-        Number(data[0][i].cost / 1000)
-      ).toLocaleString("ko-KR")} 천원`;
+      koreaMarketingMeta.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString("ko-KR")} 천원`;
     } else if (channel == "naver") {
-      koreaMarketingNaver.innerText = `${Math.round(
-        Number(data[0][i].cost / 1000)
-      ).toLocaleString("ko-KR")} 천원`;
+      koreaMarketingNaver.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString("ko-KR")} 천원`;
     } else if (channel == "kakao") {
-      koreaMarketingKakao.innerText = `${Math.round(
-        Number(data[0][i].cost / 1000)
-      ).toLocaleString("ko-KR")} 천원`;
+      koreaMarketingKakao.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString("ko-KR")} 천원`;
     } else if (channel == "google") {
-      koreaMarketingGoogle.innerText = `${Math.round(
-        Number(data[0][i].cost / 1000)
-      ).toLocaleString("ko-KR")} 천원`;
+      koreaMarketingGoogle.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString("ko-KR")} 천원`;
     }
   }
 
-  const totalMarketingFee = data[1]
-    .map((r) => Number(r.cost))
-    .reduce((acc, cur) => acc + cur, 0);
+  const totalMarketingFee = data[1].map((r) => Number(r.cost)).reduce((acc, cur) => acc + cur, 0);
   const brandMarketing = data[1].filter((r) => r.brand_id != null);
   const directMaketing = brandMarketing.map((r) => Number(r.cost));
   const directMaketingFee = directMaketing.reduce((acc, cur) => acc + cur, 0);
   const indirectMaketingFee = totalMarketingFee - directMaketingFee;
 
   const ratio = Math.round((directMaketingFee / totalMarketingFee) * 100);
-  const directMaketingRatio =
-    ratio % 5 == 0 ? ratio : ratio + (5 - (ratio % 5));
+  const directMaketingRatio = ratio % 5 == 0 ? ratio : ratio + (5 - (ratio % 5));
   const indirectMaketingRatio = 100 - directMaketingRatio;
   const ratioHtml = `
     <div class="col-6 ps-0">
@@ -282,9 +237,7 @@ async function marketing() {
         </div>
         <p class="text-xs mb-0 font-weight-bold">브랜드 광고비</p>
       </div>
-      <h4 class="font-weight-bolder">${Math.round(
-        Number(directMaketingFee / 1000)
-      ).toLocaleString("ko-KR")} 천원</h4>
+      <h4 class="font-weight-bolder">${Math.round(Number(directMaketingFee / 1000)).toLocaleString("ko-KR")} 천원</h4>
       <div class="progress w-75">
         <div class="progress-bar bg-dark w-${directMaketingRatio}" role="progressbar" aria-valuenow="${directMaketingRatio}" aria-valuemin="0" aria-valuemax="100"></div>
       </div>
@@ -297,9 +250,7 @@ async function marketing() {
         </div>
         <p class="text-xs mb-0 font-weight-bold">무무즈 광고비</p>
       </div>
-      <h4 class="font-weight-bolder">${Math.round(
-        Number(indirectMaketingFee / 1000)
-      ).toLocaleString("ko-KR")} 천원</h4>
+      <h4 class="font-weight-bolder">${Math.round(Number(indirectMaketingFee / 1000)).toLocaleString("ko-KR")} 천원</h4>
       <div class="progress w-75">
         <div class="progress-bar bg-dark w-${indirectMaketingRatio}" role="progressbar" aria-valuenow="${indirectMaketingRatio}" aria-valuemin="0" aria-valuemax="100"></div>
       </div>
@@ -307,11 +258,7 @@ async function marketing() {
 
   document.getElementById("korea-marketing-ratio").innerHTML = ratioHtml;
 
-  const roas = brandMarketing.map((r) => [
-    r.brand_id,
-    r.brand_name,
-    Math.round((r.conversion / r.cost) * 100),
-  ]);
+  const roas = brandMarketing.map((r) => [r.brand_id, r.brand_name, Math.round((r.conversion / r.cost) * 100)]);
   const sortBrandRoas = roas.sort((a, b) => b[2] - a[2]);
   sortBrandRoas.length = 6;
   let brandRoasHtml = "";
@@ -340,15 +287,9 @@ async function users() {
   const koreaMonthlyNewUsers = document.getElementById("korea-monthly-user");
   const koreaTotalUsers = document.getElementById("korea-total-user");
 
-  koreaNewUsers.innerHTML = `${Number(data[0].target_date_users).toLocaleString(
-    "ko-KR"
-  )} 명`;
-  koreaMonthlyNewUsers.innerHTML = `${Number(
-    data[1].monthly_users
-  ).toLocaleString("ko-KR")} 명`;
-  koreaTotalUsers.innerHTML = `${Number(data[2].total_users).toLocaleString(
-    "ko-KR"
-  )} 명`;
+  koreaNewUsers.innerHTML = `${Number(data[0].target_date_users).toLocaleString("ko-KR")} 명`;
+  koreaMonthlyNewUsers.innerHTML = `${Number(data[1].monthly_users).toLocaleString("ko-KR")} 명`;
+  koreaTotalUsers.innerHTML = `${Number(data[2].total_users).toLocaleString("ko-KR")} 명`;
 }
 
 async function userSaleType() {
@@ -356,32 +297,22 @@ async function userSaleType() {
   const data = await util.fetchData(URL, "GET");
 
   const firstSale = data[0].filter((r) => r.is_first == "y");
-  document.getElementById("korea-first-sale").innerText = `${Number(
-    firstSale[0].user_count
-  ).toLocaleString("ko-KR")}명 / ${Math.round(
-    Number(firstSale[0].sales_price) / 1000000
-  ).toLocaleString("ko-KR")}백만원`;
+  document.getElementById("korea-first-sale").innerText = `${Number(firstSale[0].user_count).toLocaleString(
+    "ko-KR"
+  )}명 / ${Math.round(Number(firstSale[0].sales_price) / 1000000).toLocaleString("ko-KR")}백만원`;
 
   const secondSale = data[0].filter((r) => r.is_first == "n");
-  document.getElementById("korea-second-sale").innerText = `${Number(
-    secondSale[0].user_count
-  ).toLocaleString("ko-KR")}명 / ${Math.round(
-    Number(secondSale[0].sales_price) / 1000000
-  ).toLocaleString("ko-KR")}백만원`;
+  document.getElementById("korea-second-sale").innerText = `${Number(secondSale[0].user_count).toLocaleString(
+    "ko-KR"
+  )}명 / ${Math.round(Number(secondSale[0].sales_price) / 1000000).toLocaleString("ko-KR")}백만원`;
 
   const firstSaleBrand = data[1].filter((r) => r.is_first == "y");
-  const sortFirstSaleBrand = firstSaleBrand.sort(
-    (a, b) => b.sales_price - a.sales_price
-  );
+  const sortFirstSaleBrand = firstSaleBrand.sort((a, b) => b.sales_price - a.sales_price);
   sortFirstSaleBrand.length = 6;
   let firstSaleBrandHtml = "";
   for (let i = 0; i < sortFirstSaleBrand.length; i++) {
-    const countUser = Number(sortFirstSaleBrand[i].user_count).toLocaleString(
-      "ko-KR"
-    );
-    const salePrice = Math.round(
-      Number(sortFirstSaleBrand[i].sales_price) / 1000
-    ).toLocaleString("ko-KR");
+    const countUser = Number(sortFirstSaleBrand[i].user_count).toLocaleString("ko-KR");
+    const salePrice = Math.round(Number(sortFirstSaleBrand[i].sales_price) / 1000).toLocaleString("ko-KR");
     let html = `
       <tr>
         <td>
@@ -396,22 +327,15 @@ async function userSaleType() {
       </tr>`;
     firstSaleBrandHtml = firstSaleBrandHtml + html;
   }
-  document.getElementById("korea-user-first-sale").innerHTML =
-    firstSaleBrandHtml;
+  document.getElementById("korea-user-first-sale").innerHTML = firstSaleBrandHtml;
 
   const secondSaleBrand = data[1].filter((r) => r.is_first == "n");
-  const sortSecondSaleBrand = secondSaleBrand.sort(
-    (a, b) => b.sales_price - a.sales_price
-  );
+  const sortSecondSaleBrand = secondSaleBrand.sort((a, b) => b.sales_price - a.sales_price);
   sortSecondSaleBrand.length = 6;
   let secondSaleBrandHtml = "";
   for (let i = 0; i < sortSecondSaleBrand.length; i++) {
-    const countUser = Number(sortSecondSaleBrand[i].user_count).toLocaleString(
-      "ko-KR"
-    );
-    const salePrice = Math.round(
-      Number(sortSecondSaleBrand[i].sales_price) / 1000
-    ).toLocaleString("ko-KR");
+    const countUser = Number(sortSecondSaleBrand[i].user_count).toLocaleString("ko-KR");
+    const salePrice = Math.round(Number(sortSecondSaleBrand[i].sales_price) / 1000).toLocaleString("ko-KR");
     let html = `
       <tr>
         <td>
@@ -426,17 +350,14 @@ async function userSaleType() {
       </tr>`;
     secondSaleBrandHtml = secondSaleBrandHtml + html;
   }
-  document.getElementById("korea-user-second-sale").innerHTML =
-    secondSaleBrandHtml;
+  document.getElementById("korea-user-second-sale").innerHTML = secondSaleBrandHtml;
 }
 
 async function salesChartData() {
   const URL = `${util.host}/korea/chart-sales`;
   const data = await util.fetchData(URL, "GET");
 
-  const labelData = data[0].map((r) =>
-    DateTime.fromISO(r.payment_date).toFormat("LL/dd")
-  );
+  const labelData = data[0].map((r) => DateTime.fromISO(r.payment_date).toFormat("LL/dd"));
   const thisYearSales = data[0].map((r) => Math.round(r.sales_price / 1000));
   const beforeYearSales = data[1].map((r) => Math.round(r.sales_price / 1000));
 
@@ -444,9 +365,7 @@ async function salesChartData() {
   const sumBeforeYearSales = beforeYearSales.reduce((acc, cur) => acc + cur, 0);
   const ratio = (sumThisYearSales / sumBeforeYearSales).toFixed(2);
 
-  const koreaSalesChartSummary = document.getElementById(
-    "korea-sales-chart-summary"
-  );
+  const koreaSalesChartSummary = document.getElementById("korea-sales-chart-summary");
   koreaSalesChartSummary.innerHTML = `<i class="fa ${
     ratio > 1 ? "fa-arrow-up text-success" : "fa-arrow-down text-danger"
   }"></i> 
@@ -565,33 +484,17 @@ async function weatherChartData() {
   const URL = `${util.host}/weather/seoul`;
   const data = await util.fetchData(URL, "GET");
 
-  const thisYearTemp = data[0].map((r) => [
-    r.Weather_temperature_min,
-    r.Weather_temperature_max,
-  ]);
-  const beforeYearTemp = data[1].map((r) => [
-    r.Weather_temperature_min,
-    r.Weather_temperature_max,
-  ]);
+  const thisYearTemp = data[0].map((r) => [r.Weather_temperature_min, r.Weather_temperature_max]);
+  const beforeYearTemp = data[1].map((r) => [r.Weather_temperature_min, r.Weather_temperature_max]);
 
-  const labelData = data[0].map((r) =>
-    DateTime.fromISO(r.Weather_date).toFormat("LL/dd")
-  );
+  const labelData = data[0].map((r) => DateTime.fromISO(r.Weather_date).toFormat("LL/dd"));
 
   weatherChart(thisYearTemp, beforeYearTemp, labelData);
 }
 
 async function weatherChart(thisYearTemp, beforeYearTemp, labelData) {
   const ctx = document.getElementById("korea-weather-chart").getContext("2d");
-  const colorCode = [
-    "#696969",
-    "#696969",
-    "#696969",
-    "#696969",
-    "#696969",
-    "#696969",
-    "#696969",
-  ];
+  const colorCode = ["#696969", "#696969", "#696969", "#696969", "#696969", "#696969", "#696969"];
 
   if (koreaWeatherChart) {
     koreaWeatherChart.destroy();
@@ -685,9 +588,7 @@ async function sqaudData() {
   let actualObj = {};
   for (let squad of squadIdList) {
     const budgetDataArray = data[0].filter((r) => r.budget_squad_id == squad);
-    const budgetSales = Math.round(
-      budgetDataArray[0].budget_sale_sales / 1000000
-    );
+    const budgetSales = Math.round(budgetDataArray[0].budget_sale_sales / 1000000);
     const budgetMargin = Math.round(budgetDataArray[0].budget_margin / 1000000);
     budgetObj[squad] = [budgetSales, budgetMargin];
 
@@ -695,9 +596,7 @@ async function sqaudData() {
     let actualSales = 0;
     let actualMargin = 0;
     if (actualDataArray.length != 0) {
-      actualSales = Math.round(
-        Number(actualDataArray[0].sales_price) / 1000000
-      );
+      actualSales = Math.round(Number(actualDataArray[0].sales_price) / 1000000);
       const cost = Number(actualDataArray[0].cost);
       const expense =
         Number(actualDataArray[0].mileage) +
@@ -763,9 +662,7 @@ async function squadChart(budget, actual) {
     },
   };
 
-  const consignmentctx = document
-    .getElementById("consignment-squad-chart")
-    .getContext("2d");
+  const consignmentctx = document.getElementById("consignment-squad-chart").getContext("2d");
   if (consignmentChart) {
     consignmentChart.destroy();
   }
@@ -825,9 +722,7 @@ async function squadChart(budget, actual) {
     },
   });
 
-  const strategicctx = document
-    .getElementById("strategic-squad-chart")
-    .getContext("2d");
+  const strategicctx = document.getElementById("strategic-squad-chart").getContext("2d");
   if (strategicChart) {
     strategicChart.destroy();
   }
@@ -887,9 +782,7 @@ async function squadChart(budget, actual) {
     },
   });
 
-  const buyingctx = document
-    .getElementById("buying-squad-chart")
-    .getContext("2d");
+  const buyingctx = document.getElementById("buying-squad-chart").getContext("2d");
   if (buyingChart) {
     buyingChart.destroy();
   }
@@ -949,9 +842,7 @@ async function squadChart(budget, actual) {
     },
   });
 
-  const essentialctx = document
-    .getElementById("essential-squad-chart")
-    .getContext("2d");
+  const essentialctx = document.getElementById("essential-squad-chart").getContext("2d");
   if (essentialChart) {
     essentialChart.destroy();
   }
