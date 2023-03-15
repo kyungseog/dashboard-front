@@ -1,11 +1,9 @@
 const utility = {
   host: "http://localhost:3000",
 
-  fetchData: async (URL, method) => {
-    const response = await fetch(URL, { method: method });
-    const data = await response.json();
-    return data;
-  },
+  fetchData: (URL, method) => fetch(URL, { method: method }).then((r) => r.json()),
+  chunwon: (num) => Math.round(num / 1000).toLocaleString("ko-KR"),
+  bmwon: (num) => Math.round(num / 1000000).toLocaleString("ko-KR"),
 
   dayofweek: {
     0: "Mon",
@@ -29,14 +27,6 @@ const utility = {
     strategic_2: { id: "strategic_2", email: "sh.lim", name: "임수현" },
     strategic_3: { id: "strategic_3", email: "eskim", name: "김은선" },
     essential_1: { id: "essential_1", email: "km.kim", name: "김경민" },
-  },
-
-  chunwon: (num) => {
-    return Math.round(num / 1000).toLocaleString("ko-KR");
-  },
-
-  bmwon: (num) => {
-    return Math.round(num / 1000000).toLocaleString("ko-KR");
   },
 };
 export default utility;
