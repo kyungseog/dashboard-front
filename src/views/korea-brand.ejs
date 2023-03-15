@@ -20,52 +20,47 @@
           <div class="card h-100">
             <div class="card-header ps-0 pe-0 pb-0 mb-0 sticky-top">
               <div class="row">
-                <div class="col-lg-6 col-md-4">
+                <div class="col-lg-5 col-md-5">
                   <h6 id="title">전체 브랜드 현황이에요</h6>
                 </div>
-                <div class="col-lg-4 col-md-6 d-flex">
-                  <div class="col-4 pe-2 text-end align-self-center">
-                    <h6><i class="far fa-calendar-alt me-2"></i>기간 선택하기</h6>
-                  </div>
-                  <div class="col-4 pe-2 align-self-center">
-                    <div class="form-floating d-flex">
-                      <input type="text" class="form-control" id="datepicker1" required placeholder="YYYY-MM-DD" />
-                      <label for="datepicker1"><i class="far fa-calendar-alt me-2"></i>Start Date</label>
-                    </div>
-                  </div>
-                  <div class="col-4 align-self-center">
-                    <div class="form-floating d-flex">
-                      <input
-                        type="text"
-                        class="form-control border-2"
-                        id="datepicker2"
-                        required
-                        placeholder="YYYY-MM-DD"
-                      />
-                      <label for="datepicker2"><i class="far fa-calendar-alt me-2"></i>End Date</label>
-                    </div>
+                <div class="col-lg-5 col-md-5 d-flex mb-2 p-1">
+                  <div class="input-group">
+                    <button type="button" class="btn btn-outline-secondary mb-0 p-2">검색 기간</button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split mb-0"
+                      data-bs-toggle="dropdown"
+                    >
+                      <span id="easy-select-date"></span>빠른 선택</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item">today</a></li>
+                      <li><a class="dropdown-item">yesterday</a></li>
+                      <li><a class="dropdown-item">last_7_days</a></li>
+                      <li><a class="dropdown-item">last_14_days</a></li>
+                    </ul>
+                    <input type="text" id="datepicker1" class="form-control text-center text-lg" placeholder="시작일" />
+                    <input type="text" id="datepicker2" class="form-control text-center text-lg" placeholder="종료일" />
                   </div>
                 </div>
-                <div class="col-lg-2 col-md-2 my-sm-auto ms-sm-auto me-sm-0 text-end">
-                  <div class="dropdown float-lg-end pe-4" id="select-md">
-                    <a class="btn mb-0" id="mdDropdownTable" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="fa fa-user-circle me-2"></i>MD_all
-                    </a>
-                    <ul class="dropdown-menu px-2 py-3 ms-sm-n4 ms-n5" aria-labelledby="mdDropdownTable">
-                      <li>
-                        <a class="dropdown-item border-radius-md">today</a>
-                      </li>
-                      <li>
-                        <a class="dropdown-item border-radius-md">yesterday</a>
-                      </li>
-                      <li>
-                        <a class="dropdown-item border-radius-md">last_7_days</a>
-                      </li>
-                      <li>
-                        <a class="dropdown-item border-radius-md">last_14_days</a>
-                      </li>
-                    </ul>
-                  </div>
+                <div class="col-lg-1 col-md-1 mb-2 p-1">
+                  <select class="form-select mb-0" id="md-list">
+                    <option value="all" selected>MD</option>
+                    <option value="consignment_1">남쪽빛</option>
+                    <option value="consignment_5">이지연</option>
+                    <option value="consignment_4">홍민지</option>
+                    <option value="buying_1">이예지</option>
+                    <option value="buying_2">양주연</option>
+                    <option value="essential_1">김경민</option>
+                    <option value="strategic_1">황은경</option>
+                    <option value="strategic_2">임수현</option>
+                    <option value="strategic_3">김은선</option>
+                    <option value="consignment_2">진수현</option>
+                    <option value="consignment_3">김선영</option>
+                  </select>
+                </div>
+                <div class="col-lg-1 col-md-1 text-center mb-2 p-1">
+                  <button type="submit" class="btn btn-secondary" id="submit">조회</button>
                 </div>
               </div>
               <div class="row">

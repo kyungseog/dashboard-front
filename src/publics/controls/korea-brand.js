@@ -1,19 +1,20 @@
 import util from "./utility.js";
 const DateTime = luxon.DateTime;
 
-const dateList = document.querySelectorAll("#select-date .dropdown-menu .dropdown-item");
-for (let list of dateList) {
-  list.addEventListener("click", () => brandSales(list.innerText));
-}
+(function startFunction() {
+  brandSales("yesterday");
+})();
+
+const mdSelectList = document.querySelector("#md-list");
+mdSelectList.addEventListener("change", () => console.log(mdSelectList.options[mdSelectList.selectedIndex].value));
+
+const submit = document.querySelector("#submit");
+submit.addEventListener("click", () => console.log("실행"));
 
 const startDayPicker = document.querySelector("#datepicker1");
 const endDayPicker = document.querySelector("#datepicker2");
 const startDay = new Datepicker(startDayPicker, { format: "yyyy-mm-dd" });
 const endDay = new Datepicker(endDayPicker, { format: "yyyy-mm-dd" });
-
-(function startFunction() {
-  brandSales("yesterday");
-})();
 
 async function brandSales(dateText) {
   const URL = `${util.host}/korea/brand-sales/${dateText}`;
