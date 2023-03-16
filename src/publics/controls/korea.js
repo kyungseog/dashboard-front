@@ -37,7 +37,6 @@ async function brandSales() {
   const endDay = DateTime.now().toFormat("yyyy-LL-dd");
   const URL = `${util.host}/korea/brand-sales?startDay=${startDay}&endDay=${endDay}`;
   const data = await util.fetchData(URL, "GET");
-  console.log(data[0], data[2]);
   data[1].length = 5;
 
   const brandsData = document.getElementById("korea-brands-data");

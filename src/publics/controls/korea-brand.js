@@ -6,7 +6,6 @@ const startDayPicker = new Datepicker(document.querySelector("#datepicker1"), { 
 const endDayPicker = new Datepicker(document.querySelector("#datepicker2"), { format: "yyyy-mm-dd" });
 const yesterday = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
 const today = DateTime.now().toFormat("yyyy-LL-dd");
-const tomorrow = DateTime.now().plus({ days: 1 }).toFormat("yyyy-LL-dd");
 
 startFunction();
 
@@ -47,7 +46,6 @@ submit.addEventListener("click", () => {
 async function brandSales(startDay, endDay, mdId) {
   const URL = `${util.host}/korea/brand-sales?startDay=${startDay}&endDay=${endDay}`;
   const data = await util.fetchData(URL, "GET");
-  console.log(data[2]);
   const brandsData = document.getElementById("korea-brands-data");
   const filteredData = mdId == "all" ? data[1] : data[1].filter((r) => r.md_id == mdId);
 
@@ -58,7 +56,8 @@ async function brandSales(startDay, endDay, mdId) {
     const expense = Number(el.cost) + Number(el.mileage) + couponFee + Number(el.pg_expense);
     const marketing = data[0].filter((r) => r.brand_id == el.brand_id);
     const marketingFee = marketing[0] == undefined || marketing[0] == null ? 0 : Number(marketing[0].cost);
-    const logisticFee = el.order_count * 4800 * 0.7;
+    const logistic = data[2].filter((r) => r.brand_id == el.brand_id);
+    const logisticFee = logistic[0] == undefined || logistic[0] == null ? 0 : Number(logistic[0].logistic_fee);
     const calculateMargin =
       el.brand_type == "consignment"
         ? el.commission - expense - marketingFee
@@ -81,8 +80,8 @@ async function brandSales(startDay, endDay, mdId) {
         ${commonTD(el.brand_type == "consignment" ? util.chunwon(Number(el.commission)) : "-")}
         ${commonTD(el.brand_type == "consignment" ? "-" : util.chunwon(Number(el.cost)))}
         ${commonTD(util.chunwon(couponFee))}
-        ${commonTD(util.chunwon(Number(el.mileage)))}
-        ${commonTD(util.chunwon(Number(el.pg_expense)))}
+        ${commonTD(util.chunwon(Number(el.mileage) + Number(el.pg_expense)))}
+        ${commonTD(util.chunwon(marketingFee))}
         ${commonTD(util.chunwon(marketingFee))}
         ${commonTD(el.brand_type == "consignment" ? "-" : util.chunwon(logisticFee))}
         <td class="align-middle text-center" width="9%">
@@ -92,5 +91,9 @@ async function brandSales(startDay, endDay, mdId) {
       </tr>`;
     brandHtml = brandHtml + html;
   }
+  document.querySelector("#title").innerHTML =
+    '<span class="text-primary font-weight-bold">' +
+    mdSelectList.options[mdSelectList.selectedIndex].innerText +
+    "</span> 담당 브랜드별 현황이에요";
   brandsData.innerHTML = brandHtml;
 }
