@@ -11,7 +11,7 @@ let essentialChart;
 (function startFunction() {
   sales();
   salesChartData();
-  brandSales("yesterday");
+  brandSales();
   productSales("moomooz", "yesterday");
   partnerSales("yesterday");
   marketing();
@@ -32,9 +32,12 @@ async function sales() {
   document.getElementById("korea-monthly-sales").innerHTML = `${util.bmwon(data[1].sales_price)} 백만원`;
 }
 
-async function brandSales(dateText) {
-  const URL = `${util.host}/korea/brand-sales/${dateText}`;
+async function brandSales() {
+  const startDay = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
+  const endDay = DateTime.now().toFormat("yyyy-LL-dd");
+  const URL = `${util.host}/korea/brand-sales?startDay=${startDay}&endDay=${endDay}`;
   const data = await util.fetchData(URL, "GET");
+  console.log(data[0], data[2]);
   data[1].length = 5;
 
   const brandsData = document.getElementById("korea-brands-data");
