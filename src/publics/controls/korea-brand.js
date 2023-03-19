@@ -54,21 +54,48 @@ async function brandSales(startDay, endDay, mdId) {
     const couponFee =
       el.brand_type == "consignment" ? Number(el.product_coupon) : Number(el.order_coupon) + Number(el.product_coupon);
     const expense = Number(el.cost) + Number(el.mileage) + couponFee + Number(el.pg_expense);
-    const marketing = data[0].filter((r) => r.brand_id == el.brand_id);
-    const marketingFee = marketing[0] == undefined || marketing[0] == null ? 0 : Number(marketing[0].cost);
+
+    const marketing_d = data[0].filter((r) => r.brand_id == el.brand_id);
+    const marketingFee_d =
+      marketing_d[0] == undefined || marketing_d[0] == null ? 0 : Number(marketing_d[0].direct_marketing_fee);
+    const marketing_i = data[3].filter((r) => r.brand_id == el.brand_id);
+    const marketingFee_i =
+      marketing_i[0] == undefined || marketing_i[0] == null ? 0 : Number(marketing_i[0].indirect_marketing_fee);
+    const marketing_live = data[4].filter((r) => r.brand_id == el.brand_id);
+    const marketingFee_live =
+      marketing_live[0] == undefined || marketing_live[0] == null ? 0 : Number(marketing_live[0].live_fee);
+
     const logistic = data[2].filter((r) => r.brand_id == el.brand_id);
     const logisticFee = logistic[0] == undefined || logistic[0] == null ? 0 : Number(logistic[0].logistic_fee);
+
     const calculateMargin =
       el.brand_type == "consignment"
-        ? el.commission - expense - marketingFee
-        : el.sales_price - expense - marketingFee - logisticFee;
+        ? el.commission - expense - marketingFee_d - marketingFee_i - marketingFee_live
+        : el.sales_price - expense - marketingFee_d - marketingFee_i - marketingFee_live - logisticFee;
+    const marginRate = Math.round((calculateMargin / el.sales_price) * 100);
+
+    let huddleMarginRate = "";
+    if (el.brand_type == "consignment") {
+      huddleMarginRate = marginRate < 4 ? '<i class="text-primary fa-solid fa-temperature-arrow-down me-2"></i>' : "";
+    } else if (el.brand_type == "strategic") {
+      huddleMarginRate = marginRate < 5 ? '<i class="text-primary fa-solid fa-temperature-arrow-down me-2"></i>' : "";
+    } else if (el.brand_type == "buying") {
+      huddleMarginRate = marginRate < 11 ? '<i class="text-primary fa-solid fa-temperature-arrow-down me-2"></i>' : "";
+    } else {
+      huddleMarginRate = marginRate < 21 ? '<i class="text-primary fa-solid fa-temperature-arrow-down me-2"></i>' : "";
+    }
 
     const commonTD = (elem) => `<td class="align-middle text-center" width="7%">
         <span class="text-xs font-weight-bold"> ${elem} </span></td>`;
     let html = `
       <tr class="pb-0 ${calculateMargin >= 0 ? "" : "table-danger"}">
         <td class="text-center" width="10%">
-          <h6 class="mb-0 text-sm"><a href="/korea/brand/${el.brand_id}">${el.brand_name}<a></h6>
+          <div class="d-flex">
+            ${huddleMarginRate}
+            <h6 class="mb-0 text-sm">
+              <a href="/korea/brand/${el.brand_id}">${el.brand_name}<a>
+            </h6>
+          </div>
         </td>
         <td class="align-middle text-center" width="11%">
           <span class="text-xs font-weight-bold">
@@ -81,12 +108,12 @@ async function brandSales(startDay, endDay, mdId) {
         ${commonTD(el.brand_type == "consignment" ? "-" : util.chunwon(Number(el.cost)))}
         ${commonTD(util.chunwon(couponFee))}
         ${commonTD(util.chunwon(Number(el.mileage) + Number(el.pg_expense)))}
-        ${commonTD(util.chunwon(marketingFee))}
-        ${commonTD(util.chunwon(marketingFee))}
+        ${commonTD(util.chunwon(Number(marketingFee_d) + Number(marketingFee_live)))}
+        ${commonTD(util.chunwon(marketingFee_i))}
         ${commonTD(el.brand_type == "consignment" ? "-" : util.chunwon(logisticFee))}
         <td class="align-middle text-center" width="9%">
           <span class="${calculateMargin >= 0 ? "text-success" : "text-danger"} text-xs font-weight-bold"> 
-          ${util.chunwon(calculateMargin)} (${Math.round((calculateMargin / el.sales_price) * 100)}%)</span>
+          ${util.chunwon(calculateMargin)} (${marginRate}%)</span>
         </td>
       </tr>`;
     brandHtml = brandHtml + html;
