@@ -3,10 +3,14 @@ const DateTime = luxon.DateTime;
 
 let koreaSalesChart;
 let koreaWeatherChart;
-let consignmentChart;
-let strategicChart;
-let buyingChart;
-let essentialChart;
+let consignmentSalesChart;
+let consignmentMarginChart;
+let strategicSalesChart;
+let strategicMarginChart;
+let buyingSalesChart;
+let buyingMarginChart;
+let essentialSalesChart;
+let essentialMarginChart;
 
 (function startFunction() {
   sales();
@@ -37,52 +41,82 @@ async function brandSales() {
   const endDay = DateTime.now().toFormat("yyyy-LL-dd");
   const URL = `${util.host}/korea/brand-sales?startDay=${startDay}&endDay=${endDay}`;
   const data = await util.fetchData(URL, "GET");
-  data[1].length = 5;
 
+  const totalSales = data[1].map((r) => Number(r.sales_price)).reduce((acc, cur) => acc + cur, 0);
+  const totalDirectMarketingFee = data[0].map((r) => Number(r.direct_marketing_fee)).reduce((acc, cur) => acc + cur, 0);
+  const totalIndirectMarketingFee = data[3]
+    .map((r) => Number(r.indirect_marketing_fee))
+    .reduce((acc, cur) => acc + cur, 0);
+  const totalLiveMarketingFee = data[4].map((r) => Number(r.live_fee)).reduce((acc, cur) => acc + cur, 0);
+  const totalMarketingFee = totalDirectMarketingFee + totalIndirectMarketingFee + totalLiveMarketingFee;
+  const blendedRoas = Math.round((totalSales / totalMarketingFee) * 100);
+
+  document.getElementById("yesterday-roas").innerHTML = `
+    <h6 class="text-center mb-0">Blended ROAS (어제)</h6>
+    <span class="text-xs">(실판가매출) ${util.bmwon(totalSales)}백만</span>
+    <span class="text-xs">(총광고비) ${util.bmwon(totalMarketingFee)}백만</span>
+    <hr class="horizontal dark my-3">
+    <h5 class="mb-0">${blendedRoas}%</h5>`;
+
+  data[1].length = 5;
   const brandsData = document.getElementById("korea-brands-data");
 
   let brandHtml = "";
-  for (let i = 0; i < data[1].length; i++) {
+  for (let el of data[1]) {
     const couponFee =
-      data[1][i].brand_type == "consignment"
-        ? Number(data[1][i].product_coupon)
-        : Number(data[1][i].order_coupon) + Number(data[1][i].product_coupon);
-    const expense = Number(data[1][i].cost) + Number(data[1][i].mileage) + couponFee + Number(data[1][i].pg_expense);
-    const marketing = data[0].filter((r) => r.brand_id == data[1][i].brand_id);
-    const marketingFee = marketing[0] == undefined || marketing[0] == null ? 0 : Number(marketing[0].cost);
+      el.brand_type == "consignment" ? Number(el.product_coupon) : Number(el.order_coupon) + Number(el.product_coupon);
+    const expense = Number(el.cost) + Number(el.mileage) + couponFee + Number(el.pg_expense);
+
+    const marketing_d = data[0].filter((r) => r.brand_id == el.brand_id);
+    const marketingFee_d =
+      marketing_d[0] == undefined || marketing_d[0] == null ? 0 : Number(marketing_d[0].direct_marketing_fee);
+    const marketing_i = data[3].filter((r) => r.brand_id == el.brand_id);
+    const marketingFee_i =
+      marketing_i[0] == undefined || marketing_i[0] == null ? 0 : Number(marketing_i[0].indirect_marketing_fee);
+    const marketing_live = data[4].filter((r) => r.brand_id == el.brand_id);
+    const marketingFee_live =
+      marketing_live[0] == undefined || marketing_live[0] == null ? 0 : Number(marketing_live[0].live_fee);
+
+    const logistic = data[2].filter((r) => r.brand_id == el.brand_id);
+    const logisticFee = logistic[0] == undefined || logistic[0] == null ? 0 : Number(logistic[0].logistic_fee);
+
     const calculateMargin =
-      data[1][i].brand_type == "consignment"
-        ? data[1][i].commission - expense - marketingFee
-        : data[1][i].sales_price - expense - marketingFee;
+      el.brand_type == "consignment"
+        ? el.commission - expense - marketingFee_d - marketingFee_i - marketingFee_live
+        : el.sales_price - expense - marketingFee_d - marketingFee_i - marketingFee_live - logisticFee;
     let html = `
       <tr>
         <td>
           <div class="d-flex px-2 py-1">
             <div class="d-flex flex-column justify-content-center">
               <h6 class="mb-0 text-sm">
-                <a href="/korea/brand/${data[1][i].brand_id}">${data[1][i].brand_name}<a>
+                <a href="/korea/brand/${el.brand_id}">${el.brand_name}<a>
               </h6>
             </div>
           </div>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${data[1][i].order_count} </span>
+          <span class="text-xs font-weight-bold"> ${el.order_count} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${data[1][i].quantity} </span>
+          <span class="text-xs font-weight-bold"> ${el.quantity} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(data[1][i].sales_price)} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(el.sales_price)} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(expense)} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(expense + logisticFee)} </span>
         </td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${Math.round(
-          marketingFee / 1000
-        ).toLocaleString("ko-KR")} </span></td>
-        <td class="align-middle text-center text-sm"><span class="${
-          calculateMargin >= 0 ? "text-success" : "text-danger"
-        } text-xs font-weight-bold"> ${util.chunwon(calculateMargin)} </span></td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(
+            marketingFee_d + marketingFee_i + marketingFee_live
+          )} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="${
+            calculateMargin >= 0 ? "text-success" : "text-danger"
+          } text-xs font-weight-bold"> ${util.chunwon(calculateMargin)} </span>
+       </td>
       </tr>`;
     brandHtml = brandHtml + html;
   }
@@ -203,28 +237,32 @@ async function marketing() {
   const URL = `${util.host}/korea/marketing`;
   const data = await util.fetchData(URL, "GET");
 
-  const koreaMarketingMeta = document.getElementById("korea-marketing-meta");
-  const koreaMarketingNaver = document.getElementById("korea-marketing-naver");
-  const koreaMarketingKakao = document.getElementById("korea-marketing-kakao");
-  const koreaMarketingGoogle = document.getElementById("korea-marketing-google");
-
   for (let i = 0; i < data[0].length; i++) {
     const channel = data[0][i].channel;
     if (channel == "meta") {
-      koreaMarketingMeta.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString("ko-KR")} 천원`;
+      document.getElementById("korea-marketing-meta").innerText = `${util.chunwon(data[0][i].cost)} 천원`;
     } else if (channel == "naver") {
-      koreaMarketingNaver.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString("ko-KR")} 천원`;
+      document.getElementById("korea-marketing-naver").innerText = `${util.chunwon(data[0][i].cost)} 천원`;
     } else if (channel == "kakao") {
-      koreaMarketingKakao.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString("ko-KR")} 천원`;
+      document.getElementById("korea-marketing-kakao").innerText = `${util.chunwon(data[0][i].cost)} 천원`;
     } else if (channel == "google") {
-      koreaMarketingGoogle.innerText = `${Math.round(Number(data[0][i].cost / 1000)).toLocaleString("ko-KR")} 천원`;
+      document.getElementById("korea-marketing-google").innerText = `${util.chunwon(data[0][i].cost)} 천원`;
     }
   }
 
+  const blendedRoas = Math.round((data[3].sales_price / data[2].cost) * 100);
+  document.getElementById("this-yearly-roas").innerHTML = `
+    <h6 class="text-center mb-0">Blended ROAS (금년)</h6>
+    <span class="text-xs">(실판가매출) ${util.bmwon(data[3].sales_price)}백만</span>
+    <span class="text-xs">(총광고비) ${util.bmwon(data[2].cost)}백만</span>
+    <hr class="horizontal dark my-3">
+    <h5 class="mb-0">${blendedRoas}%</h5>`;
+
   const totalMarketingFee = data[1].map((r) => Number(r.cost)).reduce((acc, cur) => acc + cur, 0);
-  const brandMarketing = data[1].filter((r) => r.brand_id != null);
-  const directMaketing = brandMarketing.map((r) => Number(r.cost));
-  const directMaketingFee = directMaketing.reduce((acc, cur) => acc + cur, 0);
+  const directMaketingFee = data[1]
+    .filter((r) => r.brand_id != null)
+    .map((r) => Number(r.cost))
+    .reduce((acc, cur) => acc + cur, 0);
   const indirectMaketingFee = totalMarketingFee - directMaketingFee;
 
   const ratio = Math.round((directMaketingFee / totalMarketingFee) * 100);
@@ -239,7 +277,7 @@ async function marketing() {
         </div>
         <p class="text-xs mb-0 font-weight-bold">브랜드 광고비</p>
       </div>
-      <h4 class="font-weight-bolder">${Math.round(Number(directMaketingFee / 1000)).toLocaleString("ko-KR")} 천원</h4>
+      <h4 class="font-weight-bolder">${util.chunwon(directMaketingFee)} 천원</h4>
       <div class="progress w-75">
         <div class="progress-bar bg-dark w-${directMaketingRatio}" role="progressbar" aria-valuenow="${directMaketingRatio}" aria-valuemin="0" aria-valuemax="100"></div>
       </div>
@@ -252,33 +290,13 @@ async function marketing() {
         </div>
         <p class="text-xs mb-0 font-weight-bold">무무즈 광고비</p>
       </div>
-      <h4 class="font-weight-bolder">${Math.round(Number(indirectMaketingFee / 1000)).toLocaleString("ko-KR")} 천원</h4>
+      <h4 class="font-weight-bolder">${util.chunwon(indirectMaketingFee)} 천원</h4>
       <div class="progress w-75">
         <div class="progress-bar bg-dark w-${indirectMaketingRatio}" role="progressbar" aria-valuenow="${indirectMaketingRatio}" aria-valuemin="0" aria-valuemax="100"></div>
       </div>
     </div>`;
 
   document.getElementById("korea-marketing-ratio").innerHTML = ratioHtml;
-
-  const roas = brandMarketing.map((r) => [r.brand_id, r.brand_name, Math.round((r.conversion / r.cost) * 100)]);
-  const sortBrandRoas = roas.sort((a, b) => b[2] - a[2]);
-  sortBrandRoas.length = 6;
-  let brandRoasHtml = "";
-  for (let i = 0; i < sortBrandRoas.length; i++) {
-    let html = `
-      <tr>
-        <td>
-          <div class="d-flex px-2 py-1">
-            <div class="d-flex flex-column justify-content-center">
-              <h6 class="mb-0 text-sm">${sortBrandRoas[i][1]}</h6>
-            </div>
-          </div>
-        </td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${sortBrandRoas[i][2]}% </span></td>
-      </tr>`;
-    brandRoasHtml = brandRoasHtml + html;
-  }
-  document.getElementById("korea-brand-roas").innerHTML = brandRoasHtml;
 }
 
 async function users() {
@@ -586,116 +604,134 @@ async function sqaudData() {
 
   const squadIdList = data[0].map((r) => r.budget_squad_id);
 
-  let budgetObj = {};
-  let actualObj = {};
+  let salesObj = {};
+  let marginObj = {};
   for (let squad of squadIdList) {
     const budgetDataArray = data[0].filter((r) => r.budget_squad_id == squad);
     const budgetSales = Math.round(budgetDataArray[0].budget_sale_sales / 1000000);
     const budgetMargin = Math.round(budgetDataArray[0].budget_margin / 1000000);
-    budgetObj[squad] = [budgetSales, budgetMargin];
 
-    const actualDataArray = data[1].filter((r) => r.squad_id == squad);
     let actualSales = 0;
     let actualMargin = 0;
+    const actualDataArray = data[1].filter((r) => r.squad_id == squad);
+    const directMarketingArray = data[2].filter((r) => r.squad_id == squad);
+    const indirectMarketingArray = data[3].filter((r) => r.squad_id == squad);
+    const liveMarketingArray = data[4].filter((r) => r.squad_id == squad);
+    const logisticArray = data[5].filter((r) => r.squad_id == squad);
+
     if (actualDataArray.length != 0) {
       actualSales = Math.round(Number(actualDataArray[0].sales_price) / 1000000);
       const cost = Number(actualDataArray[0].cost);
-      const expense =
-        Number(actualDataArray[0].mileage) +
-        Number(actualDataArray[0].order_coupon) +
-        Number(actualDataArray[0].product_coupon) +
-        Number(actualDataArray[0].pg_expense);
-      const marketingArray = data[2].filter((r) => r.squad_id == squad);
-      const marketingFee = Number(marketingArray[0].cost);
+      const couponFee =
+        squad == "consignment" || squad == "strategic"
+          ? Number(actualDataArray[0].order_coupon)
+          : Number(actualDataArray[0].order_coupon) + Number(actualDataArray[0].product_coupon);
+      const expense = couponFee + Number(actualDataArray[0].mileage) + Number(actualDataArray[0].pg_expense);
+      const marketingFee =
+        Number(directMarketingArray[0].cost) +
+        Number(indirectMarketingArray[0].indirect_marketing_fee) +
+        Number(liveMarketingArray[0].live_fee);
+      const logisticFee = squad == "consignment" || squad == "strategic" ? 0 : Number(logisticArray[0].logistic_fee);
+
       let margin = 0;
       if (squad == "consignment" || squad == "strategic") {
         margin = actualDataArray[0].commission - expense - marketingFee;
       } else {
-        margin = actualDataArray[0].sales_price - cost - expense - marketingFee;
+        margin = actualDataArray[0].sales_price - cost - expense - marketingFee - logisticFee;
       }
       actualMargin = Math.round(margin / 1000000);
     }
-    actualObj[squad] = [actualSales, actualMargin];
+    salesObj[squad] = [budgetSales, actualSales];
+    marginObj[squad] = [budgetMargin, actualMargin];
   }
-  squadChart(budgetObj, actualObj);
+  squadChart(salesObj, marginObj);
 }
 
-async function squadChart(budget, actual) {
-  const scalesData = {
-    y: {
-      grid: {
-        drawBorder: false,
+async function squadChart(sales, margin) {
+  const optionsData = {
+    responsive: true,
+    plugins: {
+      datalabels: {
+        color: "white",
         display: true,
-        drawOnChartArea: true,
-        drawTicks: false,
-        borderDash: [5, 5],
-      },
-      ticks: {
-        display: false,
-        padding: 10,
-        color: "#b2b9bf",
         font: {
-          size: 10,
+          size: 11,
           family: "Open Sans",
-          style: "normal",
+          style: "bold",
           lineHeight: 2,
         },
       },
-    },
-    x: {
-      grid: {
-        drawBorder: false,
-        display: false,
-        drawOnChartArea: false,
-        drawTicks: false,
-        borderDash: [5, 5],
-      },
-      ticks: {
+      legend: {
+        labels: {
+          boxWidth: 0,
+          boxHeight: 0,
+        },
         display: true,
-        color: "#b2b9bf",
-        padding: 10,
-        font: {
-          size: 10,
-          family: "Open Sans",
-          style: "normal",
-          lineHeight: 2,
+      },
+    },
+    scales: {
+      y: {
+        grid: {
+          drawBorder: false,
+          display: true,
+          drawOnChartArea: true,
+          drawTicks: false,
+          borderDash: [5, 5],
+        },
+        ticks: {
+          display: false,
+          padding: 10,
+          color: "#b2b9bf",
+          font: {
+            size: 10,
+            family: "Open Sans",
+            style: "normal",
+            lineHeight: 2,
+          },
+        },
+      },
+      x: {
+        grid: {
+          drawBorder: false,
+          display: false,
+          drawOnChartArea: false,
+          drawTicks: false,
+          borderDash: [5, 5],
+        },
+        ticks: {
+          display: true,
+          color: "#b2b9bf",
+          padding: 10,
+          font: {
+            size: 10,
+            family: "Open Sans",
+            style: "normal",
+            lineHeight: 2,
+          },
         },
       },
     },
   };
 
-  const consignmentctx = document.getElementById("consignment-squad-chart").getContext("2d");
-  if (consignmentChart) {
-    consignmentChart.destroy();
+  const consignmentSalesCtx = document.getElementById("consignment-squad-sales-chart").getContext("2d");
+  if (consignmentSalesChart) {
+    consignmentSalesChart.destroy();
   }
 
-  consignmentChart = new Chart(consignmentctx, {
+  consignmentSalesChart = new Chart(consignmentSalesCtx, {
     plugins: [ChartDataLabels],
     type: "bar",
     data: {
-      labels: ["실판가매출", "공헌이익"],
+      labels: ["예산", "추정"],
       datasets: [
         {
-          label: "예산",
-          data: budget.consignment,
+          label: "실판가매출",
+          data: sales.consignment,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
           borderSkipped: false,
-          backgroundColor: "#37306B",
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-        {
-          label: "추정",
-          data: actual.consignment,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: "#66347F",
+          backgroundColor: ["#37306B", "#66347F"],
           datalabels: {
             align: "center",
             anchor: "center",
@@ -703,59 +739,28 @@ async function squadChart(budget, actual) {
         },
       ],
     },
-    options: {
-      responsive: true,
-      plugins: {
-        datalabels: {
-          color: "white",
-          display: true,
-          font: {
-            size: 11,
-            family: "Open Sans",
-            style: "bold",
-            lineHeight: 2,
-          },
-        },
-        legend: {
-          display: false,
-        },
-      },
-      scales: scalesData,
-    },
+    options: optionsData,
   });
 
-  const strategicctx = document.getElementById("strategic-squad-chart").getContext("2d");
-  if (strategicChart) {
-    strategicChart.destroy();
+  const consignmentMarginCtx = document.getElementById("consignment-squad-margin-chart").getContext("2d");
+  if (consignmentMarginChart) {
+    consignmentMarginChart.destroy();
   }
 
-  strategicChart = new Chart(strategicctx, {
+  consignmentMarginChart = new Chart(consignmentMarginCtx, {
     plugins: [ChartDataLabels],
     type: "bar",
     data: {
-      labels: ["실판가매출", "공헌이익"],
+      labels: ["예산", "추정"],
       datasets: [
         {
-          label: "예산",
-          data: budget.strategic,
+          label: "공헌이익",
+          data: margin.consignment,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
           borderSkipped: false,
-          backgroundColor: "#37306B",
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-        {
-          label: "추정",
-          data: actual.strategic,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: "#66347F",
+          backgroundColor: ["#37306B", "#66347F"],
           datalabels: {
             align: "center",
             anchor: "center",
@@ -763,59 +768,28 @@ async function squadChart(budget, actual) {
         },
       ],
     },
-    options: {
-      responsive: true,
-      plugins: {
-        datalabels: {
-          color: "white",
-          display: true,
-          font: {
-            size: 11,
-            family: "Open Sans",
-            style: "bold",
-            lineHeight: 2,
-          },
-        },
-        legend: {
-          display: false,
-        },
-      },
-      scales: scalesData,
-    },
+    options: optionsData,
   });
 
-  const buyingctx = document.getElementById("buying-squad-chart").getContext("2d");
-  if (buyingChart) {
-    buyingChart.destroy();
+  const strategicSalesCtx = document.getElementById("strategic-squad-sales-chart").getContext("2d");
+  if (strategicSalesChart) {
+    strategicSalesChart.destroy();
   }
 
-  buyingChart = new Chart(buyingctx, {
+  strategicSalesChart = new Chart(strategicSalesCtx, {
     plugins: [ChartDataLabels],
     type: "bar",
     data: {
-      labels: ["실판가매출", "공헌이익"],
+      labels: ["예산", "추정"],
       datasets: [
         {
-          label: "예산",
-          data: budget.buying,
+          label: "실판가매출",
+          data: sales.strategic,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
           borderSkipped: false,
-          backgroundColor: "#37306B",
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-        {
-          label: "추정",
-          data: actual.buying,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: "#66347F",
+          backgroundColor: ["#37306B", "#66347F"],
           datalabels: {
             align: "center",
             anchor: "center",
@@ -823,59 +797,28 @@ async function squadChart(budget, actual) {
         },
       ],
     },
-    options: {
-      responsive: true,
-      plugins: {
-        datalabels: {
-          color: "white",
-          display: true,
-          font: {
-            size: 11,
-            family: "Open Sans",
-            style: "bold",
-            lineHeight: 2,
-          },
-        },
-        legend: {
-          display: false,
-        },
-      },
-      scales: scalesData,
-    },
+    options: optionsData,
   });
 
-  const essentialctx = document.getElementById("essential-squad-chart").getContext("2d");
-  if (essentialChart) {
-    essentialChart.destroy();
+  const strategicMarginCtx = document.getElementById("strategic-squad-margin-chart").getContext("2d");
+  if (strategicMarginChart) {
+    strategicMarginChart.destroy();
   }
 
-  essentialChart = new Chart(essentialctx, {
+  strategicMarginChart = new Chart(strategicMarginCtx, {
     plugins: [ChartDataLabels],
     type: "bar",
     data: {
-      labels: ["실판가매출", "공헌이익"],
+      labels: ["예산", "추정"],
       datasets: [
         {
-          label: "예산",
-          data: budget.essential,
+          label: "공헌이익",
+          data: margin.strategic,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
           borderSkipped: false,
-          backgroundColor: "#37306B",
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-        {
-          label: "추정",
-          data: actual.essential,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: "#66347F",
+          backgroundColor: ["#37306B", "#66347F"],
           datalabels: {
             align: "center",
             anchor: "center",
@@ -883,24 +826,122 @@ async function squadChart(budget, actual) {
         },
       ],
     },
-    options: {
-      responsive: true,
-      plugins: {
-        datalabels: {
-          color: "white",
-          display: true,
-          font: {
-            size: 11,
-            family: "Open Sans",
-            style: "bold",
-            lineHeight: 2,
+    options: optionsData,
+  });
+
+  const buyingSalesCtx = document.getElementById("buying-squad-sales-chart").getContext("2d");
+  if (buyingSalesChart) {
+    buyingSalesChart.destroy();
+  }
+
+  buyingSalesChart = new Chart(buyingSalesCtx, {
+    plugins: [ChartDataLabels],
+    type: "bar",
+    data: {
+      labels: ["예산", "추정"],
+      datasets: [
+        {
+          label: "실판가매출",
+          data: sales.buying,
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 8,
+          borderSkipped: false,
+          backgroundColor: ["#37306B", "#66347F"],
+          datalabels: {
+            align: "center",
+            anchor: "center",
           },
         },
-        legend: {
-          display: false,
-        },
-      },
-      scales: scalesData,
+      ],
     },
+    options: optionsData,
+  });
+
+  const buyingMarginCtx = document.getElementById("buying-squad-margin-chart").getContext("2d");
+  if (buyingMarginChart) {
+    buyingMarginChart.destroy();
+  }
+
+  buyingMarginChart = new Chart(buyingMarginCtx, {
+    plugins: [ChartDataLabels],
+    type: "bar",
+    data: {
+      labels: ["예산", "추정"],
+      datasets: [
+        {
+          label: "공헌이익",
+          data: margin.buying,
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 8,
+          borderSkipped: false,
+          backgroundColor: ["#37306B", "#66347F"],
+          datalabels: {
+            align: "center",
+            anchor: "center",
+          },
+        },
+      ],
+    },
+    options: optionsData,
+  });
+
+  const essentialSalesCtx = document.getElementById("essential-squad-sales-chart").getContext("2d");
+  if (essentialSalesChart) {
+    essentialSalesChart.destroy();
+  }
+
+  essentialSalesChart = new Chart(essentialSalesCtx, {
+    plugins: [ChartDataLabels],
+    type: "bar",
+    data: {
+      labels: ["예산", "추정"],
+      datasets: [
+        {
+          label: "실판가매출",
+          data: sales.essential,
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 8,
+          borderSkipped: false,
+          backgroundColor: ["#37306B", "#66347F"],
+          datalabels: {
+            align: "center",
+            anchor: "center",
+          },
+        },
+      ],
+    },
+    options: optionsData,
+  });
+
+  const essentialMarginCtx = document.getElementById("essential-squad-margin-chart").getContext("2d");
+  if (essentialMarginChart) {
+    essentialMarginChart.destroy();
+  }
+
+  essentialMarginChart = new Chart(essentialMarginCtx, {
+    plugins: [ChartDataLabels],
+    type: "bar",
+    data: {
+      labels: ["예산", "추정"],
+      datasets: [
+        {
+          label: "공헌이익",
+          data: margin.essential,
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 8,
+          borderSkipped: false,
+          backgroundColor: ["#37306B", "#66347F"],
+          datalabels: {
+            align: "center",
+            anchor: "center",
+          },
+        },
+      ],
+    },
+    options: optionsData,
   });
 }

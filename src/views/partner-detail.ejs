@@ -2,33 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>Partners/Detail</title>
     <!--     Fonts and Font Awesome Icons     -->
-    <link
-      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700"
-      rel="stylesheet"
-    />
-    <script
-      src="https://kit.fontawesome.com/b1baf8bd8e.js"
-      crossorigin="anonymous"
-    ></script>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+    <script src="https://kit.fontawesome.com/b1baf8bd8e.js" crossorigin="anonymous"></script>
     <!-- CSS Files -->
-    <link
-      id="pagestyle"
-      href="/../assets/css/soft-ui-dashboard.css?v=1.0.6"
-      rel="stylesheet"
-    />
+    <link id="pagestyle" href="/../assets/css/soft-ui-dashboard.css?v=1.0.6" rel="stylesheet" />
   </head>
 
   <body class="bg-gray-100">
     <%-include('sidebar')%>
-    <main
-      class="main-content position-relative max-height-vh-100 h-100 border-radius-lg mt-6"
-    >
+    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg mt-6">
       <div class="container-fluid py-4">
         <div class="row">
           <div class="col-lg-8">
@@ -37,57 +22,30 @@
                 <div class="card bg-transparent shadow-xl">
                   <div
                     class="overflow-hidden position-relative border-radius-xl"
-                    style="
-                      background-image: url('/../assets/img/curved-images/curved14.jpg');
-                    "
+                    style="background-image: url('/../assets/img/curved-images/curved14.jpg')"
                   >
                     <span class="mask bg-gradient-dark"></span>
                     <div class="card-body position-relative z-index-1 p-3">
-                      <i class="text-white p-2" id="partner-sales-region"
-                        >한국 / 일본 운영여부</i
-                      >
-                      <h5 class="text-white mt-4 pb-2" id="partner-name">
-                        파트너명
-                      </h5>
-                      <h6 class="text-white mb-3" id="brand-list">
-                        파트너 보유 브랜드
-                      </h6>
+                      <i class="text-white p-2" id="partner-sales-region">한국 / 일본 운영여부</i>
+                      <h5 class="text-white mt-4 pb-2" id="partner-name">파트너명</h5>
+                      <h6 class="text-white mb-3" id="brand-list">파트너 보유 브랜드</h6>
                       <div class="d-flex">
                         <div class="d-flex">
                           <div class="me-4">
-                            <p class="text-white text-sm opacity-8 mb-0">
-                              대표자
-                            </p>
-                            <h6 class="text-white mb-0" id="partner-ceo">
-                              대표자명
-                            </h6>
+                            <p class="text-white text-sm opacity-8 mb-0">대표자</p>
+                            <h6 class="text-white mb-0" id="partner-ceo">대표자명</h6>
                           </div>
                           <div class="me-4">
-                            <p class="text-white text-sm opacity-8 mb-0">
-                              사업자번호
-                            </p>
-                            <h6
-                              class="text-white mb-0"
-                              id="partner-registraion-no"
-                            >
-                              000-00-00000
-                            </h6>
+                            <p class="text-white text-sm opacity-8 mb-0">사업자번호</p>
+                            <h6 class="text-white mb-0" id="partner-registraion-no">000-00-00000</h6>
                           </div>
                           <div class="me-4">
-                            <p class="text-white text-sm opacity-8 mb-0">
-                              입점년월
-                            </p>
-                            <h6 class="text-white mb-0" id="partner-start-date">
-                              0000년 00월
-                            </h6>
+                            <p class="text-white text-sm opacity-8 mb-0">입점년월</p>
+                            <h6 class="text-white mb-0" id="partner-start-date">0000년 00월</h6>
                           </div>
                           <div>
-                            <p class="text-white text-sm opacity-8 mb-0">
-                              대표이메일
-                            </p>
-                            <h6 class="text-white mb-0" id="partner-email">
-                              partner@partner.com
-                            </h6>
+                            <p class="text-white text-sm opacity-8 mb-0">대표이메일</p>
+                            <h6 class="text-white mb-0" id="partner-email">partner@partner.com</h6>
                           </div>
                         </div>
                       </div>
@@ -100,31 +58,21 @@
                   <div class="col-md-6">
                     <div class="card">
                       <div class="card-header mx-4 p-3 text-center">
-                        <div
-                          class="icon icon-shape icon-lg bg-gradient-primary shadow text-center border-radius-lg"
-                        >
+                        <div class="icon icon-shape icon-lg bg-gradient-primary shadow text-center border-radius-lg">
                           <i class="fas fa-landmark opacity-10"></i>
                         </div>
                       </div>
-                      <div
-                        class="card-body pt-0 p-3 text-center"
-                        id="this-monthly-sales"
-                      ></div>
+                      <div class="card-body pt-0 p-3 text-center" id="this-monthly-sales"></div>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="card">
                       <div class="card-header mx-4 p-3 text-center">
-                        <div
-                          class="icon icon-shape icon-lg bg-gradient-primary shadow text-center border-radius-lg"
-                        >
+                        <div class="icon icon-shape icon-lg bg-gradient-primary shadow text-center border-radius-lg">
                           <i class="fab fa-paypal opacity-10"></i>
                         </div>
                       </div>
-                      <div
-                        class="card-body pt-0 p-3 text-center"
-                        id="this-yearly-sales"
-                      ></div>
+                      <div class="card-body pt-0 p-3 text-center" id="this-yearly-sales"></div>
                     </div>
                   </div>
                 </div>
@@ -143,11 +91,7 @@
                   </div>
                   <div class="card-body p-3">
                     <div class="chart">
-                      <canvas
-                        id="partner-sales-chart"
-                        class="chart-canvas"
-                        height="350"
-                      ></canvas>
+                      <canvas id="partner-sales-chart" class="chart-canvas" height="350"></canvas>
                     </div>
                   </div>
                 </div>
@@ -192,27 +136,18 @@
                       >
                         <i class="far fa-calendar-alt me-2"></i>기간 선택하기
                       </a>
-                      <ul
-                        class="dropdown-menu px-2 py-3 ms-sm-n4 ms-n5"
-                        aria-labelledby="dropdownTable"
-                      >
+                      <ul class="dropdown-menu px-2 py-3 ms-sm-n4 ms-n5" aria-labelledby="dropdownTable">
                         <li>
                           <a class="dropdown-item border-radius-md">today</a>
                         </li>
                         <li>
-                          <a class="dropdown-item border-radius-md"
-                            >yesterday</a
-                          >
+                          <a class="dropdown-item border-radius-md">yesterday</a>
                         </li>
                         <li>
-                          <a class="dropdown-item border-radius-md"
-                            >last_7_days</a
-                          >
+                          <a class="dropdown-item border-radius-md">last_7_days</a>
                         </li>
                         <li>
-                          <a class="dropdown-item border-radius-md"
-                            >last_14_days</a
-                          >
+                          <a class="dropdown-item border-radius-md">last_14_days</a>
                         </li>
                       </ul>
                     </div>
