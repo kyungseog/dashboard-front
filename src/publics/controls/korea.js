@@ -13,12 +13,12 @@ let essentialSalesChart;
 let essentialMarginChart;
 
 (function startFunction() {
+  marketing();
   sales();
   salesChartData();
   brandSales();
   productSales("moomooz", "yesterday");
   partnerSales("yesterday");
-  marketing();
   users();
   userSaleType();
   weatherChartData();
@@ -43,18 +43,14 @@ async function brandSales() {
   const data = await util.fetchData(URL, "GET");
 
   const totalSales = data[1].map((r) => Number(r.sales_price)).reduce((acc, cur) => acc + cur, 0);
-  const totalDirectMarketingFee = data[0].map((r) => Number(r.direct_marketing_fee)).reduce((acc, cur) => acc + cur, 0);
-  const totalIndirectMarketingFee = data[3]
-    .map((r) => Number(r.indirect_marketing_fee))
-    .reduce((acc, cur) => acc + cur, 0);
-  const totalLiveMarketingFee = data[4].map((r) => Number(r.live_fee)).reduce((acc, cur) => acc + cur, 0);
-  const totalMarketingFee = totalDirectMarketingFee + totalIndirectMarketingFee + totalLiveMarketingFee;
+  const totalMarketingFee = data[0].map((r) => Number(r.direct_marketing_fee)).reduce((acc, cur) => acc + cur, 0);
   const blendedRoas = Math.round((totalSales / totalMarketingFee) * 100);
 
   document.getElementById("yesterday-roas").innerHTML = `
     <h6 class="text-center mb-0">Blended ROAS (어제)</h6>
-    <span class="text-xs">(실판가매출) ${util.bmwon(totalSales)}백만</span>
-    <span class="text-xs">(총광고비) ${util.bmwon(totalMarketingFee)}백만</span>
+    <span class="text-xs">(실판가매출) ${util.bmwon(totalSales)}백만 <br> (총광고비) ${util.bmwon(
+    totalMarketingFee
+  )}백만</span>
     <hr class="horizontal dark my-3">
     <h5 class="mb-0">${blendedRoas}%</h5>`;
 
@@ -253,8 +249,9 @@ async function marketing() {
   const blendedRoas = Math.round((data[3].sales_price / data[2].cost) * 100);
   document.getElementById("this-yearly-roas").innerHTML = `
     <h6 class="text-center mb-0">Blended ROAS (금년)</h6>
-    <span class="text-xs">(실판가매출) ${util.bmwon(data[3].sales_price)}백만</span>
-    <span class="text-xs">(총광고비) ${util.bmwon(data[2].cost)}백만</span>
+    <span class="text-xs">(실판가매출) ${util.bmwon(data[3].sales_price)}백만 <br> (총광고비) ${util.bmwon(
+    data[2].cost
+  )}백만 </span>
     <hr class="horizontal dark my-3">
     <h5 class="mb-0">${blendedRoas}%</h5>`;
 
