@@ -230,33 +230,39 @@ async function partnerSales(dateText) {
 }
 
 async function marketing() {
-  const URL = `${util.host}/korea/marketing`;
-  const data = await util.fetchData(URL, "GET");
+  const salesByData = await util.fetchData(`${util.host}/korea/marketing/salesBy`, "GET");
+  const yearlyData = await util.fetchData(`${util.host}/korea/marketing/yearly`, "GET");
 
-  for (let i = 0; i < data[0].length; i++) {
-    const channel = data[0][i].channel;
+  for (let i = 0; i < salesByData.byChannel.length; i++) {
+    const channel = salesByData.byChannel[i].channel;
     if (channel == "meta") {
-      document.getElementById("korea-marketing-meta").innerText = `${util.chunwon(data[0][i].cost)} 천원`;
+      document.getElementById("korea-marketing-meta").innerText = `${util.chunwon(salesByData.byChannel[i].cost)} 천원`;
     } else if (channel == "naver") {
-      document.getElementById("korea-marketing-naver").innerText = `${util.chunwon(data[0][i].cost)} 천원`;
+      document.getElementById("korea-marketing-naver").innerText = `${util.chunwon(
+        salesByData.byChannel[i].cost
+      )} 천원`;
     } else if (channel == "kakao") {
-      document.getElementById("korea-marketing-kakao").innerText = `${util.chunwon(data[0][i].cost)} 천원`;
+      document.getElementById("korea-marketing-kakao").innerText = `${util.chunwon(
+        salesByData.byChannel[i].cost
+      )} 천원`;
     } else if (channel == "google") {
-      document.getElementById("korea-marketing-google").innerText = `${util.chunwon(data[0][i].cost)} 천원`;
+      document.getElementById("korea-marketing-google").innerText = `${util.chunwon(
+        salesByData.byChannel[i].cost
+      )} 천원`;
     }
   }
 
-  const blendedRoas = Math.round((data[3].sales_price / data[2].cost) * 100);
+  const blendedRoas = Math.round((yearlyData.totalSales.sales_price / yearlyData.totalMarketingFee.cost) * 100);
   document.getElementById("this-yearly-roas").innerHTML = `
     <h6 class="text-center mb-0">Blended ROAS (금년)</h6>
-    <span class="text-xs">(실판가매출) ${util.bmwon(data[3].sales_price)}백만 <br> (총광고비) ${util.bmwon(
-    data[2].cost
-  )}백만 </span>
+    <span class="text-xs">(실판가매출) ${util.bmwon(
+      yearlyData.totalSales.sales_price
+    )}백만 <br> (총광고비) ${util.bmwon(yearlyData.totalMarketingFee.cost)}백만 </span>
     <hr class="horizontal dark my-3">
     <h5 class="mb-0">${blendedRoas}%</h5>`;
 
-  const totalMarketingFee = data[1].map((r) => Number(r.cost)).reduce((acc, cur) => acc + cur, 0);
-  const directMaketingFee = data[1]
+  const totalMarketingFee = salesByData.byType.map((r) => Number(r.cost)).reduce((acc, cur) => acc + cur, 0);
+  const directMaketingFee = salesByData.byType
     .filter((r) => r.brand_id != null)
     .map((r) => Number(r.cost))
     .reduce((acc, cur) => acc + cur, 0);
@@ -596,7 +602,7 @@ async function weatherChart(thisYearTemp, beforeYearTemp, labelData) {
 }
 
 async function sqaudData() {
-  const URL = `${util.host}/korea/squad-sales`;
+  const URL = `${util.host}/squad/sales`;
   const data = await util.fetchData(URL, "GET");
 
   const squadIdList = data[0].map((r) => r.budget_squad_id);
@@ -654,7 +660,7 @@ async function squadChart(sales, margin) {
         font: {
           size: 11,
           family: "Open Sans",
-          style: "bold",
+          style: "normal",
           lineHeight: 2,
         },
       },
