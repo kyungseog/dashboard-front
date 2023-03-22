@@ -1,66 +1,142 @@
 import util from "./utility.js";
 const DateTime = luxon.DateTime;
 
-let squadSalesChart;
-let koreaWeatherChart;
-let consignmentSalesChart;
-let consignmentMarginChart;
-let strategicSalesChart;
-let strategicMarginChart;
-let buyingSalesChart;
-let buyingMarginChart;
-let essentialSalesChart;
-let essentialMarginChart;
+let monthlySquadSalesChart;
+let monthlySquadChart;
+let yearlySquadSalesChart;
+let yearlySquadChart;
 
 (function startFunction() {
   const URL = window.location.href;
   const squadId = URL.substring(URL.indexOf("/", URL.indexOf("squad")) + 1);
-  salesChart(squadId);
-  sqaudData();
+  monthlyData(squadId);
+  yearlyData(squadId);
 })();
 
-async function salesChart(squadId) {
-  const data = await util.fetchData(`${util.host}/squad/${squadId}/sales`, "GET");
+async function monthlyData(squadId) {
+  const startDay = DateTime.now().startOf("month").toFormat("yyyy-LL-dd");
+  const endDay = DateTime.now().toFormat("yyyy-LL-dd");
+  const beforeYearStartDay = DateTime.now().startOf("month").minus({ years: 1 }).toFormat("yyyy-LL-dd");
+  const beforeYearEndDay = DateTime.now().minus({ years: 1 }).toFormat("yyyy-LL-dd");
 
-  const labelData = data[0].map((r) => DateTime.fromISO(r.payment_date).toFormat("LL/dd"));
-  const thisYearSales = data[0].map((r) => Math.round(r.sales_price / 1000));
-  const beforeYearSales = data[1].map((r) => Math.round(r.sales_price / 1000));
+  const thisYearURL = `${util.host}/squad/${squadId}/sales?startDay=${startDay}&endDay=${endDay}`;
+  const beforeYearURL = `${util.host}/squad/${squadId}/sales?startDay=${beforeYearStartDay}&endDay=${beforeYearEndDay}`;
+  const thisYearData = await util.fetchData(thisYearURL, "GET");
+  const beforeYearData = await util.fetchData(beforeYearURL, "GET");
 
-  const sumThisYearSales = thisYearSales.reduce((acc, cur) => acc + cur, 0);
-  const sumBeforeYearSales = beforeYearSales.reduce((acc, cur) => acc + cur, 0);
+  document.getElementById("squad-name").innerText = thisYearData.actual[0].squad_name;
+
+  const countDays = Number(DateTime.now().endOf("month").toFormat("dd"));
+  let labels = [];
+  let budgetSales = [];
+  for (let i = 0; i < countDays; i++) {
+    labels.push(DateTime.now().toFormat("LL") + "-" + (i < 9 ? "0" + (i + 1) : i + 1));
+    budgetSales.push(Math.round(thisYearData.sales / 1000000));
+  }
+
+  let stepThisYearSales = [];
+  thisYearData.actual
+    .map((r) => Math.round(r.sales_price / 1000000))
+    .reduce((acc, cur) => {
+      stepThisYearSales.push(acc + cur);
+      return acc + cur;
+    }, 0);
+
+  let stepBeforeYearSales = [];
+  beforeYearData.actual
+    .map((r) => Math.round(r.sales_price / 1000000))
+    .reduce((acc, cur) => {
+      stepBeforeYearSales.push(acc + cur);
+      return acc + cur;
+    }, 0);
+
+  const sumThisYearSales = thisYearData.actual.map((r) => Number(r.sales_price)).reduce((acc, cur) => acc + cur, 0);
+  const sumBeforeYearSales = beforeYearData.actual.map((r) => Number(r.sales_price)).reduce((acc, cur) => acc + cur, 0);
   const ratio = (sumThisYearSales / sumBeforeYearSales).toFixed(2);
 
-  const koreaSalesChartSummary = document.getElementById("squad-sales-chart-summary");
-  koreaSalesChartSummary.innerHTML = `<i class="fa ${
+  monthlySalesChart(ratio, labels, budgetSales, stepThisYearSales, stepBeforeYearSales);
+
+  const commission =
+    squadId == "consignment" || squadId == "strategic"
+      ? thisYearData.actual.map((r) => Number(r.commission)).reduce((acc, cur) => acc + cur, 0)
+      : sumThisYearSales;
+  const cost = thisYearData.actual.map((r) => Number(r.cost)).reduce((acc, cur) => acc + cur, 0);
+  const coupon =
+    squadId == "consignment" || squadId == "strategic"
+      ? thisYearData.actual.map((r) => Number(r.order_coupon)).reduce((acc, cur) => acc + cur, 0)
+      : thisYearData.actual.map((r) => Number(r.order_coupon)).reduce((acc, cur) => acc + cur, 0) +
+        thisYearData.actual.map((r) => Number(r.product_coupon)).reduce((acc, cur) => acc + cur, 0);
+  const expense =
+    Number(thisYearData.logistic.fee) +
+    thisYearData.actual.map((r) => Number(r.mileage)).reduce((acc, cur) => acc + cur, 0) +
+    thisYearData.actual.map((r) => Number(r.pg_expense)).reduce((acc, cur) => acc + cur, 0);
+  const marketing =
+    Number(thisYearData.directMarketing.fee) +
+    Number(thisYearData.indirectMarketing.fee) +
+    Number(thisYearData.liveMarketing.fee);
+  const margin = commission - coupon - marketing - expense;
+
+  const monthlyData = [
+    Math.round(commission / 1000000),
+    [Math.round(commission / 1000000) - Math.round(cost / 1000000), Math.round(commission / 1000000)],
+    [
+      Math.round(commission / 1000000) - Math.round(cost / 1000000) - Math.round(coupon / 1000000),
+      Math.round(commission / 1000000) - Math.round(cost / 1000000),
+    ],
+    [
+      Math.round(commission / 1000000) -
+        Math.round(cost / 1000000) -
+        Math.round(coupon / 1000000) -
+        Math.round(marketing / 1000000),
+      Math.round(commission / 1000000) - Math.round(cost / 1000000) - Math.round(coupon / 1000000),
+    ],
+    [
+      Math.round(commission / 1000000) -
+        Math.round(cost / 1000000) -
+        Math.round(coupon / 1000000) -
+        Math.round(marketing / 1000000) -
+        Math.round(expense / 1000000),
+      Math.round(commission / 1000000) -
+        Math.round(cost / 1000000) -
+        Math.round(coupon / 1000000) -
+        Math.round(marketing / 1000000),
+    ],
+    Math.round(margin / 1000000),
+  ];
+  monthlyChart(monthlyData);
+}
+
+async function monthlySalesChart(ratio, labels, budgetSales, thisYearSales, beforeYearSales) {
+  document.getElementById("monthly-sales-chart-summary").innerHTML = `<i class="fa ${
     ratio > 1 ? "fa-arrow-up text-success" : "fa-arrow-down text-danger"
   }"></i> 
   <span class="font-weight-bold">전년대비 ${ratio * 100}%</span>`;
 
-  const squadSalesCtx = document.getElementById("squad-sales-chart").getContext("2d");
+  const monthlySalesCtx = document.getElementById("monthly-sales-chart").getContext("2d");
 
-  const gradientStroke1 = squadSalesCtx.createLinearGradient(0, 230, 0, 50);
+  const gradientStroke1 = monthlySalesCtx.createLinearGradient(0, 230, 0, 50);
   gradientStroke1.addColorStop(1, "rgba(203,12,159,0.2)");
   gradientStroke1.addColorStop(0.2, "rgba(72,72,176,0.0)");
   gradientStroke1.addColorStop(0, "rgba(203,12,159,0)");
 
-  const gradientStroke2 = squadSalesCtx.createLinearGradient(0, 230, 0, 50);
+  const gradientStroke2 = monthlySalesCtx.createLinearGradient(0, 230, 0, 50);
   gradientStroke2.addColorStop(1, "rgba(20,23,39,0.2)");
   gradientStroke2.addColorStop(0.2, "rgba(72,72,176,0.0)");
   gradientStroke2.addColorStop(0, "rgba(20,23,39,0)");
 
-  const gradientStroke3 = squadSalesCtx.createLinearGradient(0, 230, 0, 50);
+  const gradientStroke3 = monthlySalesCtx.createLinearGradient(0, 230, 0, 50);
   gradientStroke2.addColorStop(1, "rgba(20,23,39,0.2)");
   gradientStroke2.addColorStop(0.2, "rgba(72,72,176,0.0)");
   gradientStroke2.addColorStop(0, "rgba(20,23,39,0)");
 
-  if (squadSalesChart) {
-    squadSalesChart.destroy();
+  if (monthlySquadSalesChart) {
+    monthlySquadSalesChart.destroy();
   }
 
-  squadSalesChart = new Chart(squadSalesCtx, {
+  monthlySquadSalesChart = new Chart(monthlySalesCtx, {
     type: "line",
     data: {
-      labels: labelData,
+      labels: labels,
       datasets: [
         {
           label: "목표",
@@ -158,7 +234,7 @@ async function salesChart(squadId) {
   });
 }
 
-async function squadChart(sales, margin) {
+async function monthlyChart(monthlyData) {
   const optionsData = {
     responsive: true,
     plugins: {
@@ -168,7 +244,7 @@ async function squadChart(sales, margin) {
         font: {
           size: 11,
           family: "Open Sans",
-          style: "bold",
+          style: "normal",
           lineHeight: 2,
         },
       },
@@ -177,7 +253,7 @@ async function squadChart(sales, margin) {
           boxWidth: 0,
           boxHeight: 0,
         },
-        display: true,
+        display: false,
       },
     },
     scales: {
@@ -224,20 +300,20 @@ async function squadChart(sales, margin) {
     },
   };
 
-  const consignmentSalesCtx = document.getElementById("consignment-squad-sales-chart").getContext("2d");
-  if (consignmentSalesChart) {
-    consignmentSalesChart.destroy();
+  const monthlyCtx = document.getElementById("monthly-chart").getContext("2d");
+  if (monthlySquadChart) {
+    monthlySquadChart.destroy();
   }
 
-  consignmentSalesChart = new Chart(consignmentSalesCtx, {
+  monthlySquadChart = new Chart(monthlyCtx, {
     plugins: [ChartDataLabels],
     type: "bar",
     data: {
-      labels: ["예산", "추정"],
+      labels: ["매출", "원가", "쿠폰", "마케팅", "기타", "공헌이익"],
       datasets: [
         {
-          label: "실판가매출",
-          data: sales.consignment,
+          label: "당월",
+          data: monthlyData,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
@@ -252,195 +328,307 @@ async function squadChart(sales, margin) {
     },
     options: optionsData,
   });
+}
 
-  const consignmentMarginCtx = document.getElementById("consignment-squad-margin-chart").getContext("2d");
-  if (consignmentMarginChart) {
-    consignmentMarginChart.destroy();
+async function yearlyData(squadId) {
+  const startDay = DateTime.now().startOf("year").toFormat("yyyy-LL-dd");
+  const endDay = DateTime.now().toFormat("yyyy-LL-dd");
+  const beforeYearStartDay = DateTime.now().startOf("year").minus({ years: 1 }).toFormat("yyyy-LL-dd");
+  const beforeYearEndDay = DateTime.now().minus({ years: 1 }).toFormat("yyyy-LL-dd");
+
+  const thisYearURL = `${util.host}/squad/${squadId}/sales?startDay=${startDay}&endDay=${endDay}`;
+  const beforeYearURL = `${util.host}/squad/${squadId}/sales?startDay=${beforeYearStartDay}&endDay=${beforeYearEndDay}`;
+  const thisYearData = await util.fetchData(thisYearURL, "GET");
+  const beforeYearData = await util.fetchData(beforeYearURL, "GET");
+
+  const countDays = Number(DateTime.now().toFormat("ll"));
+  let labels = [];
+  let budgetSales = [];
+  for (let i = 0; i < countDays; i++) {
+    labels.push(i + 1 + "월");
+    budgetSales.push(Math.round(thisYearData.budget.sales / 1000000));
   }
 
-  consignmentMarginChart = new Chart(consignmentMarginCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
+  let stepThisYearSales = [];
+  thisYearData.actual
+    .map((r) => Math.round(r.sales_price / 1000000))
+    .reduce((acc, cur) => {
+      stepThisYearSales.push(acc + cur);
+      return acc + cur;
+    }, 0);
+
+  let stepBeforeYearSales = [];
+  beforeYearData.actual
+    .map((r) => Math.round(r.sales_price / 1000000))
+    .reduce((acc, cur) => {
+      stepBeforeYearSales.push(acc + cur);
+      return acc + cur;
+    }, 0);
+
+  const sumThisYearSales = thisYearData.actual.map((r) => Number(r.sales_price)).reduce((acc, cur) => acc + cur, 0);
+  const sumBeforeYearSales = beforeYearData.actual.map((r) => Number(r.sales_price)).reduce((acc, cur) => acc + cur, 0);
+  const ratio = (sumThisYearSales / sumBeforeYearSales).toFixed(2);
+
+  yearlySalesChart(ratio, labels, budgetSales, stepThisYearSales, stepBeforeYearSales);
+
+  const commission =
+    squadId == "consignment" || squadId == "strategic"
+      ? thisYearData.actual.map((r) => Number(r.commission)).reduce((acc, cur) => acc + cur, 0)
+      : sumThisYearSales;
+  const cost = thisYearData.actual.map((r) => Number(r.cost)).reduce((acc, cur) => acc + cur, 0);
+  const coupon =
+    squadId == "consignment" || squadId == "strategic"
+      ? thisYearData.actual.map((r) => Number(r.order_coupon)).reduce((acc, cur) => acc + cur, 0)
+      : thisYearData.actual.map((r) => Number(r.order_coupon)).reduce((acc, cur) => acc + cur, 0) +
+        thisYearData.actual.map((r) => Number(r.product_coupon)).reduce((acc, cur) => acc + cur, 0);
+  const expense =
+    Number(thisYearData.logistic.fee) +
+    thisYearData.actual.map((r) => Number(r.mileage)).reduce((acc, cur) => acc + cur, 0) +
+    thisYearData.actual.map((r) => Number(r.pg_expense)).reduce((acc, cur) => acc + cur, 0);
+  const marketing =
+    Number(thisYearData.directMarketing.fee) +
+    Number(thisYearData.indirectMarketing.fee) +
+    Number(thisYearData.liveMarketing.fee);
+  const margin = commission - coupon - marketing - expense;
+
+  const yearlyData = [
+    Math.round(commission / 1000000),
+    [Math.round(commission / 1000000) - Math.round(cost / 1000000), Math.round(commission / 1000000)],
+    [
+      Math.round(commission / 1000000) - Math.round(cost / 1000000) - Math.round(coupon / 1000000),
+      Math.round(commission / 1000000) - Math.round(cost / 1000000),
+    ],
+    [
+      Math.round(commission / 1000000) -
+        Math.round(cost / 1000000) -
+        Math.round(coupon / 1000000) -
+        Math.round(marketing / 1000000),
+      Math.round(commission / 1000000) - Math.round(cost / 1000000) - Math.round(coupon / 1000000),
+    ],
+    [
+      Math.round(commission / 1000000) -
+        Math.round(cost / 1000000) -
+        Math.round(coupon / 1000000) -
+        Math.round(marketing / 1000000) -
+        Math.round(expense / 1000000),
+      Math.round(commission / 1000000) -
+        Math.round(cost / 1000000) -
+        Math.round(coupon / 1000000) -
+        Math.round(marketing / 1000000),
+    ],
+    Math.round(margin / 1000000),
+  ];
+  yearlyChart(yearlyData);
+}
+
+async function yearlySalesChart(ratio, labels, budgetSales, thisYearSales, beforeYearSales) {
+  document.getElementById("yearly-sales-chart-summary").innerHTML = `<i class="fa ${
+    ratio > 1 ? "fa-arrow-up text-success" : "fa-arrow-down text-danger"
+  }"></i> 
+  <span class="font-weight-bold">전년대비 ${ratio * 100}%</span>`;
+
+  const yearlySalesCtx = document.getElementById("yearly-sales-chart").getContext("2d");
+
+  const gradientStroke1 = yearlySalesCtx.createLinearGradient(0, 230, 0, 50);
+  gradientStroke1.addColorStop(1, "rgba(203,12,159,0.2)");
+  gradientStroke1.addColorStop(0.2, "rgba(72,72,176,0.0)");
+  gradientStroke1.addColorStop(0, "rgba(203,12,159,0)");
+
+  const gradientStroke2 = yearlySalesCtx.createLinearGradient(0, 230, 0, 50);
+  gradientStroke2.addColorStop(1, "rgba(20,23,39,0.2)");
+  gradientStroke2.addColorStop(0.2, "rgba(72,72,176,0.0)");
+  gradientStroke2.addColorStop(0, "rgba(20,23,39,0)");
+
+  const gradientStroke3 = yearlySalesCtx.createLinearGradient(0, 230, 0, 50);
+  gradientStroke2.addColorStop(1, "rgba(20,23,39,0.2)");
+  gradientStroke2.addColorStop(0.2, "rgba(72,72,176,0.0)");
+  gradientStroke2.addColorStop(0, "rgba(20,23,39,0)");
+
+  if (yearlySquadSalesChart) {
+    yearlySquadSalesChart.destroy();
+  }
+
+  yearlySquadSalesChart = new Chart(yearlySalesCtx, {
+    type: "line",
     data: {
-      labels: ["예산", "추정"],
+      labels: labels,
       datasets: [
         {
-          label: "공헌이익",
-          data: margin.consignment,
+          label: "목표",
           tension: 0.4,
           borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
+          pointRadius: 0,
+          borderColor: "#3A416F",
+          borderWidth: 3,
+          backgroundColor: gradientStroke3,
+          fill: true,
+          data: budgetSales,
+          maxBarThickness: 6,
+        },
+        {
+          label: "Y" + DateTime.now().toFormat("yyyy"),
+          tension: 0.4,
+          borderWidth: 0,
+          pointRadius: 0,
+          borderColor: "#cb0c9f",
+          borderWidth: 3,
+          backgroundColor: gradientStroke1,
+          fill: true,
+          data: thisYearSales,
+          maxBarThickness: 6,
+        },
+        {
+          label: "Y" + DateTime.now().minus({ years: 1 }).toFormat("yyyy"),
+          tension: 0.4,
+          borderWidth: 0,
+          pointRadius: 0,
+          borderColor: "#3A416F",
+          borderWidth: 3,
+          backgroundColor: gradientStroke2,
+          fill: true,
+          data: beforeYearSales,
+          maxBarThickness: 6,
         },
       ],
     },
-    options: optionsData,
-  });
-
-  const strategicSalesCtx = document.getElementById("strategic-squad-sales-chart").getContext("2d");
-  if (strategicSalesChart) {
-    strategicSalesChart.destroy();
-  }
-
-  strategicSalesChart = new Chart(strategicSalesCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "실판가매출",
-          data: sales.strategic,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+        },
+      },
+      interaction: {
+        intersect: false,
+        mode: "index",
+      },
+      scales: {
+        y: {
+          grid: {
+            drawBorder: false,
+            display: true,
+            drawOnChartArea: true,
+            drawTicks: false,
+            borderDash: [5, 5],
+          },
+          ticks: {
+            display: true,
+            padding: 10,
+            color: "#b2b9bf",
+            font: {
+              size: 11,
+              family: "Open Sans",
+              style: "normal",
+              lineHeight: 2,
+            },
           },
         },
-      ],
-    },
-    options: optionsData,
-  });
-
-  const strategicMarginCtx = document.getElementById("strategic-squad-margin-chart").getContext("2d");
-  if (strategicMarginChart) {
-    strategicMarginChart.destroy();
-  }
-
-  strategicMarginChart = new Chart(strategicMarginCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "공헌이익",
-          data: margin.strategic,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
+        x: {
+          grid: {
+            drawBorder: false,
+            display: false,
+            drawOnChartArea: false,
+            drawTicks: false,
+            borderDash: [5, 5],
+          },
+          ticks: {
+            display: true,
+            color: "#b2b9bf",
+            padding: 20,
+            font: {
+              size: 11,
+              family: "Open Sans",
+              style: "normal",
+              lineHeight: 2,
+            },
           },
         },
-      ],
+      },
     },
-    options: optionsData,
   });
+}
 
-  const buyingSalesCtx = document.getElementById("buying-squad-sales-chart").getContext("2d");
-  if (buyingSalesChart) {
-    buyingSalesChart.destroy();
-  }
-
-  buyingSalesChart = new Chart(buyingSalesCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "실판가매출",
-          data: sales.buying,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
+async function yearlyChart(yearlyData) {
+  const optionsData = {
+    responsive: true,
+    plugins: {
+      datalabels: {
+        color: "white",
+        display: true,
+        font: {
+          size: 11,
+          family: "Open Sans",
+          style: "normal",
+          lineHeight: 2,
+        },
+      },
+      legend: {
+        labels: {
+          boxWidth: 0,
+          boxHeight: 0,
+        },
+        display: false,
+      },
+    },
+    scales: {
+      y: {
+        grid: {
+          drawBorder: false,
+          display: true,
+          drawOnChartArea: true,
+          drawTicks: false,
+          borderDash: [5, 5],
+        },
+        ticks: {
+          display: false,
+          padding: 10,
+          color: "#b2b9bf",
+          font: {
+            size: 10,
+            family: "Open Sans",
+            style: "normal",
+            lineHeight: 2,
           },
         },
-      ],
-    },
-    options: optionsData,
-  });
-
-  const buyingMarginCtx = document.getElementById("buying-squad-margin-chart").getContext("2d");
-  if (buyingMarginChart) {
-    buyingMarginChart.destroy();
-  }
-
-  buyingMarginChart = new Chart(buyingMarginCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "공헌이익",
-          data: margin.buying,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
+      },
+      x: {
+        grid: {
+          drawBorder: false,
+          display: false,
+          drawOnChartArea: false,
+          drawTicks: false,
+          borderDash: [5, 5],
+        },
+        ticks: {
+          display: true,
+          color: "#b2b9bf",
+          padding: 10,
+          font: {
+            size: 10,
+            family: "Open Sans",
+            style: "normal",
+            lineHeight: 2,
           },
         },
-      ],
+      },
     },
-    options: optionsData,
-  });
+  };
 
-  const essentialSalesCtx = document.getElementById("essential-squad-sales-chart").getContext("2d");
-  if (essentialSalesChart) {
-    essentialSalesChart.destroy();
+  const yearlyCtx = document.getElementById("yearly-chart").getContext("2d");
+  if (yearlySquadChart) {
+    yearlySquadChart.destroy();
   }
 
-  essentialSalesChart = new Chart(essentialSalesCtx, {
+  yearlySquadChart = new Chart(yearlyCtx, {
     plugins: [ChartDataLabels],
     type: "bar",
     data: {
-      labels: ["예산", "추정"],
+      labels: ["매출", "원가", "쿠폰", "마케팅", "기타", "공헌이익"],
       datasets: [
         {
-          label: "실판가매출",
-          data: sales.essential,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: optionsData,
-  });
-
-  const essentialMarginCtx = document.getElementById("essential-squad-margin-chart").getContext("2d");
-  if (essentialMarginChart) {
-    essentialMarginChart.destroy();
-  }
-
-  essentialMarginChart = new Chart(essentialMarginCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "공헌이익",
-          data: margin.essential,
+          label: "당월",
+          data: yearlyData,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,

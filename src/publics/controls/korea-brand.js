@@ -46,8 +46,36 @@ submit.addEventListener("click", () => {
 async function brandSales(startDay, endDay, mdId) {
   const URL = `${util.host}/korea/brand-sales?startDay=${startDay}&endDay=${endDay}`;
   const data = await util.fetchData(URL, "GET");
-  const brandsData = document.getElementById("korea-brands-data");
   const filteredData = mdId == "all" ? data[1] : data[1].filter((r) => r.md_id == mdId);
+
+  const totalQuantity = filteredData.map((r) => Number(r.quantity)).reduce((acc, cur) => acc + cur);
+  const totalSales = filteredData.map((r) => Number(r.sales_price)).reduce((acc, cur) => acc + cur);
+  const totalCommission = filteredData.map((r) => Number(r.commission)).reduce((acc, cur) => acc + cur);
+  const totalCost = filteredData.map((r) => Number(r.cost)).reduce((acc, cur) => acc + cur);
+
+  console.log(totalQuantity);
+  const commonTD = (elem) => `<td class="align-middle text-center" width="7%">
+  <span class="text-xs font-weight-bold"> ${elem} </span></td>`;
+  let sumHtml = `
+      <tr class="pb-0">
+        <td class="text-center" col-span=3 width="28%">
+          <h6 class="mb-0 text-sm">합계</h6>
+        </td>
+        ${commonTD(totalQuantity)}
+        ${commonTD(util.chunwon(totalSales))}
+        ${commonTD(util.chunwon(totalCommission))}
+        ${commonTD(util.chunwon(totalCost))}
+        ${commonTD(util.chunwon(couponFee))}
+        ${commonTD(util.chunwon(Number(el.mileage) + Number(el.pg_expense)))}
+        ${commonTD(util.chunwon(Number(marketingFee_d) + Number(marketingFee_live)))}
+        ${commonTD(util.chunwon(marketingFee_i))}
+        ${commonTD(el.brand_type == "consignment" ? "-" : util.chunwon(logisticFee))}
+        <td class="align-middle text-center" width="9%">
+          <span class="${huddleMarginRate} text-xs font-weight-bold"> 
+          ${util.chunwon(calculateMargin)} (${marginRate}%)</span>
+        </td>
+      </tr>`;
+  document.getElementById("korea-brands-sum-data").innerHTML = sumHtml;
 
   let brandHtml = "";
   for (let el of filteredData) {
@@ -76,26 +104,20 @@ async function brandSales(startDay, endDay, mdId) {
 
     let huddleMarginRate = "";
     if (el.brand_type == "consignment") {
-      huddleMarginRate = marginRate < 4 ? '<i class="text-primary fa-solid fa-temperature-arrow-down me-2"></i>' : "";
+      huddleMarginRate = marginRate < 4 ? "text-danger" : "text-success";
     } else if (el.brand_type == "strategic") {
-      huddleMarginRate = marginRate < 5 ? '<i class="text-primary fa-solid fa-temperature-arrow-down me-2"></i>' : "";
+      huddleMarginRate = marginRate < 5 ? "text-danger" : "text-success";
     } else if (el.brand_type == "buying") {
-      huddleMarginRate = marginRate < 11 ? '<i class="text-primary fa-solid fa-temperature-arrow-down me-2"></i>' : "";
+      huddleMarginRate = marginRate < 11 ? "text-danger" : "text-success";
     } else {
-      huddleMarginRate = marginRate < 21 ? '<i class="text-primary fa-solid fa-temperature-arrow-down me-2"></i>' : "";
+      huddleMarginRate = marginRate < 21 ? "text-danger" : "text-success";
     }
-
-    const commonTD = (elem) => `<td class="align-middle text-center" width="7%">
-        <span class="text-xs font-weight-bold"> ${elem} </span></td>`;
     let html = `
       <tr class="pb-0 ${calculateMargin >= 0 ? "" : "table-danger"}">
         <td class="text-center" width="10%">
-          <div class="d-flex">
-            ${huddleMarginRate}
-            <h6 class="mb-0 text-sm">
-              <a href="/korea/brand/${el.brand_id}">${el.brand_name}<a>
-            </h6>
-          </div>
+          <h6 class="mb-0 text-sm">
+            <a href="/korea/brand/${el.brand_id}">${el.brand_name}<a>
+          </h6>
         </td>
         <td class="align-middle text-center" width="11%">
           <span class="text-xs font-weight-bold">
@@ -112,7 +134,7 @@ async function brandSales(startDay, endDay, mdId) {
         ${commonTD(util.chunwon(marketingFee_i))}
         ${commonTD(el.brand_type == "consignment" ? "-" : util.chunwon(logisticFee))}
         <td class="align-middle text-center" width="9%">
-          <span class="${calculateMargin >= 0 ? "text-success" : "text-danger"} text-xs font-weight-bold"> 
+          <span class="${huddleMarginRate} text-xs font-weight-bold"> 
           ${util.chunwon(calculateMargin)} (${marginRate}%)</span>
         </td>
       </tr>`;
@@ -122,5 +144,5 @@ async function brandSales(startDay, endDay, mdId) {
     '<span class="text-primary font-weight-bold">' +
     mdSelectList.options[mdSelectList.selectedIndex].innerText +
     "</span> 담당 브랜드별 현황이에요";
-  brandsData.innerHTML = brandHtml;
+  document.getElementById("korea-brands-data").innerHTML = brandHtml;
 }

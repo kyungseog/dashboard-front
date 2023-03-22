@@ -320,14 +320,14 @@ async function userSaleType() {
   const data = await util.fetchData(URL, "GET");
 
   const firstSale = data[0].filter((r) => r.is_first == "y");
-  document.getElementById("korea-first-sale").innerText = `${Number(firstSale[0].user_count).toLocaleString(
+  document.getElementById("korea-first-sale").innerHTML = `${Number(firstSale[0].user_count).toLocaleString(
     "ko-KR"
-  )}명 / ${Math.round(Number(firstSale[0].sales_price) / 1000000).toLocaleString("ko-KR")}백만원`;
+  )}명 / <br/> ${util.bmwon(Number(firstSale[0].sales_price))}백만원`;
 
   const secondSale = data[0].filter((r) => r.is_first == "n");
-  document.getElementById("korea-second-sale").innerText = `${Number(secondSale[0].user_count).toLocaleString(
+  document.getElementById("korea-second-sale").innerHTML = `${Number(secondSale[0].user_count).toLocaleString(
     "ko-KR"
-  )}명 / ${Math.round(Number(secondSale[0].sales_price) / 1000000).toLocaleString("ko-KR")}백만원`;
+  )}명 / <br/> ${util.bmwon(Number(secondSale[0].sales_price))}백만원`;
 
   const firstSaleBrand = data[1].filter((r) => r.is_first == "y");
   const sortFirstSaleBrand = firstSaleBrand.sort((a, b) => b.sales_price - a.sales_price);
@@ -335,7 +335,7 @@ async function userSaleType() {
   let firstSaleBrandHtml = "";
   for (let i = 0; i < sortFirstSaleBrand.length; i++) {
     const countUser = Number(sortFirstSaleBrand[i].user_count).toLocaleString("ko-KR");
-    const salePrice = Math.round(Number(sortFirstSaleBrand[i].sales_price) / 1000).toLocaleString("ko-KR");
+    const salePrice = util.chunwon(Number(sortFirstSaleBrand[i].sales_price));
     let html = `
       <tr>
         <td>
@@ -634,6 +634,7 @@ async function sqaudData() {
         Number(directMarketingArray[0].cost) +
         Number(indirectMarketingArray[0].indirect_marketing_fee) +
         Number(liveMarketingArray[0].live_fee);
+
       const logisticFee = squad == "consignment" || squad == "strategic" ? 0 : Number(logisticArray[0].logistic_fee);
 
       let margin = 0;
