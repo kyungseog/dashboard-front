@@ -145,7 +145,7 @@ async function productSales(brandId, dateText) {
           <div class="d-flex px-2 py-1">
             <div><img src="${data[i].image}" class="avatar avatar-sm me-3" alt="xd"></div>
             <div class="d-flex flex-column justify-content-center text-truncate">
-              <h6 class="mb-0 text-sm">${data[i].product_name}</h6>
+              <h6 class="mb-0 text-xs">${data[i].product_name}</h6>
             </div>
           </div>
         </td>
@@ -196,14 +196,10 @@ async function partnerSales(dateText) {
     const margin = Math.round(calculateMargin / 1000).toLocaleString("ko-KR");
     let html = `
       <tr>
-        <td>
-          <div class="d-flex px-2 py-1">
-            <div class="d-flex flex-column justify-content-center">
-              <h6 class="mb-0 text-sm">
-                <a href="/korea/partner/${data[1][i].supplier_id}">${data[1][i].supplier_name}<a>
-              </h6>
-            </div>
-          </div>
+        <td class="align-middle text-center">
+          <h6 class="mb-0 text-xs">
+            <a href="/korea/partner/${data[1][i].supplier_id}">${data[1][i].supplier_name}<a>
+          </h6>
         </td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${data[1][
           i
@@ -322,12 +318,12 @@ async function userSaleType() {
   const firstSale = data[0].filter((r) => r.is_first == "y");
   document.getElementById("korea-first-sale").innerHTML = `${Number(firstSale[0].user_count).toLocaleString(
     "ko-KR"
-  )}명 / <br/> ${util.bmwon(Number(firstSale[0].sales_price))}백만원`;
+  )}명 / ${util.bmwon(Number(firstSale[0].sales_price))}백만원`;
 
   const secondSale = data[0].filter((r) => r.is_first == "n");
   document.getElementById("korea-second-sale").innerHTML = `${Number(secondSale[0].user_count).toLocaleString(
     "ko-KR"
-  )}명 / <br/> ${util.bmwon(Number(secondSale[0].sales_price))}백만원`;
+  )}명 / ${util.bmwon(Number(secondSale[0].sales_price))}백만원`;
 
   const firstSaleBrand = data[1].filter((r) => r.is_first == "y");
   const sortFirstSaleBrand = firstSaleBrand.sort((a, b) => b.sales_price - a.sales_price);
@@ -338,12 +334,8 @@ async function userSaleType() {
     const salePrice = util.chunwon(Number(sortFirstSaleBrand[i].sales_price));
     let html = `
       <tr>
-        <td>
-          <div class="d-flex px-2 py-1">
-            <div class="d-flex flex-column justify-content-center">
-              <h6 class="mb-0 text-sm">${sortFirstSaleBrand[i].brand_name}</h6>
-            </div>
-          </div>
+        <td class="align-middle text-center">
+          <h6 class="mb-0 text-xs">${sortFirstSaleBrand[i].brand_name}</h6>
         </td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${countUser} </span></td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${salePrice} </span></td>
@@ -361,12 +353,8 @@ async function userSaleType() {
     const salePrice = Math.round(Number(sortSecondSaleBrand[i].sales_price) / 1000).toLocaleString("ko-KR");
     let html = `
       <tr>
-        <td>
-          <div class="d-flex px-2 py-1">
-            <div class="d-flex flex-column justify-content-center">
-              <h6 class="mb-0 text-sm">${sortSecondSaleBrand[i].brand_name}</h6>
-            </div>
-          </div>
+        <td class="align-middle text-center">
+          <h6 class="mb-0 text-xs">${sortSecondSaleBrand[i].brand_name}</h6>
         </td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${countUser} </span></td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${salePrice} </span></td>
