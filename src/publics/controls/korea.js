@@ -124,28 +124,18 @@ async function productSales(brandId, dateText) {
   const data = await util.fetchData(URL, "GET");
   data.length = 7;
 
-  const productsData = document.getElementById("korea-products-data");
-
   let productHtml = "";
   for (let i = 0; i < data.length; i++) {
-    const salePrice = Math.round(data[i].sales_price / 1000).toLocaleString("ko-KR");
-    const expense =
-      Number(data[i].cost) +
-      Number(data[i].mileage) +
-      Number(data[i].order_coupon) +
-      Number(data[i].product_coupon) +
-      Number(data[i].pg_expense);
-    const calculateMargin =
-      data[i].brand_type == "consignment" ? data[i].commission - expense : data[i].sales_price - expense;
-    const margin = Math.round(calculateMargin / 1000).toLocaleString("ko-KR");
-
+    const productName = data[i].product_name;
     let html = `
       <tr>
         <td class="col-4">
           <div class="d-flex px-2 py-1">
             <div><img src="${data[i].image}" class="avatar avatar-sm me-3" alt="xd"></div>
             <div class="d-flex flex-column justify-content-center text-truncate">
-              <h6 class="mb-0 text-xs">${data[i].product_name}</h6>
+              <h6 class="mb-0 text-xs">${
+                productName.length > 20 ? productName.substring(0, 19) + "..." : productName
+              }</h6>
             </div>
           </div>
         </td>
@@ -156,20 +146,12 @@ async function productSales(brandId, dateText) {
           <span class="text-xs font-weight-bold"> ${Number(data[i].quantity).toLocaleString("ko-KR")} </span>
         </td>
         <td class="align-middle text-center text-sm col-2">
-          <span class="text-xs font-weight-bold"> ${salePrice} </span>
-        </td>
-        <td class="align-middle text-center text-sm col-2">
-          <span class="text-xs font-weight-bold"> ${Math.round(expense / 1000).toLocaleString("ko-KR")} </span>
-        </td>
-        <td class="align-middle text-center text-sm col-2">
-          <span class="${
-            calculateMargin >= 0 ? "text-success" : "text-danger"
-          } text-xs font-weight-bold"> ${margin} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(data[i].sales_price)} </span>
         </td>
       </tr>`;
     productHtml = productHtml + html;
   }
-  productsData.innerHTML = productHtml;
+  document.getElementById("korea-products-data").innerHTML = productHtml;
 }
 
 async function partnerSales(dateText) {
@@ -559,8 +541,8 @@ async function weatherChart(thisYearTemp, beforeYearTemp, labelData) {
             drawTicks: false,
           },
           ticks: {
-            suggestedMin: -20,
-            suggestedMax: 20,
+            suggestedMin: -10,
+            suggestedMax: 40,
             beginAtZero: true,
             padding: 5,
             font: {
