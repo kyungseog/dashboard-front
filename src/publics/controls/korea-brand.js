@@ -15,25 +15,25 @@ function startFunction() {
   brandSales(yesterday, today, "all");
 }
 
-const dateList = document.querySelectorAll(".dropdown-menu .dropdown-item");
-for (let list of dateList) {
-  list.addEventListener("click", () => {
-    if (list.innerText == "today") {
-      startDayPicker.setDate(today);
-      endDayPicker.setDate(today);
-    } else if (list.innerText == "yesterday") {
-      startDayPicker.setDate(yesterday);
-      endDayPicker.setDate(yesterday);
-    } else if (list.innerText == "last_7_days") {
-      startDayPicker.setDate(DateTime.now().minus({ days: 6 }).toFormat("yyyy-LL-dd"));
-      endDayPicker.setDate(today);
-    } else if (list.innerText == "last_14_days") {
-      startDayPicker.setDate(DateTime.now().minus({ days: 13 }).toFormat("yyyy-LL-dd"));
-      endDayPicker.setDate(today);
-    }
-    document.querySelector("#easy-select-date").innerHTML = `빠른 선택<br>${list.innerText}`;
-  });
-}
+// const dateList = document.querySelectorAll(".dropdown-menu .dropdown-item");
+// for (let list of dateList) {
+//   list.addEventListener("click", () => {
+//     if (list.innerText == "today") {
+//       startDayPicker.setDate(today);
+//       endDayPicker.setDate(today);
+//     } else if (list.innerText == "yesterday") {
+//       startDayPicker.setDate(yesterday);
+//       endDayPicker.setDate(yesterday);
+//     } else if (list.innerText == "last_7_days") {
+//       startDayPicker.setDate(DateTime.now().minus({ days: 6 }).toFormat("yyyy-LL-dd"));
+//       endDayPicker.setDate(today);
+//     } else if (list.innerText == "last_14_days") {
+//       startDayPicker.setDate(DateTime.now().minus({ days: 13 }).toFormat("yyyy-LL-dd"));
+//       endDayPicker.setDate(today);
+//     }
+//     document.querySelector("#easy-select-date").innerHTML = `빠른 선택<br>${list.innerText}`;
+//   });
+// }
 
 const submit = document.querySelector("#submit");
 submit.addEventListener("click", () => {

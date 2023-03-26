@@ -350,10 +350,14 @@ async function salesChartData() {
   const URL = `${util.host}/korea/chart-sales`;
   const data = await util.fetchData(URL, "GET");
 
-  const labelData = data[0].map((r) => DateTime.fromISO(r.payment_date).toFormat("LL/dd"));
+  const labelData = data[1].map((r) => DateTime.fromISO(r.payment_date).toFormat("LL/dd"));
   const thisYearSales = data[0].map((r) => Math.round(r.sales_price / 1000));
   const beforeYearSales = data[1].map((r) => Math.round(r.sales_price / 1000));
 
+  salesChart(labelData, thisYearSales, beforeYearSales);
+
+  thisYearSales.length = 14;
+  beforeYearSales.length = 14;
   const sumThisYearSales = thisYearSales.reduce((acc, cur) => acc + cur, 0);
   const sumBeforeYearSales = beforeYearSales.reduce((acc, cur) => acc + cur, 0);
   const ratio = (sumThisYearSales / sumBeforeYearSales).toFixed(2);
@@ -363,8 +367,6 @@ async function salesChartData() {
     ratio > 1 ? "fa-arrow-up text-success" : "fa-arrow-down text-danger"
   }"></i> 
   <span class="font-weight-bold">전년대비 ${ratio * 100}%</span>`;
-
-  salesChart(labelData, thisYearSales, beforeYearSales);
 }
 
 async function salesChart(labelData, thisYearSales, beforeYearSales) {

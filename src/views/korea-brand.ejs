@@ -24,31 +24,31 @@
                   <h6 id="title">브랜드별 현황이에요</h6>
                 </div>
                 <div class="col-lg-5 col-md-5 d-flex mb-2 p-1">
-                  <div class="input-group">
+                  <div class="input-group" style="justify-content: flex-end">
                     <span class="input-group-text">검색 기간</span>
-                    <button
-                      type="button"
-                      class="btn dropdown-toggle dropdown-toggle-split btn-outline-secondary mb-0"
-                      data-bs-toggle="dropdown"
-                    >
-                      <span id="easy-select-date">빠른 선택</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                      <li><a class="dropdown-item">today</a></li>
-                      <li><a class="dropdown-item">yesterday</a></li>
-                      <li><a class="dropdown-item">last_7_days</a></li>
-                      <li><a class="dropdown-item">last_14_days</a></li>
-                    </ul>
-                    <input
-                      type="text"
-                      id="datepicker1"
-                      class="form-control input-sm text-center text-sm me-1"
-                      placeholder="시작일"
-                    />
-                    <input type="text" id="datepicker2" class="form-control text-center text-sm" placeholder="종료일" />
+                    <div class="form-floating">
+                      <input
+                        type="text"
+                        id="datepicker1"
+                        class="form-control text-center"
+                        id="floatingInputGroup1"
+                        placeholder="시작일"
+                      />
+                      <label for="floatingInputGroup1">시작일</label>
+                    </div>
+                    <div class="form-floating">
+                      <input
+                        type="text"
+                        id="datepicker2"
+                        class="form-control text-center"
+                        id="floatingInputGroup1"
+                        placeholder="종료일"
+                      />
+                      <label for="floatingInputGroup1">종료일</label>
+                    </div>
                   </div>
                 </div>
-                <div class="col-lg-1 col-md-1 mb-2 p-1">
+                <div class="col-lg-1 col-md-1 mb-2 p-1" style="display: flex; align-items: stretch">
                   <select class="form-select mb-0" id="md-list">
                     <option value="all" selected>MD</option>
                     <option value="namjjok">남쪽빛</option>
@@ -68,8 +68,8 @@
                     <option value="sunyoungkim">김선영</option>
                   </select>
                 </div>
-                <div class="col-lg-1 col-md-1 text-center mb-2 p-1">
-                  <button type="submit" class="btn btn-secondary" id="submit">조회</button>
+                <div class="col-lg-1 col-md-1 text-center mb-2 p-1" style="display: flex; align-items: stretch">
+                  <button type="submit" class="btn btn-secondary mb-0 me-0" id="submit">조회</button>
                 </div>
               </div>
               <div class="row">
