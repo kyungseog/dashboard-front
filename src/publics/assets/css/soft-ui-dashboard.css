@@ -21467,7 +21467,7 @@ fieldset:disabled .btn {
   border-right: 1px solid #e293d3 !important;
 } */
 
-.input-group .form-control:not(:first-child) {
+/* .input-group .form-control:not(:first-child) {
   border-left: 0;
   padding-left: 0;
 }
@@ -21475,7 +21475,7 @@ fieldset:disabled .btn {
 .input-group .form-control:not(:last-child) {
   border-right: 0;
   padding-right: 0;
-}
+} */
 
 .input-group .form-control + .input-group-text {
   position: absolute;
