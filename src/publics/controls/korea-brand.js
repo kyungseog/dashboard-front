@@ -88,11 +88,11 @@ async function brandSales(startDay, endDay, mdId) {
     const marginRate = Math.round((calculateMargin / el.sales_price) * 100);
 
     let huddleMarginRate = "";
-    if (el.brand_type == "consignment") {
+    if (el.brand_squad == "위탁SQ") {
       huddleMarginRate = marginRate < 4 ? "text-danger" : "text-success";
-    } else if (el.brand_type == "strategic") {
+    } else if (el.brand_squad == "전략카테고리SQ") {
       huddleMarginRate = marginRate < 5 ? "text-danger" : "text-success";
-    } else if (el.brand_type == "buying") {
+    } else if (el.brand_squad == "매입SQ") {
       huddleMarginRate = marginRate < 11 ? "text-danger" : "text-success";
     } else {
       huddleMarginRate = marginRate < 21 ? "text-danger" : "text-success";
