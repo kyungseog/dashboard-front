@@ -122,36 +122,27 @@ async function brandSales() {
 async function productSales(brandId, dateText) {
   const URL = `${util.host}/korea/product-sales/${brandId}/${dateText}`;
   const data = await util.fetchData(URL, "GET");
-  data.length = 7;
-
+  data.length = 6;
   let productHtml = "";
-  for (let i = 0; i < data.length; i++) {
-    const productName = data[i].product_name;
+  for (let item of data) {
     let html = `
-      <tr>
-        <td class="col-4">
-          <div class="d-flex px-2 py-1">
-            <div><img src="${data[i].image}" class="avatar avatar-sm me-3" alt="xd"></div>
-            <div class="d-flex flex-column justify-content-center text-truncate">
-              <h6 class="mb-0 text-xs">${
-                productName.length > 20 ? productName.substring(0, 19) + "..." : productName
-              }</h6>
-            </div>
-          </div>
-        </td>
-        <td class="align-middle text-center text-sm col-2">
-          <span class="text-xs font-weight-bold"> ${data[i].brand_name} </span>
-        </td>
-        <td class="align-middle text-center text-sm col-2">
-          <span class="text-xs font-weight-bold"> ${Number(data[i].quantity).toLocaleString("ko-KR")} </span>
-        </td>
-        <td class="align-middle text-center text-sm col-2">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(data[i].sales_price)} </span>
-        </td>
-      </tr>`;
+    <div class="col-md-6 col-xl-4 col-6 mb-2">
+      <div class="card card-blog card-plain">
+        <div class="position-relative">
+          <a class="d-block shadow-xl border-radius-xl">
+            <img src="${item.image}" alt="img-blur-shadow" class="img-fluid shadow border-radius-xl">
+          </a>
+        </div>
+        <div class="card-body px-1 pt-2">
+          <h5 class="text-sm">${item.brand_name}</h5>
+          <h5 class="text-sm">${item.product_name}</h5>
+          <p class="mb-4 text-sm">판매수량 ${item.quantity}개<br>실판매가 ${util.chunwon(item.sales_price)}천원</p>
+        </div>
+      </div>
+    </div>`;
     productHtml = productHtml + html;
   }
-  document.getElementById("korea-products-data").innerHTML = productHtml;
+  document.getElementById("brand-products-data").innerHTML = productHtml;
 }
 
 async function partnerSales(dateText) {
@@ -208,6 +199,8 @@ async function partnerSales(dateText) {
 }
 
 async function marketing() {
+  const test = await util.fetchData(`${util.host}/korea/brand?startDay=2023-03-01&endDay=2023-03-10`, "GET");
+  console.log(test);
   const salesByData = await util.fetchData(`${util.host}/korea/marketing/salesBy`, "GET");
   const yearlyData = await util.fetchData(`${util.host}/korea/marketing/yearly`, "GET");
 
@@ -298,18 +291,20 @@ async function userSaleType() {
   const data = await util.fetchData(URL, "GET");
 
   const firstSale = data[0].filter((r) => r.is_first == "y");
-  document.getElementById("korea-first-sale").innerHTML = `${Number(firstSale[0].user_count).toLocaleString(
+  document.getElementById("first-order-count").innerText = `${Number(firstSale[0].user_count).toLocaleString(
     "ko-KR"
-  )}명 / ${util.bmwon(Number(firstSale[0].sales_price))}백만원`;
+  )}명`;
+  document.getElementById("first-order-sales").innerText = `${util.bmwon(Number(firstSale[0].sales_price))}백만원`;
 
   const secondSale = data[0].filter((r) => r.is_first == "n");
-  document.getElementById("korea-second-sale").innerHTML = `${Number(secondSale[0].user_count).toLocaleString(
+  document.getElementById("second-order-count").innerText = `${Number(secondSale[0].user_count).toLocaleString(
     "ko-KR"
-  )}명 / ${util.bmwon(Number(secondSale[0].sales_price))}백만원`;
+  )}명`;
+  document.getElementById("second-order-sales").innerText = `${util.bmwon(Number(secondSale[0].sales_price))}백만원`;
 
   const firstSaleBrand = data[1].filter((r) => r.is_first == "y");
   const sortFirstSaleBrand = firstSaleBrand.sort((a, b) => b.sales_price - a.sales_price);
-  sortFirstSaleBrand.length = 6;
+  sortFirstSaleBrand.length = 5;
   let firstSaleBrandHtml = "";
   for (let i = 0; i < sortFirstSaleBrand.length; i++) {
     const countUser = Number(sortFirstSaleBrand[i].user_count).toLocaleString("ko-KR");
@@ -328,7 +323,7 @@ async function userSaleType() {
 
   const secondSaleBrand = data[1].filter((r) => r.is_first == "n");
   const sortSecondSaleBrand = secondSaleBrand.sort((a, b) => b.sales_price - a.sales_price);
-  sortSecondSaleBrand.length = 6;
+  sortSecondSaleBrand.length = 5;
   let secondSaleBrandHtml = "";
   for (let i = 0; i < sortSecondSaleBrand.length; i++) {
     const countUser = Number(sortSecondSaleBrand[i].user_count).toLocaleString("ko-KR");
@@ -369,7 +364,7 @@ async function salesChartData() {
   <span class="font-weight-bold">전년대비 ${ratio * 100}%</span>`;
 }
 
-async function salesChart(labelData, thisYearSales, beforeYearSales) {
+function salesChart(labelData, thisYearSales, beforeYearSales) {
   var ctx2 = document.getElementById("korea-sales-chart").getContext("2d");
 
   var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
@@ -487,7 +482,7 @@ async function weatherChartData() {
   weatherChart(thisYearTemp, beforeYearTemp, labelData);
 }
 
-async function weatherChart(thisYearTemp, beforeYearTemp, labelData) {
+function weatherChart(thisYearTemp, beforeYearTemp, labelData) {
   const ctx = document.getElementById("korea-weather-chart").getContext("2d");
   const colorCode = ["#696969", "#696969", "#696969", "#696969", "#696969", "#696969", "#696969"];
 
@@ -603,11 +598,16 @@ async function sqaudData() {
           : Number(actualDataArray[0].order_coupon) + Number(actualDataArray[0].product_coupon);
       const expense = couponFee + Number(actualDataArray[0].mileage) + Number(actualDataArray[0].pg_expense);
       const marketingFee =
-        Number(directMarketingArray[0].cost) +
-        Number(indirectMarketingArray[0].indirect_marketing_fee) +
-        Number(liveMarketingArray[0].live_fee);
+        Number(directMarketingArray[0] == undefined ? 0 : directMarketingArray[0].cost) +
+        Number(indirectMarketingArray[0] == undefined ? 0 : indirectMarketingArray[0].indirect_marketing_fee) +
+        Number(liveMarketingArray[0] == undefined ? 0 : liveMarketingArray[0].live_fee);
 
-      const logisticFee = squad == "consignment" || squad == "strategic" ? 0 : Number(logisticArray[0].logistic_fee);
+      const logisticFee =
+        logisticArray[0] == undefined
+          ? 0
+          : squad == "consignment" || squad == "strategic"
+          ? 0
+          : Number(logisticArray[0].logistic_fee);
 
       let margin = 0;
       if (squad == "consignment" || squad == "strategic") {
@@ -623,7 +623,7 @@ async function sqaudData() {
   squadChart(salesObj, marginObj);
 }
 
-async function squadChart(sales, margin) {
+function squadChart(sales, margin) {
   const optionsData = {
     responsive: true,
     plugins: {
@@ -631,7 +631,7 @@ async function squadChart(sales, margin) {
         color: "white",
         display: true,
         font: {
-          size: 11,
+          size: 15,
           family: "Open Sans",
           style: "normal",
           lineHeight: 2,
