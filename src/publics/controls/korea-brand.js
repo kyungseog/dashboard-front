@@ -15,26 +15,6 @@ function startFunction() {
   brandSales(yesterday, today, "all");
 }
 
-// const dateList = document.querySelectorAll(".dropdown-menu .dropdown-item");
-// for (let list of dateList) {
-//   list.addEventListener("click", () => {
-//     if (list.innerText == "today") {
-//       startDayPicker.setDate(today);
-//       endDayPicker.setDate(today);
-//     } else if (list.innerText == "yesterday") {
-//       startDayPicker.setDate(yesterday);
-//       endDayPicker.setDate(yesterday);
-//     } else if (list.innerText == "last_7_days") {
-//       startDayPicker.setDate(DateTime.now().minus({ days: 6 }).toFormat("yyyy-LL-dd"));
-//       endDayPicker.setDate(today);
-//     } else if (list.innerText == "last_14_days") {
-//       startDayPicker.setDate(DateTime.now().minus({ days: 13 }).toFormat("yyyy-LL-dd"));
-//       endDayPicker.setDate(today);
-//     }
-//     document.querySelector("#easy-select-date").innerHTML = `빠른 선택<br>${list.innerText}`;
-//   });
-// }
-
 const submit = document.querySelector("#submit");
 submit.addEventListener("click", () => {
   const mdId = mdSelectList.options[mdSelectList.selectedIndex].value;
@@ -65,7 +45,7 @@ async function brandSales(startDay, endDay, mdId) {
   let brandHtml = "";
   for (let el of filteredData) {
     const couponFee =
-      el.brand_type == "consignment" ? Number(el.product_coupon) : Number(el.order_coupon) + Number(el.product_coupon);
+      el.brand_type == "consignment" ? Number(el.order_coupon) : Number(el.order_coupon) + Number(el.product_coupon);
     const expense = Number(el.cost) + Number(el.mileage) + couponFee + Number(el.pg_expense);
 
     const marketing_d = data[0].filter((r) => r.brand_id == el.brand_id);
@@ -102,15 +82,15 @@ async function brandSales(startDay, endDay, mdId) {
       <tr class="pb-0 ${calculateMargin >= 0 ? "" : "table-danger"}">
         <td class="text-center" width="10%">
           <h6 class="mb-0 text-sm">
-            <a href="/korea/brand/${el.brand_id}">${el.brand_name}<a>
+            <a href="/brand/${el.brand_id}">${el.brand_name}<a>
           </h6>
         </td>
         <td class="align-middle text-center" width="11%">
           <span class="text-xs font-weight-bold">
           <a href="/korea/partner/${el.supplier_id}"> ${el.supplier_name} </a></span>
         </td>
-        ${commonTD(el.order_count)}
-        ${commonTD(el.quantity)}
+        ${commonTD(Number(el.order_count).toLocaleString("ko-kr"))}
+        ${commonTD(Number(el.quantity).toLocaleString("ko-kr"))}
         ${commonTD(util.chunwon(el.sales_price))}
         ${commonTD(el.brand_type == "consignment" ? util.chunwon(Number(el.commission)) : "-")}
         ${commonTD(el.brand_type == "consignment" ? "-" : util.chunwon(Number(el.cost)))}
@@ -147,7 +127,7 @@ async function brandSales(startDay, endDay, mdId) {
         <td class="text-center" colspan="3" width="28%">
           <h6 class="mb-0 text-sm">합계</h6>
         </td>
-        ${commonTD(totalQuantity)}
+        ${commonTD(totalQuantity.toLocaleString("ko-kr"))}
         ${commonTD(util.chunwon(totalSales))}
         ${commonTD(util.chunwon(totalCommission))}
         ${commonTD(util.chunwon(totalCost))}

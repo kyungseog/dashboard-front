@@ -295,12 +295,18 @@ async function userSaleType() {
     "ko-KR"
   )}명`;
   document.getElementById("first-order-sales").innerText = `${util.bmwon(Number(firstSale[0].sales_price))}백만원`;
+  document.getElementById("first-average-sales").innerText = `${Math.round(
+    Number(firstSale[0].sales_price) / Number(firstSale[0].user_count)
+  ).toLocaleString("ko-kr")}원`;
 
   const secondSale = data[0].filter((r) => r.is_first == "n");
   document.getElementById("second-order-count").innerText = `${Number(secondSale[0].user_count).toLocaleString(
     "ko-KR"
   )}명`;
   document.getElementById("second-order-sales").innerText = `${util.bmwon(Number(secondSale[0].sales_price))}백만원`;
+  document.getElementById("second-average-sales").innerText = `${Math.round(
+    Number(secondSale[0].sales_price) / Number(secondSale[0].user_count)
+  ).toLocaleString("ko-kr")}원`;
 
   const firstSaleBrand = data[1].filter((r) => r.is_first == "y");
   const sortFirstSaleBrand = firstSaleBrand.sort((a, b) => b.sales_price - a.sales_price);
