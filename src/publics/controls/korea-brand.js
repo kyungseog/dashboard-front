@@ -29,7 +29,31 @@ const commonTD = (elem) => `<td class="align-middle text-center" width="7%">
 async function brandSales(startDay, endDay, mdId) {
   const URL = `${util.host}/korea/brand-sales?startDay=${startDay}&endDay=${endDay}`;
   const data = await util.fetchData(URL, "GET");
-  const filteredData = mdId == "all" ? data[1] : data[1].filter((r) => r.md_id == mdId);
+  let filteredData = [];
+  if (mdId == "all") {
+    filteredData = data[1];
+  } else if (mdId == "marketing") {
+    const keyBrand = [
+      "B0000DFV",
+      "B0000CZU",
+      "B0000DCM",
+      "B0000DPV",
+      "B0000DWV",
+      "B0000DIX",
+      "B0000DIU",
+      "B0000EQN",
+      "B0000DHQ",
+      "B0000EQA",
+      "B0000DGS",
+      "B0000DGT",
+      "B0000EVE",
+      "B0000DIO",
+      "B0000DKQ",
+    ];
+    filteredData = data[1].filter((r) => keyBrand.indexOf(r.brand_id) >= 0);
+  } else {
+    filteredData = data[1].filter((r) => r.md_id == mdId);
+  }
 
   let totalQuantity = 0;
   let totalSales = 0;

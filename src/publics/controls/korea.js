@@ -293,20 +293,26 @@ async function userSaleType() {
   const firstSale = data[0].filter((r) => r.is_first == "y");
   document.getElementById("first-order-count").innerText = `${Number(firstSale[0].user_count).toLocaleString(
     "ko-KR"
-  )}명`;
-  document.getElementById("first-order-sales").innerText = `${util.bmwon(Number(firstSale[0].sales_price))}백만원`;
+  )} 명`;
+  document.getElementById("first-order-sales").innerText = `${util.bmwon(Number(firstSale[0].sales_price))} 백만원`;
   document.getElementById("first-average-sales").innerText = `${Math.round(
     Number(firstSale[0].sales_price) / Number(firstSale[0].user_count)
-  ).toLocaleString("ko-kr")}원`;
+  ).toLocaleString("ko-kr")} 원`;
+  document.getElementById("first-average-quantity").innerText = `${(
+    Number(firstSale[0].quantity) / Number(firstSale[0].user_count)
+  ).toFixed(2)} pcs`;
 
   const secondSale = data[0].filter((r) => r.is_first == "n");
   document.getElementById("second-order-count").innerText = `${Number(secondSale[0].user_count).toLocaleString(
     "ko-KR"
-  )}명`;
-  document.getElementById("second-order-sales").innerText = `${util.bmwon(Number(secondSale[0].sales_price))}백만원`;
+  )} 명`;
+  document.getElementById("second-order-sales").innerText = `${util.bmwon(Number(secondSale[0].sales_price))} 백만원`;
   document.getElementById("second-average-sales").innerText = `${Math.round(
     Number(secondSale[0].sales_price) / Number(secondSale[0].user_count)
-  ).toLocaleString("ko-kr")}원`;
+  ).toLocaleString("ko-kr")} 원`;
+  document.getElementById("second-average-quantity").innerText = `${(
+    Number(secondSale[0].quantity) / Number(secondSale[0].user_count)
+  ).toFixed(2)} pcs`;
 
   const firstSaleBrand = data[1].filter((r) => r.is_first == "y");
   const sortFirstSaleBrand = firstSaleBrand.sort((a, b) => b.sales_price - a.sales_price);
@@ -314,6 +320,7 @@ async function userSaleType() {
   let firstSaleBrandHtml = "";
   for (let i = 0; i < sortFirstSaleBrand.length; i++) {
     const countUser = Number(sortFirstSaleBrand[i].user_count).toLocaleString("ko-KR");
+    const quantity = Number(sortFirstSaleBrand[i].quantity).toLocaleString("ko-KR");
     const salePrice = util.chunwon(Number(sortFirstSaleBrand[i].sales_price));
     let html = `
       <tr>
@@ -321,6 +328,7 @@ async function userSaleType() {
           <h6 class="mb-0 text-xs">${sortFirstSaleBrand[i].brand_name}</h6>
         </td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${countUser} </span></td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${quantity} </span></td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${salePrice} </span></td>
       </tr>`;
     firstSaleBrandHtml = firstSaleBrandHtml + html;
@@ -333,6 +341,7 @@ async function userSaleType() {
   let secondSaleBrandHtml = "";
   for (let i = 0; i < sortSecondSaleBrand.length; i++) {
     const countUser = Number(sortSecondSaleBrand[i].user_count).toLocaleString("ko-KR");
+    const quantity = Number(sortSecondSaleBrand[i].quantity).toLocaleString("ko-KR");
     const salePrice = Math.round(Number(sortSecondSaleBrand[i].sales_price) / 1000).toLocaleString("ko-KR");
     let html = `
       <tr>
@@ -340,6 +349,7 @@ async function userSaleType() {
           <h6 class="mb-0 text-xs">${sortSecondSaleBrand[i].brand_name}</h6>
         </td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${countUser} </span></td>
+        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${quantity} </span></td>
         <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${salePrice} </span></td>
       </tr>`;
     secondSaleBrandHtml = secondSaleBrandHtml + html;

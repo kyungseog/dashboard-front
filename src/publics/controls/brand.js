@@ -24,6 +24,7 @@ submit.addEventListener("click", () => {
   const startDay = startDayPicker.getDate("yyyy-mm-dd");
   const endDay = DateTime.fromISO(endDayPicker.getDate("yyyy-mm-dd")).plus({ days: 1 }).toFormat("yyyy-LL-dd");
   brandSales(brandId, startDay, endDay);
+  bestProducts(brandId, startDay, endDay);
 });
 
 async function brandSales(brandId, startDay, endDay) {
@@ -33,9 +34,11 @@ async function brandSales(brandId, startDay, endDay) {
     `${util.host}/korea/marketing?startDay=${startDay}&endDay=${endDay}`,
     "GET"
   );
+  const logisticData = await util.fetchData(`${util.host}/korea/logistic?startDay=${startDay}&endDay=${endDay}`, "GET");
   const directMarketing = marketingData.directMarketingFee.filter((r) => r.brand_id == brandId);
   const indirectMarketing = marketingData.indirectMarketingFee.filter((r) => r.brand_id == brandId);
   const liveMarketing = marketingData.liveMarketingFee.filter((r) => r.brand_id == brandId);
+  const logistic = logisticData.logisticFee.filter((r) => r.brand_id == brandId);
 
   document.getElementById(
     "title"
@@ -53,22 +56,10 @@ async function brandSales(brandId, startDay, endDay) {
       : Number(sales[0].order_coupon) + Number(sales[0].product_coupon);
   const expense = Number(sales[0].cost) + Number(sales[0].mileage) + couponFee + Number(sales[0].pg_expense);
 
-  const directMarketingFee =
-    directMarketing[0] == undefined
-      ? 0
-      : directMarketing[0].map((r) => r.direct_marketing_fee).reduce((acc, cur) => Number(acc) + Number(cur));
-
-  const indirectMarketingFee =
-    indirectMarketing[0] == undefined
-      ? 0
-      : indirectMarketing[0].map((r) => r.indirect_marketing_fee).reduce((acc, cur) => Number(acc) + Number(cur));
-
-  const liveMarketingFee =
-    liveMarketing[0] == undefined
-      ? 0
-      : liveMarketing[0].map((r) => r.live_fee).reduce((acc, cur) => Number(acc) + Number(cur));
-
-  const logisticFee = 0;
+  const directMarketingFee = directMarketing[0] == null ? 0 : Number(directMarketing[0].direct_marketing_fee);
+  const indirectMarketingFee = indirectMarketing[0] == null ? 0 : Number(indirectMarketing[0].indirect_marketing_fee);
+  const liveMarketingFee = liveMarketing[0] == null ? 0 : Number(liveMarketing[0].live_fee);
+  const logisticFee = logistic[0] == null ? 0 : Number(logistic[0].logistic_fee);
 
   const calculateMargin =
     sales[0].brand_type == "consignment"
@@ -105,10 +96,14 @@ async function brandSales(brandId, startDay, endDay) {
         <span class="text-xs font-weight-bold"> ${util.chunwon(Number(sales[0].sales_price))} </span>
       </td>
       <td class="align-middle text-center">
-        <span class="text-xs font-weight-bold"> ${util.chunwon(Number(sales[0].commission))} </span>
+        <span class="text-xs font-weight-bold"> ${
+          sales[0].brand_type != "consignment" ? "-" : util.chunwon(Number(sales[0].commission))
+        } </span>
       </td>
       <td class="align-middle text-center">
-        <span class="text-xs font-weight-bold"> ${util.chunwon(Number(sales[0].cost))} </span>
+        <span class="text-xs font-weight-bold"> ${
+          sales[0].brand_type == "consignment" ? "-" : util.chunwon(Number(sales[0].cost))
+        } </span>
       </td>
       <td class="align-middle text-center">
         <span class="text-xs font-weight-bold"> ${util.chunwon(couponFee)} </span>
@@ -124,7 +119,9 @@ async function brandSales(brandId, startDay, endDay) {
         <span class="text-xs font-weight-bold"> ${util.chunwon(indirectMarketingFee)} </span>
       </td>
       <td class="align-middle text-center">
-      <span class="text-xs font-weight-bold"> ${util.chunwon(logisticFee)} </span>
+      <span class="text-xs font-weight-bold"> ${
+        sales[0].brand_type == "consignment" ? "-" : util.chunwon(logisticFee)
+      } </span>
     </td>
       <td class="align-middle text-center">
         <span class="${huddleMarginRate} text-xs font-weight-bold"> 
@@ -151,7 +148,7 @@ async function bestProducts(brandId, startDay, endDay) {
             <img src="${product.image}" alt="img-blur-shadow" class="img-fluid shadow border-radius-xl">
           </a>
         </div>
-        <div class="card-body px-1 pb-0 mt-2">
+        <div class="card-body px-1 pb-0 mt-4">
           <h5 class="text-sm">${product.product_name}</h5>
           <p class="mb-4 text-sm">판매수량 ${product.quantity}개<br>실판매가 ${util.chunwon(
       product.sales_price
@@ -178,7 +175,7 @@ async function salesChartData(brandId) {
 
   const koreaSalesChartSummary = document.getElementById("brand-sales-chart-summary");
   koreaSalesChartSummary.innerHTML = `<i class="fa ${
-    ratio > 1 ? "fa-arrow-up text-success" : "fa-arrow-down text-danger"
+    ratio >= 100 ? "fa-arrow-up text-success" : "fa-arrow-down text-danger"
   }"></i> 
   <span class="font-weight-bold">전년대비 ${ratio}%</span>`;
 
