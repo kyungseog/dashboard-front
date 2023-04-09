@@ -11,26 +11,26 @@ const today = DateTime.now().toFormat("yyyy-LL-dd");
 (function startFunction() {
   startDayPicker.setDate(yesterday);
   endDayPicker.setDate(yesterday);
-  marketing(today);
-  marketingByBrand(yesterday, today, "all");
+  monthlyRoas();
+  marketingByBrand(yesterday, yesterday, "all");
 })();
 
 const submit = document.querySelector("#submit");
 submit.addEventListener("click", () => {
   const selectedId = selectList.options[selectList.selectedIndex].value;
   const startDay = startDayPicker.getDate("yyyy-mm-dd");
-  const endDay = DateTime.fromISO(endDayPicker.getDate("yyyy-mm-dd")).plus({ days: 1 }).toFormat("yyyy-LL-dd");
+  const endDay = endDayPicker.getDate("yyyy-mm-dd");
   marketingByBrand(startDay, endDay, selectedId);
 });
 
-async function marketing(today) {
+async function monthlyRoas() {
   const startDay = DateTime.now().minus({ month: 5 }).startOf("month").toFormat("yyyy-LL-dd");
   const marketingData = await util.fetchData(
-    `${util.host}/korea/marketing/channel?startDay=${startDay}&endDay=${today}`,
+    `${util.host}/korea/marketing/channel?sumType=day&startDay=${startDay}&endDay=${yesterday}`,
     "GET"
   );
   const salesData = await util.fetchData(
-    `${util.host}/korea/sales/monthly?startDay=${startDay}&endDay=${today}`,
+    `${util.host}/korea/sales?sumType=day&startDay=${startDay}&endDay=${yesterday}`,
     "GET"
   );
 
@@ -47,13 +47,13 @@ async function marketing(today) {
         monthlyMarketingData
           .filter((r) => r.channel == channel)
           .map((r) => Number(r.marketing_fee))
-          .reduce((acc, cur) => Number(acc) + Number(cur))
+          .reduce((acc, cur) => Number(acc) + Number(cur), 0)
       );
     }
     const monthlySalesData = salesData.filter((r) => DateTime.fromISO(r.payment_date).toFormat("yy-LL") == month);
     const monthlySales = monthlySalesData
       .map((r) => Number(r.sales_price))
-      .reduce((acc, cur) => Number(acc) + Number(cur));
+      .reduce((acc, cur) => Number(acc) + Number(cur), 0);
     const roasByMonth = Math.round(
       (monthlySales / saleByChannel.reduce((acc, cur) => Number(acc) + Number(cur))) * 100
     );
@@ -61,10 +61,10 @@ async function marketing(today) {
     saleByMonth.push(uploadSales);
     roas.push(roasByMonth);
   }
-  marketingChart(monthList, channelList, saleByMonth, roas);
+  blendedRoasChart(monthList, channelList, saleByMonth, roas);
 }
 
-function marketingChart(labels, labelData, feeByChannel, roas) {
+function blendedRoasChart(labels, labelData, feeByChannel, roas) {
   var ctx = document.getElementById("roas-chart").getContext("2d");
 
   let marketingData = [];
@@ -213,25 +213,23 @@ function marketingChart(labels, labelData, feeByChannel, roas) {
 }
 
 async function marketingByBrand(startDay, endDay, selectedId) {
+  const salesData = await util.fetchData(`${util.host}/korea/brand?startDay=${startDay}&endDay=${endDay}`, "GET");
   const marketingData = await util.fetchData(
-    `${util.host}/korea/marketing/brand?startDay=${startDay}&endDay=${endDay}`,
+    `${util.host}/korea/brand/marketing?startDay=${startDay}&endDay=${endDay}`,
     "GET"
   );
-  const salesData = await util.fetchData(`${util.host}/korea/brand?startDay=${startDay}&endDay=${endDay}`, "GET");
-  console.log(salesData.brandSales);
-
-  const roasData = document.getElementById("brand-roas-data");
+  console.log(marketingData);
   let roasHtml = "";
-  for (let el of salesData.brandSales) {
-    const marketing_d = data[0].filter((r) => r.brand_id == el.brand_id);
-    const marketingFee_d =
-      marketing_d[0] == undefined || marketing_d[0] == null ? 0 : Number(marketing_d[0].direct_marketing_fee);
-    const marketing_i = data[3].filter((r) => r.brand_id == el.brand_id);
-    const marketingFee_i =
-      marketing_i[0] == undefined || marketing_i[0] == null ? 0 : Number(marketing_i[0].indirect_marketing_fee);
-    const marketing_live = data[4].filter((r) => r.brand_id == el.brand_id);
-    const marketingFee_live =
-      marketing_live[0] == undefined || marketing_live[0] == null ? 0 : Number(marketing_live[0].live_fee);
+  for (let el of salesData) {
+    const directList = marketingData.direct.filter((r) => r.brand_id == el.brand_id);
+    const directMarketing =
+      directList[0] == undefined || directList[0] == null ? 0 : Number(directList[0].direct_marketing_fee);
+
+    const indirectList = marketingData.indirect.filter((r) => r.brand_id == el.brand_id);
+    const indirectMarketing =
+      indirectList[0] == undefined || indirectList[0] == null ? 0 : Number(indirectList[0].indirect_marketing_fee);
+
+    const roas = Math.round((Number(el.sales_price) / (directMarketing + indirectMarketing)) * 100);
     let html = `
       <tr>
         <td>
@@ -244,24 +242,22 @@ async function marketingByBrand(startDay, endDay, selectedId) {
           </div>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${el.sales_price} </span>
+          <span class="text-xs font-weight-bold"> ${roas.toLocaleString("ko-kr")} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${el.sales_price} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(Number(el.sales_price))} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(el.sales_price)} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(directMarketing + indirectMarketing)} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(expense + logisticFee)} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(directMarketing)} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(
-            marketingFee_d + marketingFee_i + marketingFee_live
-          )} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(indirectMarketing)} </span>
         </td>
       </tr>`;
     roasHtml = roasHtml + html;
   }
-  roasData.innerHTML = roasHtml;
+  document.getElementById("brand-roas-data").innerHTML = roasHtml;
 }
