@@ -48,7 +48,7 @@ router.get("/korea/user", (req, res) => {
 });
 
 router.get("/japan", (req, res) => {
-  res.render("japan");
+  res.render("japan/japan");
 });
 
 router.get("/live", (req, res) => {
@@ -65,6 +65,10 @@ router.get("/tables", (req, res) => {
 
 router.get("/squad/:id", (req, res) => {
   res.render("squad");
+});
+
+router.get("/today", (req, res) => {
+  res.render("today");
 });
 
 module.exports = router;
