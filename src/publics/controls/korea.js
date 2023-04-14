@@ -729,17 +729,19 @@ async function marketing() {
     "GET"
   );
   const yesterdayMarketing = await util.fetchData(
-    `${util.host}/korea/marketing?startDay=${yesterday}&endDay=${yesterday}`,
+    `${util.host}/korea/marketing/channel?startDay=${yesterday}&endDay=${yesterday}`,
     "GET"
   );
-  const yesterdayRoas = Math.round(
-    (Number(yesterdaySales) / (Number(yesterdayMarketing.direct) + Number(yesterdayMarketing.indirect))) * 100
-  );
+  const yesterdayMarketingFee = yesterdayMarketing
+    .filter((r) => r.channel != "live")
+    .map((r) => Number(r.marketing_fee))
+    .reduce((acc, cur) => acc + cur, 0);
+  const yesterdayRoas = Math.round((Number(yesterdaySales.sales_price) / yesterdayMarketingFee) * 100);
   document.getElementById("yesterday-roas").innerHTML = `
     <h6 class="text-center mb-0">Blended ROAS (어제)</h6>
-    <span class="text-xs">(실판가매출) ${util.bmwon(Number(yesterdaySales))}백만 <br> (총광고비) ${util.bmwon(
-    Number(yesterdayMarketing.direct) + Number(yesterdayMarketing.indirect)
-  )}백만</span>
+    <span class="text-xs">(실판가매출) ${util.bmwon(
+      Number(yesterdaySales.sales_price)
+    )}백만 <br> (총광고비) ${util.bmwon(yesterdayMarketingFee)}백만</span>
     <hr class="horizontal dark my-3">
     <h5 class="mb-0">${yesterdayRoas}%</h5>`;
 
@@ -763,19 +765,23 @@ async function marketing() {
     <hr class="horizontal dark my-3">
     <h5 class="mb-0">${yearlyRoas}%</h5>`;
 
-  const monthlyMarketing = await util.fetchData(
-    `${util.host}/korea/marketing?startDay=${DateTime.now()
+  const monthlyMarketingData = await util.fetchData(
+    `${util.host}/korea/marketing/channel?startDay=${DateTime.now()
       .startOf("month")
       .toFormat("yyyy-LL-dd")}&endDay=${yesterday}`,
     "GET"
   );
+  const monthlyMarketing = monthlyMarketingData
+    .filter((r) => r.channel != "live")
+    .map((r) => Number(r.marketing_fee))
+    .reduce((acc, cur) => acc + cur, 0);
   const monthlyIndirectMarketing = await util.fetchData(
     `${util.host}/korea/marketing/indirect?startDay=${DateTime.now()
       .startOf("month")
       .toFormat("yyyy-LL-dd")}&endDay=${yesterday}`,
     "GET"
   );
-  const ratio = Math.round((monthlyIndirectMarketing.indirect_marketing_fee / monthlyMarketing.marketing_fee) * 100);
+  const ratio = Math.round((monthlyIndirectMarketing.indirect_marketing_fee / monthlyMarketing) * 100);
   const indirectMaketingRatio = ratio % 5 == 0 ? ratio : ratio + (5 - (ratio % 5));
   const directMaketingRatio = 100 - indirectMaketingRatio;
   const ratioHtml = `
@@ -788,7 +794,7 @@ async function marketing() {
         <p class="text-xs mb-0 font-weight-bold">브랜드 광고비</p>
       </div>
       <h4 class="font-weight-bolder">${util.chunwon(
-        Number(monthlyMarketing.marketing_fee) - Number(monthlyIndirectMarketing.indirect_marketing_fee)
+        monthlyMarketing - Number(monthlyIndirectMarketing.indirect_marketing_fee)
       )} 천원</h4>
       <div class="progress w-75">
         <div class="progress-bar bg-dark w-${directMaketingRatio}" role="progressbar" aria-valuenow="${directMaketingRatio}" aria-valuemin="0" aria-valuemax="100"></div>

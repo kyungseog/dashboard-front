@@ -6,7 +6,6 @@ const selectList = document.querySelector("#select-list");
 const startDayPicker = new Datepicker(document.querySelector("#datepicker1"), { format: "yyyy-mm-dd" });
 const endDayPicker = new Datepicker(document.querySelector("#datepicker2"), { format: "yyyy-mm-dd" });
 const yesterday = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
-const today = DateTime.now().toFormat("yyyy-LL-dd");
 
 (function startFunction() {
   startDayPicker.setDate(yesterday);
@@ -34,8 +33,12 @@ async function monthlyRoas() {
     "GET"
   );
 
-  const monthList = [...new Set(marketingData.map((r) => DateTime.fromISO(r.created_at).toFormat("yy-LL")))];
-  const channelList = [...new Set(marketingData.map((r) => r.channel))];
+  const monthList = [
+    ...new Set(
+      marketingData.filter((r) => r.channel != "live").map((r) => DateTime.fromISO(r.created_at).toFormat("yy-LL"))
+    ),
+  ];
+  const channelList = [...new Set(marketingData.filter((r) => r.channel != "live").map((r) => r.channel))];
 
   let saleByMonth = [];
   let roas = [];
@@ -213,23 +216,78 @@ function blendedRoasChart(labels, labelData, feeByChannel, roas) {
 }
 
 async function marketingByBrand(startDay, endDay, selectedId) {
-  const salesData = await util.fetchData(`${util.host}/korea/brand?startDay=${startDay}&endDay=${endDay}`, "GET");
+  const salesOriginData = await util.fetchData(`${util.host}/korea/brand?startDay=${startDay}&endDay=${endDay}`, "GET");
+  let salesData;
+  if (selectedId == "all") {
+    salesData = salesOriginData;
+  } else if (selectedId == "consignment") {
+    salesData = salesOriginData.filter((r) => r.brand_type == "consignment");
+  } else if (selectedId == "consignmentSquad") {
+    salesData = salesOriginData.filter((r) => r.brand_squad == "위탁SQ");
+  } else if (selectedId == "starategicSquad") {
+    salesData = salesOriginData.filter((r) => r.brand_squad == "전략카테고리SQ");
+  } else if (selectedId == "buyingSquad") {
+    salesData = salesOriginData.filter((r) => r.brand_type == "purchase");
+  } else {
+    salesData = salesOriginData.filter((r) => r.brand_type == "production");
+  }
+
   const marketingData = await util.fetchData(
-    `${util.host}/korea/brand/marketing?startDay=${startDay}&endDay=${endDay}`,
+    `${util.host}/korea/marketing/brand-channel?startDay=${startDay}&endDay=${endDay}`,
     "GET"
   );
-  console.log(marketingData);
+
+  const marketingDataByBrand = await util.fetchData(
+    `${util.host}/korea/marketing/brand?startDay=${startDay}&endDay=${endDay}`,
+    "GET"
+  );
+
+  let totalMarketing = 0;
+  let totalMeta = 0;
+  let totalNaver = 0;
+  let totalKakao = 0;
+  let totalGoogle = 0;
+  let totalIndirect = 0;
+
   let roasHtml = "";
   for (let el of salesData) {
-    const directList = marketingData.direct.filter((r) => r.brand_id == el.brand_id);
-    const directMarketing =
-      directList[0] == undefined || directList[0] == null ? 0 : Number(directList[0].direct_marketing_fee);
+    const filteredData = marketingData.filter((r) => r.brand_id == el.brand_id);
 
-    const indirectList = marketingData.indirect.filter((r) => r.brand_id == el.brand_id);
-    const indirectMarketing =
-      indirectList[0] == undefined || indirectList[0] == null ? 0 : Number(indirectList[0].indirect_marketing_fee);
+    const meta = filteredData
+      .filter((r) => r.channel == "meta")
+      .map((r) => Number(r.marketing_fee))
+      .reduce((acc, cur) => acc + cur, 0);
+    totalMeta += meta;
 
-    const roas = Math.round((Number(el.sales_price) / (directMarketing + indirectMarketing)) * 100);
+    const naver = filteredData
+      .filter((r) => r.channel == "naver")
+      .map((r) => Number(r.marketing_fee))
+      .reduce((acc, cur) => acc + cur, 0);
+    totalNaver += naver;
+
+    const kakao = filteredData
+      .filter((r) => r.channel == "kakao")
+      .map((r) => Number(r.marketing_fee))
+      .reduce((acc, cur) => acc + cur, 0);
+    totalKakao += kakao;
+
+    const google = filteredData
+      .filter((r) => r.channel == "google")
+      .map((r) => Number(r.marketing_fee))
+      .reduce((acc, cur) => acc + cur, 0);
+    totalGoogle += google;
+
+    const indirect = marketingDataByBrand.indirect
+      .filter((r) => r.brand_id == el.brand_id)
+      .map((r) => Number(r.indirect_marketing_fee))
+      .reduce((acc, cur) => acc + cur, 0);
+    totalIndirect += indirect;
+
+    const marketingFee = meta + naver + kakao + google + indirect;
+    totalMarketing += marketingFee;
+
+    const roas = Math.round((Number(el.sales_price) / marketingFee) * 100);
+
     let html = `
       <tr>
         <td>
@@ -248,16 +306,63 @@ async function marketingByBrand(startDay, endDay, selectedId) {
           <span class="text-xs font-weight-bold"> ${util.chunwon(Number(el.sales_price))} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(directMarketing + indirectMarketing)} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(marketingFee)} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(directMarketing)} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(meta)} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(indirectMarketing)} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(naver)} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(kakao)} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(google)} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(indirect)} </span>
         </td>
       </tr>`;
     roasHtml = roasHtml + html;
   }
-  document.getElementById("brand-roas-data").innerHTML = roasHtml;
+
+  const totalSales = salesData.map((r) => Number(r.sales_price)).reduce((acc, cur) => acc + cur, 0);
+  const totalRoas = (totalSales / totalMarketing).toFixed(2) * 100;
+  let sumHtml = `
+  <tr class="table-active">
+    <td>
+      <div class="d-flex px-2 py-1">
+        <div class="d-flex flex-column justify-content-center">
+          <h6 class="mb-0 text-sm">합계</h6>
+        </div>
+      </div>
+    </td>
+    <td class="align-middle text-center text-sm">
+      <span class="text-xs font-weight-bold"> ${totalRoas.toLocaleString("ko-kr")} </span>
+    </td>
+    <td class="align-middle text-center text-sm">
+      <span class="text-xs font-weight-bold"> ${util.chunwon(totalSales)} </span>
+    </td>
+    <td class="align-middle text-center text-sm">
+      <span class="text-xs font-weight-bold"> ${util.chunwon(totalMarketing)} </span>
+    </td>
+    <td class="align-middle text-center text-sm">
+      <span class="text-xs font-weight-bold"> ${util.chunwon(totalMeta)} </span>
+    </td>
+    <td class="align-middle text-center text-sm">
+      <span class="text-xs font-weight-bold"> ${util.chunwon(totalNaver)} </span>
+    </td>
+    <td class="align-middle text-center text-sm">
+      <span class="text-xs font-weight-bold"> ${util.chunwon(totalKakao)} </span>
+    </td>
+    <td class="align-middle text-center text-sm">
+      <span class="text-xs font-weight-bold"> ${util.chunwon(totalGoogle)} </span>
+    </td>
+    <td class="align-middle text-center text-sm">
+      <span class="text-xs font-weight-bold"> ${util.chunwon(totalIndirect)} </span>
+    </td>
+  </tr>`;
+
+  document.getElementById("brand-roas-data").innerHTML = sumHtml + roasHtml;
 }
