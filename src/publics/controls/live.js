@@ -9,7 +9,7 @@ let liveTimeChart;
 async function getLives() {
   const start_date = DateTime.now().toFormat("yyyy-LL-dd") + " 11:00:00";
 
-  const URL = `${util.host}/live-commerces/${start_date}`;
+  const URL = `${util.host}/live/${start_date}`;
   const data = await util.fetchData(URL, "GET");
 
   if (data.statusCode === 404) {
