@@ -294,7 +294,7 @@ async function marketingByBrand(startDay, endDay, selectedId) {
           <div class="d-flex px-2 py-1">
             <div class="d-flex flex-column justify-content-center">
               <h6 class="mb-0 text-sm">
-                <a href="/korea/brand/${el.brand_id}">${el.brand_name}<a>
+                <a href="/brand/${el.brand_id}">${el.brand_name}<a>
               </h6>
             </div>
           </div>
