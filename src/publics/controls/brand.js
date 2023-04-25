@@ -7,22 +7,21 @@ const endDayPicker = new Datepicker(document.querySelector("#datepicker2"), { fo
 const URL = window.location.href;
 const brandId = URL.substring(URL.indexOf("/", URL.indexOf("brand")) + 1);
 const yesterday = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
-const today = DateTime.now().toFormat("yyyy-LL-dd");
 
 (function startFunction() {
   startDayPicker.setDate(yesterday);
   endDayPicker.setDate(yesterday);
   const URL = window.location.href;
   const brandId = URL.substring(URL.indexOf("/", URL.indexOf("brand")) + 1);
-  brandSales(brandId, yesterday, today);
-  bestProducts(brandId, yesterday, today);
+  brandSales(brandId, yesterday, yesterday);
+  bestProducts(brandId, yesterday, yesterday);
   salesChartData(brandId);
 })();
 
 const submit = document.querySelector("#submit");
 submit.addEventListener("click", () => {
   const startDay = startDayPicker.getDate("yyyy-mm-dd");
-  const endDay = DateTime.fromISO(endDayPicker.getDate("yyyy-mm-dd")).plus({ days: 1 }).toFormat("yyyy-LL-dd");
+  const endDay = endDayPicker.getDate("yyyy-mm-dd");
   brandSales(brandId, startDay, endDay);
   bestProducts(brandId, startDay, endDay);
 });
@@ -137,7 +136,6 @@ async function brandSales(brandId, startDay, endDay) {
 async function bestProducts(brandId, startDay, endDay) {
   const productsData = await util.fetchData(`${util.host}/korea/product?startDay=${startDay}&endDay=${endDay}`, "GET");
   const products = productsData.filter((r) => r.brand_id == brandId);
-  console.log(products);
   const itemData = document.getElementById("brand-items-data");
 
   products.length = 6;
