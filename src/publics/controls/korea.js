@@ -343,7 +343,7 @@ async function brandSales() {
           <div class="d-flex px-2 py-1">
             <div class="d-flex flex-column justify-content-center">
               <h6 class="mb-0 text-sm">
-                <a href="/korea/brand/${el.brand_id}">${el.brand_name}<a>
+                <a href="/brand/${el.brand_id}">${el.brand_name}<a>
               </h6>
             </div>
           </div>
@@ -750,17 +750,20 @@ async function marketing() {
     "GET"
   );
   const yearlyMarketing = await util.fetchData(
-    `${util.host}/korea/marketing?startDay=${DateTime.now()
+    `${util.host}/korea/marketing/channel?startDay=${DateTime.now()
       .startOf("year")
       .toFormat("yyyy-LL-dd")}&endDay=${yesterday}`,
     "GET"
   );
 
-  const yearlyRoas = Math.round((Number(yearlySales.sales_price) / Number(yearlyMarketing.marketing_fee)) * 100);
+  const marketingChannel = yearlyMarketing.filter((r) => r.channel != "live");
+  const marketingFee = marketingChannel.reduce((prev, cur) => prev + Number(cur.marketing_fee), 0);
+
+  const yearlyRoas = Math.round((Number(yearlySales.sales_price) / marketingFee) * 100);
   document.getElementById("this-yearly-roas").innerHTML = `
     <h6 class="text-center mb-0">Blended ROAS (금년)</h6>
     <span class="text-xs">(실판가매출) ${util.bmwon(yearlySales.sales_price)}백만 <br> (총광고비) ${util.bmwon(
-    Number(yearlyMarketing.marketing_fee)
+    Number(marketingFee)
   )}백만 </span>
     <hr class="horizontal dark my-3">
     <h5 class="mb-0">${yearlyRoas}%</h5>`;

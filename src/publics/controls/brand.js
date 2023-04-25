@@ -29,16 +29,19 @@ submit.addEventListener("click", () => {
 
 async function brandSales(brandId, startDay, endDay) {
   const salesData = await util.fetchData(`${util.host}/korea/brand?startDay=${startDay}&endDay=${endDay}`, "GET");
-  const sales = salesData.brandSales.filter((r) => r.brand_id == brandId);
   const marketingData = await util.fetchData(
-    `${util.host}/korea/marketing?startDay=${startDay}&endDay=${endDay}`,
+    `${util.host}/korea/brand/marketing?startDay=${startDay}&endDay=${endDay}`,
     "GET"
   );
-  const logisticData = await util.fetchData(`${util.host}/korea/logistic?startDay=${startDay}&endDay=${endDay}`, "GET");
-  const directMarketing = marketingData.directMarketingFee.filter((r) => r.brand_id == brandId);
-  const indirectMarketing = marketingData.indirectMarketingFee.filter((r) => r.brand_id == brandId);
-  const liveMarketing = marketingData.liveMarketingFee.filter((r) => r.brand_id == brandId);
-  const logistic = logisticData.logisticFee.filter((r) => r.brand_id == brandId);
+  const logisticData = await util.fetchData(
+    `${util.host}/korea/logistic/brand?startDay=${startDay}&endDay=${endDay}`,
+    "GET"
+  );
+
+  const sales = salesData.filter((r) => r.brand_id == brandId);
+  const directMarketing = marketingData.direct.filter((r) => r.brand_id == brandId);
+  const indirectMarketing = marketingData.indirect.filter((r) => r.brand_id == brandId);
+  const logistic = logisticData.filter((r) => r.brand_id == brandId);
 
   document.getElementById(
     "title"
@@ -58,13 +61,12 @@ async function brandSales(brandId, startDay, endDay) {
 
   const directMarketingFee = directMarketing[0] == null ? 0 : Number(directMarketing[0].direct_marketing_fee);
   const indirectMarketingFee = indirectMarketing[0] == null ? 0 : Number(indirectMarketing[0].indirect_marketing_fee);
-  const liveMarketingFee = liveMarketing[0] == null ? 0 : Number(liveMarketing[0].live_fee);
   const logisticFee = logistic[0] == null ? 0 : Number(logistic[0].logistic_fee);
 
   const calculateMargin =
     sales[0].brand_type == "consignment"
-      ? sales[0].commission - expense - directMarketingFee - indirectMarketingFee - liveMarketingFee
-      : sales[0].sales_price - expense - directMarketingFee - indirectMarketingFee - liveMarketingFee - logisticFee;
+      ? sales[0].commission - expense - directMarketingFee - indirectMarketingFee
+      : sales[0].sales_price - expense - directMarketingFee - indirectMarketingFee - logisticFee;
 
   const marginRate = Math.round((calculateMargin / sales[0].sales_price) * 100);
 
@@ -113,7 +115,7 @@ async function brandSales(brandId, startDay, endDay) {
           Number(sales[0].mileage) + Number(sales[0].pg_expense)
         )} </span></td>
       <td class="align-middle text-center">
-        <span class="text-xs font-weight-bold"> ${util.chunwon(directMarketingFee + liveMarketingFee)} </span>
+        <span class="text-xs font-weight-bold"> ${util.chunwon(directMarketingFee)} </span>
       </td>
       <td class="align-middle text-center">
         <span class="text-xs font-weight-bold"> ${util.chunwon(indirectMarketingFee)} </span>
@@ -133,8 +135,9 @@ async function brandSales(brandId, startDay, endDay) {
 }
 
 async function bestProducts(brandId, startDay, endDay) {
-  const productsData = await util.fetchData(`${util.host}/korea/brand?startDay=${startDay}&endDay=${endDay}`, "GET");
-  const products = productsData.productSalesByBrand.filter((r) => r.brand_id == brandId);
+  const productsData = await util.fetchData(`${util.host}/korea/product?startDay=${startDay}&endDay=${endDay}`, "GET");
+  const products = productsData.filter((r) => r.brand_id == brandId);
+  console.log(products);
   const itemData = document.getElementById("brand-items-data");
 
   products.length = 6;
