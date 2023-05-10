@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Korea</title>
+    <!--     Fonts and Font Awesome Icons     -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+    <script src="https://kit.fontawesome.com/b1baf8bd8e.js" crossorigin="anonymous"></script>
+    <!-- CSS Files -->
+    <link id="pagestyle" href="../assets/css/soft-ui-dashboard.css?v=1.0.6" rel="stylesheet" />
+  </head>
+
+  <body class="bg-gray-100">
+    <%-include('../sidebar')%>
+    <main class="main-content position-relative max-height-vh-100 h-100 mt-6 border-radius-lg">
+      <div class="container-fluid py-4">
+        <div class="row mb-4">
+          <div class="col-xl-2 col-sm-6 mb-xl-0 mb-2">
+            <div class="card">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="col-8">
+                    <div class="numbers">
+                      <p class="text-sm mb-0 text-capitalize font-weight-bold">오늘 주문건수</p>
+                      <h5 class="font-weight-bolder mb-0" id="korea-order-count"></h5>
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                      <i class="fa-regular fa-pen-to-square text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-2 col-sm-6 mb-xl-0 mb-2">
+            <div class="card">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="col-8">
+                    <div class="numbers">
+                      <p class="text-sm mb-0 text-capitalize font-weight-bold">오늘 실판가매출</p>
+                      <h5 class="font-weight-bolder mb-0" id="korea-sales"></h5>
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                      <i class="fa-regular fa-credit-card text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-2 col-sm-6 mb-xl-0 mb-2">
+            <div class="card">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="col-8">
+                    <div class="numbers">
+                      <p class="text-sm mb-0 text-capitalize font-weight-bold">당월 실판가매출</p>
+                      <h5 class="font-weight-bolder mb-0" id="korea-monthly-sales"></h5>
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                      <i class="fa-solid fa-coins text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-2 col-sm-6 mb-xl-0 mb-2">
+            <div class="card">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="col-8">
+                    <div class="numbers">
+                      <p class="text-sm mb-0 text-capitalize font-weight-bold">어제 신규고객수</p>
+                      <h5 class="font-weight-bolder mb-0" id="korea-new-user"></h5>
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                      <i class="fa-regular fa-circle-user text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-2 col-sm-6 mb-xl-0 mb-2">
+            <div class="card">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="col-8">
+                    <div class="numbers">
+                      <p class="text-sm mb-0 text-capitalize font-weight-bold">당월 신규고객수</p>
+                      <h5 class="font-weight-bolder mb-0" id="korea-monthly-user"></h5>
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                      <i class="fa-solid fa-person text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-2 col-sm-6 mb-xl-0 mb-2">
+            <div class="card">
+              <div class="card-body p-3">
+                <div class="row">
+                  <div class="col-8">
+                    <div class="numbers">
+                      <p class="text-sm mb-0 text-capitalize font-weight-bold">누적 고객수</p>
+                      <h5 class="font-weight-bolder mb-0" id="korea-total-user"></h5>
+                    </div>
+                  </div>
+                  <div class="col-4 text-end">
+                    <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                      <i class="fa-solid fa-users text-lg opacity-10" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mb-4">
+          <div class="col-lg-5 mb-2">
+            <div class="card h-100">
+              <div class="card-header pb-0">
+                <div class="row">
+                  <div class="col-lg-8 col-8">
+                    <h6>2주간의 실판매가 현황이에요</h6>
+                  </div>
+                  <div class="col-lg-4 col-4 my-auto text-end">
+                    <p class="text-sm" id="korea-sales-chart-summary"></p>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body p-3">
+                <div class="chart">
+                  <canvas id="korea-sales-chart" class="chart-canvas" height="350"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 mb-2">
+            <div class="card h-100 p-3">
+              <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
+                <span class="mask bg-gradient-dark"></span>
+                <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+                  <h5 class="text-white font-weight-bolder mb-4 pt-2">향후 7일간의 예상 최저/최고기온이에요</h5>
+                  <div class="bg-gradient-dark border-radius-lg py-3 pe-1 mb-3">
+                    <div class="chart">
+                      <canvas id="korea-weather-chart" class="chart-canvas" height="230"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 mb-2">
+            <div class="card h-100">
+              <div class="card-header pb-0"><h6>어제 브랜드별로 이렇게 팔았어요</h6></div>
+              <div class="card-body p-3">
+                <div class="table-responsive">
+                  <table class="table align-items-center mb-0">
+                    <thead>
+                      <tr>
+                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                          브랜드명
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                        >
+                          주문수<br />(건)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                        >
+                          판매수량<br />(pcs)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                        >
+                          실판가<br />(천원)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                        >
+                          직접비<br />(천원)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                        >
+                          마케팅비<br />(천원)
+                        </th>
+                        <th
+                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
+                        >
+                          공헌이익<br />(천원)
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody id="korea-brands-data"></tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="card-footer">
+                <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto" href="/korea/brand">
+                  More Infomation
+                  <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-lg-8 mb-lg-0 mb-4">
+            <div class="card h-100">
+              <div class="card-header pb-0">
+                <h6>스쿼드별 이번달 현황이에요</h6>
+              </div>
+              <div class="card-body p-3">
+                <div class="row mb-2">
+                  <div class="col-md-6 mb-md-0 mb-2">
+                    <div class="card">
+                      <div class="card-header pb-0">
+                        <p class="text-sm mt-0 mb-0 font-weight-bold"><a href="/squad/consignment">위탁 스쿼드</a></p>
+                      </div>
+                      <div class="card-body p-1">
+                        <div class="row">
+                          <div class="chart col-md-6">
+                            <canvas
+                              id="consignment-squad-sales-chart"
+                              class="chart-canvas"
+                              style="height: 50vh; width: 30vw"
+                            ></canvas>
+                          </div>
+                          <div class="chart col-md-6">
+                            <canvas
+                              id="consignment-squad-margin-chart"
+                              class="chart-canvas"
+                              style="height: 50vh; width: 30vw"
+                            ></canvas>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-md-0 mb-2">
+                    <div class="card">
+                      <div class="card-header pb-0">
+                        <p class="text-sm mt-0 mb-0 font-weight-bold">
+                          <a href="/squad/strategic">전략카테고리 스쿼드</a>
+                        </p>
+                      </div>
+                      <div class="card-body p-1">
+                        <div class="row">
+                          <div class="chart col-md-6">
+                            <canvas
+                              id="strategic-squad-sales-chart"
+                              class="chart-canvas"
+                              style="height: 50vh; width: 30vw"
+                            ></canvas>
+                          </div>
+                          <div class="chart col-md-6">
+                            <canvas
+                              id="strategic-squad-margin-chart"
+                              class="chart-canvas"
+                              style="height: 50vh; width: 30vw"
+                            ></canvas>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col-md-6 mb-md-0 mb-2">
+                    <div class="card">
+                      <div class="card-header pb-0">
+                        <p class="text-sm mt-0 mb-0 font-weight-bold"><a href="/squad/buying">매입 스쿼드</a></p>
+                      </div>
+                      <div class="card-body p-1">
+                        <div class="row">
+                          <div class="chart col-md-6">
+                            <canvas
+                              id="buying-squad-sales-chart"
+                              class="chart-canvas"
+                              style="height: 50vh; width: 30vw"
+                            ></canvas>
+                          </div>
+                          <div class="chart col-md-6">
+                            <canvas
+                              id="buying-squad-margin-chart"
+                              class="chart-canvas"
+                              style="height: 50vh; width: 30vw"
+                            ></canvas>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-md-0 mb-2">
+                    <div class="card">
+                      <div class="card-header pb-0">
+                        <p class="text-sm mt-0 mb-0 font-weight-bold">
+                          <a href="/squad/essential">무무즈에센셜 스쿼드</a>
+                        </p>
+                      </div>
+                      <div class="card-body p-1">
+                        <div class="row">
+                          <div class="chart col-md-6">
+                            <canvas
+                              id="essential-squad-sales-chart"
+                              class="chart-canvas"
+                              style="height: 50vh; width: 30vw"
+                            ></canvas>
+                          </div>
+                          <div class="chart col-md-6">
+                            <canvas
+                              id="essential-squad-margin-chart"
+                              class="chart-canvas"
+                              style="height: 50vh; width: 30vw"
+                            ></canvas>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 mb-lg-0 mb-4">
+            <div class="card h-100">
+              <div class="card-header pb-0">
+                <h6>이번달에 마케팅비로 이만큼 쓰고 있어요</h6>
+              </div>
+              <div class="card-body p-3">
+                <div class="d-flex flex-column h-100">
+                  <div class="container border-radius-lg mb-2 mt-2">
+                    <div class="row" id="korea-marketing-ratio"></div>
+                  </div>
+                  <div class="row mt-2">
+                    <div class="col-md-6">
+                      <div class="card">
+                        <div class="card-header p-3 text-center"></div>
+                        <div class="card-body pt-0 p-3 text-center" id="yesterday-roas"></div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="card">
+                        <div class="card-header p-3 text-center"></div>
+                        <div class="card-body pt-0 p-3 text-center" id="this-yearly-roas"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-2">
+                    <div class="col-6">
+                      <div class="card mb-2">
+                        <div class="card-body p-3">
+                          <div class="row">
+                            <div class="col-4 text-end">
+                              <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                                <i class="fa-brands fa-meta text-lg opacity-10" aria-hidden="true"></i>
+                              </div>
+                            </div>
+                            <div class="col-8">
+                              <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Meta</p>
+                                <h6 class="font-weight-bolder mb-0" id="korea-marketing-meta">천원</h6>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="card mb-2">
+                        <div class="card-body p-3">
+                          <div class="row">
+                            <div class="col-4 text-end">
+                              <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                                <i class="fa-brands fa-n text-lg opacity-10" aria-hidden="true"></i>
+                              </div>
+                            </div>
+                            <div class="col-8">
+                              <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Naver</p>
+                                <h6 class="font-weight-bolder mb-0" id="korea-marketing-naver">천원</h6>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="card mb-2">
+                        <div class="card-body p-3">
+                          <div class="row">
+                            <div class="col-4 text-end">
+                              <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                                <i class="fa-brands fa-l text-lg opacity-10" aria-hidden="true"></i>
+                              </div>
+                            </div>
+                            <div class="col-8">
+                              <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">live (참고용)</p>
+                                <h6 class="font-weight-bolder mb-0" id="korea-marketing-live">천원</h6>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="card mb-2">
+                        <div class="card-body p-3">
+                          <div class="row">
+                            <div class="col-4 text-end">
+                              <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                                <i class="fa-brands fa-k text-lg opacity-10" aria-hidden="true"></i>
+                              </div>
+                            </div>
+                            <div class="col-8">
+                              <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Kakao</p>
+                                <h6 class="font-weight-bolder mb-0" id="korea-marketing-kakao">천원</h6>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="card mb-2">
+                        <div class="card-body p-3">
+                          <div class="row">
+                            <div class="col-4 text-end">
+                              <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                                <i class="fa-brands fa-google text-lg opacity-10" aria-hidden="true"></i>
+                              </div>
+                            </div>
+                            <div class="col-8">
+                              <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Google</p>
+                                <h6 class="font-weight-bolder mb-0" id="korea-marketing-google">천원</h6>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="card mb-2">
+                        <div class="card-body p-3">
+                          <div class="row">
+                            <div class="col-4 text-end">
+                              <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                                <i class="fa-brands fa-o text-lg opacity-10" aria-hidden="true"></i>
+                              </div>
+                            </div>
+                            <div class="col-8">
+                              <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">others</p>
+                                <h6 class="font-weight-bolder mb-0" id="korea-marketing-others">천원</h6>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto" href="/korea/marketing">
+                  More Infomation
+                  <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row my-4">
+          <div class="col-lg-5 mb-2">
+            <div class="card h-100">
+              <div class="card-header pb-0">
+                <div class="row"><h6>어제 잘 팔린 아이템들이에요</h6></div>
+              </div>
+              <div class="card-body p-3">
+                <div class="row" id="brand-products-data"></div>
+              </div>
+              <div class="card-footer">
+                <a
+                  class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto"
+                  href="/korea/product/moomooz"
+                >
+                  More Infomation
+                  <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-7 mb-lg-0 mb-4">
+            <div class="col-lg-12 mb-2">
+              <div class="card h-100">
+                <div class="card-header pb-0">
+                  <h6>이번달에 우리 고객들은 이렇게 움직이고 있어요</h6>
+                </div>
+                <div class="card-body p-3">
+                  <div class="d-flex flex-column h-100">
+                    <div class="row">
+                      <div class="card mb-2">
+                        <div class="card-body p-3">
+                          <div class="row">
+                            <h5 class="mb-1 font-weight-bold">첫구매</h5>
+                            <div class="col-3">
+                              <div class="card mb-2">
+                                <div class="card-body p-3">
+                                  <div class="row">
+                                    <div class="col-8">
+                                      <div class="numbers">
+                                        <p class="text-sm mb-0 text-capitalize font-weight-bold">구매자수</p>
+                                        <h5 class="font-weight-bolder mb-0" id="first-order-count"></h5>
+                                      </div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                      <div
+                                        class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md"
+                                      >
+                                        <i
+                                          class="fa-regular fa-pen-to-square text-lg opacity-10"
+                                          aria-hidden="true"
+                                        ></i>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="card">
+                                <div class="card-body p-3">
+                                  <div class="row">
+                                    <div class="col-8">
+                                      <div class="numbers">
+                                        <p class="text-sm mb-0 text-capitalize font-weight-bold">평균객단가</p>
+                                        <h5 class="font-weight-bolder mb-0" id="first-average-sales"></h5>
+                                      </div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                      <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                                        <i class="fa-solid fa-users text-lg opacity-10" aria-hidden="true"></i>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-3">
+                              <div class="card mb-2">
+                                <div class="card-body p-3">
+                                  <div class="row">
+                                    <div class="col-8">
+                                      <div class="numbers">
+                                        <p class="text-sm mb-0 text-capitalize font-weight-bold">구매금액</p>
+                                        <h5 class="font-weight-bolder mb-0" id="first-order-sales"></h5>
+                                      </div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                      <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                                        <i class="fa-solid fa-coins text-lg opacity-10" aria-hidden="true"></i>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="card">
+                                <div class="card-body p-3">
+                                  <div class="row">
+                                    <div class="col-8">
+                                      <div class="numbers">
+                                        <p class="text-sm mb-0 text-capitalize font-weight-bold">평균구매수량</p>
+                                        <h5 class="font-weight-bolder mb-0" id="first-average-quantity"></h5>
+                                      </div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                      <div
+                                        class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md"
+                                      >
+                                        <i
+                                          class="fa-regular fa-pen-to-square text-lg opacity-10"
+                                          aria-hidden="true"
+                                        ></i>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-6">
+                              <div class="table-responsive">
+                                <table class="table align-items-center mb-0">
+                                  <thead>
+                                    <tr>
+                                      <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                                        브랜드명
+                                      </th>
+                                      <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                                        주문자수(명)
+                                      </th>
+                                      <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                                        구매수량(PCS)
+                                      </th>
+                                      <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                                        실판매가(천원)
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody id="korea-user-first-sale"></tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="card">
+                        <div class="card-body p-3">
+                          <div class="row">
+                            <h5 class="mb-1 font-weight-bold">재구매</h5>
+                            <div class="col-3">
+                              <div class="card mb-2">
+                                <div class="card-body p-3">
+                                  <div class="row">
+                                    <div class="col-8">
+                                      <div class="numbers">
+                                        <p class="text-sm mb-0 text-capitalize font-weight-bold">구매자수</p>
+                                        <h5 class="font-weight-bolder mb-0" id="second-order-count"></h5>
+                                      </div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                      <div
+                                        class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md"
+                                      >
+                                        <i
+                                          class="fa-regular fa-pen-to-square text-lg opacity-10"
+                                          aria-hidden="true"
+                                        ></i>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="card">
+                                <div class="card-body p-3">
+                                  <div class="row">
+                                    <div class="col-8">
+                                      <div class="numbers">
+                                        <p class="text-sm mb-0 text-capitalize font-weight-bold">평균객단가</p>
+                                        <h5 class="font-weight-bolder mb-0" id="second-average-sales"></h5>
+                                      </div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                      <div class="icon icon-shape bg-gradient-dark shadow text-center border-radius-md">
+                                        <i class="fa-solid fa-users text-lg opacity-10" aria-hidden="true"></i>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-3">
+                              <div class="card mb-2">
+                                <div class="card-body p-3">
+                                  <div class="row">
+                                    <div class="col-8">
+                                      <div class="numbers">
+                                        <p class="text-sm mb-0 text-capitalize font-weight-bold">구매금액</p>
+                                        <h5 class="font-weight-bolder mb-0" id="second-order-sales"></h5>
+                                      </div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                      <div class="icon icon-shape bg-gradient-info shadow text-center border-radius-md">
+                                        <i class="fa-solid fa-coins text-lg opacity-10" aria-hidden="true"></i>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="card">
+                                <div class="card-body p-3">
+                                  <div class="row">
+                                    <div class="col-8">
+                                      <div class="numbers">
+                                        <p class="text-sm mb-0 text-capitalize font-weight-bold">평균구매수량</p>
+                                        <h5 class="font-weight-bolder mb-0" id="second-average-quantity"></h5>
+                                      </div>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                      <div
+                                        class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md"
+                                      >
+                                        <i
+                                          class="fa-regular fa-pen-to-square text-lg opacity-10"
+                                          aria-hidden="true"
+                                        ></i>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-6">
+                              <div class="table-responsive">
+                                <table class="table align-items-center mb-0">
+                                  <thead>
+                                    <tr>
+                                      <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                                        브랜드명
+                                      </th>
+                                      <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                                        주문자수(명)
+                                      </th>
+                                      <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                                        구매수량(PCS)
+                                      </th>
+                                      <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                                        실판매가(천원)
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody id="korea-user-second-sale"></tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto" href="/korea/user">
+                    More Infomation
+                    <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-12">
+              <div class="card h-100">
+                <div class="card-header pb-0"><h6>어제 파트너사별로 이렇게 팔았어요</h6></div>
+                <div class="card-body p-3">
+                  <div class="table-responsive">
+                    <table class="table align-items-center mb-0">
+                      <thead>
+                        <tr>
+                          <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">파트너사</th>
+                          <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">주문수(건)</th>
+                          <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                            판매수량(pcs)
+                          </th>
+                          <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                            실판매가(천원)
+                          </th>
+                          <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">직접비(천원)</th>
+                          <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                            마케팅비(천원)
+                          </th>
+                          <th class="text-center text-secondary text-xxs font-weight-bolder opacity-7">
+                            공헌이익(천원)
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody id="korea-partners-data"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <a class="text-body text-sm font-weight-bold mb-0 icon-move-right mt-auto" href="/korea/partner">
+                    More Infomation
+                    <i class="fas fa-arrow-right text-sm ms-1" aria-hidden="true"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!--   Core JS Files   -->
+    <script src="../../controls/pb/mmz-essential.js" type="module" defer></script>
+    <script src="../../assets/js/core/popper.min.js"></script>
+    <script src="../../assets/js/core/bootstrap.min.js"></script>
+    <script src="../../assets/js/plugins/perfect-scrollbar.min.js"></script>
+    <script src="../../assets/js/plugins/smooth-scrollbar.min.js"></script>
+    <script src="../../assets/js/plugins/chartjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.2.1/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  </body>
+</html>

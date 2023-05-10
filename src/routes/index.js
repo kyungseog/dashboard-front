@@ -71,4 +71,12 @@ router.get("/today", (req, res) => {
   res.render("today");
 });
 
+router.get("/pb", (req, res) => {
+  res.render("pb/mmz-essential");
+});
+
+router.get("/pb/today", (req, res) => {
+  res.render("pb/essential-today");
+});
+
 module.exports = router;
