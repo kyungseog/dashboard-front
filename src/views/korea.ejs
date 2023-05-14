@@ -152,66 +152,47 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-3 mb-2">
-            <div class="card h-100 p-3">
-              <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
-                <span class="mask bg-gradient-dark"></span>
-                <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
-                  <h5 class="text-white font-weight-bolder mb-4 pt-2">향후 7일간의 예상 최저/최고기온이에요</h5>
-                  <div class="bg-gradient-dark border-radius-lg py-3 pe-1 mb-3">
-                    <div class="chart">
-                      <canvas id="korea-weather-chart" class="chart-canvas" height="230"></canvas>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-4 mb-2">
+          <div class="col-lg-7 mb-2">
             <div class="card h-100">
               <div class="card-header pb-0"><h6>어제 브랜드별로 이렇게 팔았어요</h6></div>
               <div class="card-body p-3">
-                <div class="table-responsive">
-                  <table class="table align-items-center mb-0">
-                    <thead>
-                      <tr>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                          브랜드명
-                        </th>
-                        <th
-                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
-                        >
-                          주문수<br />(건)
-                        </th>
-                        <th
-                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
-                        >
-                          판매수량<br />(pcs)
-                        </th>
-                        <th
-                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
-                        >
-                          실판가<br />(천원)
-                        </th>
-                        <th
-                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
-                        >
-                          직접비<br />(천원)
-                        </th>
-                        <th
-                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
-                        >
-                          마케팅비<br />(천원)
-                        </th>
-                        <th
-                          class="text-center text-uppercase text-secondary text-xxs font-weight-bolder ps-2 opacity-7"
-                        >
-                          공헌이익<br />(천원)
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody id="korea-brands-data"></tbody>
-                  </table>
+                <div class="row">
+                  <div class="col-md-4 mb-2">
+                    <div class="card">
+                      <div class="card-header text-center">볼륨브랜드</div>
+                      <div class="card-body pt-0" id=""></div>
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-2">
+                    <div class="card">
+                      <div class="card-header p-3 text-center">패션브랜드</div>
+                      <div class="card-body pt-0 p-3 text-center" id=""></div>
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-2">
+                    <div class="card">
+                      <div class="card-header p-3 text-center">디자이너브랜드</div>
+                      <div class="card-body pt-0 p-3 text-center" id=""></div>
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-2">
+                    <div class="card">
+                      <div class="card-header p-3 text-center">전략브랜드</div>
+                      <div class="card-body pt-0 p-3 text-center" id=""></div>
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-2">
+                    <div class="card">
+                      <div class="card-header p-3 text-center">매입브랜드</div>
+                      <div class="card-body pt-0 p-3 text-center" id=""></div>
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-2">
+                    <div class="card">
+                      <div class="card-header p-3 text-center">자가브랜드</div>
+                      <div class="card-body pt-0 p-3 text-center" id=""></div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="card-footer">
@@ -224,7 +205,7 @@
           </div>
         </div>
         <div class="row mt-4">
-          <div class="col-lg-8 mb-lg-0 mb-4">
+          <div class="col-lg-5 mb-lg-0 mb-4">
             <div class="card h-100">
               <div class="card-header pb-0">
                 <h6>스쿼드별 이번달 현황이에요</h6>
@@ -242,14 +223,14 @@
                             <canvas
                               id="consignment-squad-sales-chart"
                               class="chart-canvas"
-                              style="height: 50vh; width: 30vw"
+                              style="height: 100vh; width: 30vw"
                             ></canvas>
                           </div>
                           <div class="chart col-md-6">
                             <canvas
                               id="consignment-squad-margin-chart"
                               class="chart-canvas"
-                              style="height: 50vh; width: 30vw"
+                              style="height: 100vh; width: 30vw"
                             ></canvas>
                           </div>
                         </div>
@@ -269,14 +250,14 @@
                             <canvas
                               id="strategic-squad-sales-chart"
                               class="chart-canvas"
-                              style="height: 50vh; width: 30vw"
+                              style="height: 100vh; width: 30vw"
                             ></canvas>
                           </div>
                           <div class="chart col-md-6">
                             <canvas
                               id="strategic-squad-margin-chart"
                               class="chart-canvas"
-                              style="height: 50vh; width: 30vw"
+                              style="height: 100vh; width: 30vw"
                             ></canvas>
                           </div>
                         </div>
@@ -296,14 +277,14 @@
                             <canvas
                               id="buying-squad-sales-chart"
                               class="chart-canvas"
-                              style="height: 50vh; width: 30vw"
+                              style="height: 100vh; width: 30vw"
                             ></canvas>
                           </div>
                           <div class="chart col-md-6">
                             <canvas
                               id="buying-squad-margin-chart"
                               class="chart-canvas"
-                              style="height: 50vh; width: 30vw"
+                              style="height: 100vh; width: 30vw"
                             ></canvas>
                           </div>
                         </div>
@@ -323,18 +304,33 @@
                             <canvas
                               id="essential-squad-sales-chart"
                               class="chart-canvas"
-                              style="height: 50vh; width: 30vw"
+                              style="height: 100vh; width: 30vw"
                             ></canvas>
                           </div>
                           <div class="chart col-md-6">
                             <canvas
                               id="essential-squad-margin-chart"
                               class="chart-canvas"
-                              style="height: 50vh; width: 30vw"
+                              style="height: 100vh; width: 30vw"
                             ></canvas>
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 mb-lg-0 mb-4">
+            <div class="card h-100 p-3">
+              <div class="overflow-hidden position-relative border-radius-lg bg-cover h-100">
+                <span class="mask bg-gradient-dark"></span>
+                <div class="card-body position-relative z-index-1 d-flex flex-column h-100 p-3">
+                  <h5 class="text-white font-weight-bolder mb-4 pt-2">향후 7일간의 예상 최저/최고기온이에요</h5>
+                  <div class="bg-gradient-dark border-radius-lg py-3 pe-1 mb-3">
+                    <div class="chart">
+                      <canvas id="korea-weather-chart" class="chart-canvas" height="230"></canvas>
                     </div>
                   </div>
                 </div>

@@ -295,6 +295,7 @@ async function weatherChart() {
 
 async function brandSales() {
   const salesData = await util.fetchData(`${util.host}/korea/brand?startDay=${yesterday}&endDay=${yesterday}`, "GET");
+
   const marketingData = await util.fetchData(
     `${util.host}/korea/brand/marketing?startDay=${yesterday}&endDay=${yesterday}`,
     "GET"
