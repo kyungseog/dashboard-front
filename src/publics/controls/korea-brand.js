@@ -22,7 +22,7 @@ submit.addEventListener("click", () => {
   brandSales(startDay, endDay, mdId);
 });
 
-const commonTD = (elem) => `<td class="align-middle text-center" width="7%">
+const commonTD = (elem) => `<td class="align-middle text-center" width="6%">
 <span class="text-xs font-weight-bold"> ${elem} </span></td>`;
 
 async function brandSales(startDay, endDay, mdId) {
@@ -58,7 +58,8 @@ async function brandSales(startDay, endDay, mdId) {
   let totalSales = 0;
   let totalCommission = 0;
   let totalCost = 0;
-  let totalCoupon = 0;
+  let totalOrderCoupon = 0;
+  let totalProductCoupon = 0;
   let totalExpense = 0;
   let totalDirectMarketing = 0;
   let totalIndirectMarketing = 0;
@@ -122,8 +123,14 @@ async function brandSales(startDay, endDay, mdId) {
         </td>
         ${commonTD(Number(el.order_count).toLocaleString("ko-kr"))}
         ${commonTD(Number(el.quantity).toLocaleString("ko-kr"))}
-        ${commonTD(util.chunwon(el.sales_price))}
-        ${commonTD(el.brand_type == "consignment" ? util.chunwon(Number(el.commission)) : "-")}
+        <td class="align-middle text-center" width="8%">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(el.sales_price)} </span>
+        </td>
+        <td class="align-middle text-center" width="8%">
+          <span class="text-xs font-weight-bold"> ${
+            el.brand_type == "consignment" ? util.chunwon(Number(el.commission)) : "-"
+          } </span>
+        </td>
         ${commonTD(el.brand_type == "consignment" ? "-" : util.chunwon(Number(el.cost)))}
         ${commonTD(util.chunwon(Number(el.order_coupon)))}
         ${commonTD(util.chunwon(Number(el.product_coupon)))}
@@ -141,7 +148,8 @@ async function brandSales(startDay, endDay, mdId) {
     totalSales += Number(el.sales_price);
     totalCommission += Number(el.commission);
     totalCost += Number(el.cost);
-    totalCoupon += couponFee;
+    totalOrderCoupon += Number(el.order_coupon);
+    totalProductCoupon += Number(el.product_coupon);
     totalExpense += Number(el.mileage) + Number(el.pg_expense);
     totalDirectMarketing += directMarketing;
     totalIndirectMarketing += indirectMarketing;
@@ -156,14 +164,19 @@ async function brandSales(startDay, endDay, mdId) {
   const totalMarginRate = Math.round((totalMargin / totalSales) * 100);
   let sumHtml = `
       <tr class="table-active pb-0">
-        <td class="text-center" colspan="3" width="28%">
+        <td class="text-center" colspan="3" width="27%">
           <h6 class="mb-0 text-sm">합계</h6>
         </td>
         ${commonTD(totalQuantity.toLocaleString("ko-kr"))}
-        ${commonTD(util.chunwon(totalSales))}
-        ${commonTD(util.chunwon(totalCommission))}
+        <td class="align-middle text-center" width="8%">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(totalSales)} </span>
+        </td>
+        <td class="align-middle text-center" width="8%">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(totalCommission)} </span>
+        </td>
         ${commonTD(util.chunwon(totalCost))}
-        ${commonTD(util.chunwon(totalCoupon))}
+        ${commonTD(util.chunwon(totalOrderCoupon))}
+        ${commonTD(util.chunwon(totalProductCoupon))}
         ${commonTD(util.chunwon(totalExpense))}
         ${commonTD(util.chunwon(totalDirectMarketing))}
         ${commonTD(util.chunwon(totalIndirectMarketing))}
