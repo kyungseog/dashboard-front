@@ -176,7 +176,7 @@ async function salesChartKorea(koreaSalesData) {
 
 async function koreaProductSales() {
   const nowTime = DateTime.now().toFormat("yyyy-LL-dd HH:mm:ss");
-  const timeBeforeHour = DateTime.now().minus({ hours: 1 }).toFormat("yyyy-LL-dd HH:mm:ss");
+  const timeBeforeHour = DateTime.now().minus({ hours: 24 }).toFormat("yyyy-LL-dd HH:mm:ss");
   const URL = `${util.host}/korea/product?sumType=hourPeriod&startDay=${timeBeforeHour}&endDay=${nowTime}`;
   const data = await util.fetchData(URL, "GET");
   data.length = 4;

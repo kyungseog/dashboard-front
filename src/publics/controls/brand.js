@@ -30,6 +30,15 @@ submit.addEventListener("click", () => {
   bestProducts(brandId, startDay, endDay);
 });
 
+const checkBox = document.querySelector("#flexSwitchCheckChecked");
+checkBox.addEventListener("change", (e) => {
+  if (e.target.checked) {
+    monthlyCumulatedChart(brandId);
+  } else {
+    monthlyChart(brandId);
+  }
+});
+
 async function brandSales(brandId, startDay, endDay) {
   const salesData = await util.fetchData(`${util.host}/korea/brand?startDay=${startDay}&endDay=${endDay}`, "GET");
   const marketingData = await util.fetchData(
@@ -310,13 +319,26 @@ async function weeklySalesChart(labelData, thisYearSales, beforeYearSales) {
 }
 
 async function monthlyChart(brandId) {
-  const thisDay = yesterday;
-  const beforeDay = DateTime.now().minus({ years: 1 }).minus({ days: 1 }).toFormat("yyyy-LL-dd");
+  const thisYearStartDay = DateTime.now().toFormat("yyyy-01-01");
+  const beforeYearStartDay = DateTime.now().minus({ years: 1 }).toFormat("yyyy-01-01");
+  const thisYearEndDay = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
+  const beforeYearEndDay = DateTime.now().minus({ years: 1 }).minus({ days: 1 }).toFormat("yyyy-LL-dd");
 
-  const thisYearData = await monthlyData(brandId, thisDay);
-  const beforeYearData = await monthlyData(brandId, beforeDay);
-  console.log(thisYearData);
-  console.log(beforeYearData);
+  const thisYearData = await util.fetchData(
+    `${util.host}/korea/brand/month?startDay=${thisYearStartDay}&endDay=${thisYearEndDay}&brandId=${brandId}`,
+    "GET"
+  );
+  const beforeYearData = await util.fetchData(
+    `${util.host}/korea/brand/month?startDay=${beforeYearStartDay}&endDay=${beforeYearEndDay}&brandId=${brandId}`,
+    "GET"
+  );
+
+  const labels = thisYearData.map((r) => r.brand_payment_month + "월");
+  const thisYearSales = thisYearData.map((r) => util.bmwon(r.brand_sales));
+  const beforeYearSales = beforeYearData.map((r) => util.bmwon(r.brand_sales));
+  const thisYearMargin = thisYearData.map((r) => util.bmwon(r.brand_contribution_margin));
+  const beforeYearMargin = beforeYearData.map((r) => util.bmwon(r.brand_contribution_margin));
+
   const optionsData = {
     responsive: true,
     plugins: {
@@ -391,11 +413,11 @@ async function monthlyChart(brandId) {
     plugins: [ChartDataLabels],
     type: "bar",
     data: {
-      labels: thisYearData.labels,
+      labels,
       datasets: [
         {
           label: "전년",
-          data: beforeYearData?.sales,
+          data: beforeYearSales,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
@@ -408,7 +430,7 @@ async function monthlyChart(brandId) {
         },
         {
           label: "금년",
-          data: thisYearData.sales,
+          data: thisYearSales,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
@@ -433,11 +455,11 @@ async function monthlyChart(brandId) {
     plugins: [ChartDataLabels],
     type: "bar",
     data: {
-      labels: thisYearData.labels,
+      labels,
       datasets: [
         {
           label: "전년",
-          data: beforeYearData?.margins,
+          data: beforeYearMargin,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
@@ -450,7 +472,7 @@ async function monthlyChart(brandId) {
         },
         {
           label: "금년",
-          data: thisYearData.margins,
+          data: thisYearMargin,
           tension: 0.4,
           borderWidth: 0,
           borderRadius: 8,
@@ -467,68 +489,200 @@ async function monthlyChart(brandId) {
   });
 }
 
-async function monthlyData(brandId, endDay) {
-  const startDay = DateTime.fromISO(endDay).toFormat("yyyy-01-01");
-  const salesData = await util.fetchData(
-    `${util.host}/korea/brand/${brandId}?sumType=month&startDay=${startDay}&endDay=${endDay}`,
+async function monthlyCumulatedChart(brandId) {
+  const thisYearStartDay = DateTime.now().toFormat("yyyy-01-01");
+  const beforeYearStartDay = DateTime.now().minus({ years: 1 }).toFormat("yyyy-01-01");
+  const thisYearEndDay = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
+  const beforeYearEndDay = DateTime.now().minus({ years: 1 }).minus({ days: 1 }).toFormat("yyyy-LL-dd");
+
+  const thisYearData = await util.fetchData(
+    `${util.host}/korea/brand/month?startDay=${thisYearStartDay}&endDay=${thisYearEndDay}&brandId=${brandId}`,
+    "GET"
+  );
+  const beforeYearData = await util.fetchData(
+    `${util.host}/korea/brand/month?startDay=${beforeYearStartDay}&endDay=${beforeYearEndDay}&brandId=${brandId}`,
     "GET"
   );
 
-  if (salesData.length == 0) return;
+  const labels = thisYearData.map((r) => r.brand_payment_month + "월");
+  const thisYearSales = [];
+  thisYearData
+    .map((r) => r.brand_sales)
+    .reduce((cur, acc) => {
+      thisYearSales.push(Math.round((cur + acc) / 1000000));
+      return cur + acc;
+    }, 0);
 
-  const marketingData = await util.fetchData(
-    `${util.host}/korea/brand/marketing?sumType=month&startDay=${startDay}&endDay=${endDay}`,
-    "GET"
-  );
-  const directMarketing = marketingData.direct.filter((r) => r.brand_id == brandId);
-  const indirectMarketing = marketingData.indirect.filter((r) => r.brand_id == brandId);
+  const beforeYearSales = [];
+  beforeYearData
+    .map((r) => r.brand_sales)
+    .reduce((cur, acc) => {
+      beforeYearSales.push(Math.round((cur + acc) / 1000000));
+      return cur + acc;
+    }, 0);
 
-  const logisticData = await util.fetchData(
-    `${util.host}/korea/logistic/brand?sumType=month&startDay=${startDay}&endDay=${endDay}`,
-    "GET"
-  );
-  const logistic = logisticData.filter((r) => r.brand_id == brandId);
+  const thisYearMargin = [];
+  thisYearData
+    .map((r) => r.brand_contribution_margin)
+    .reduce((cur, acc) => {
+      thisYearMargin.push(Math.round((cur + acc) / 1000000));
+      return cur + acc;
+    }, 0);
 
-  const sortedSales = salesData.sort((a, b) => Number(a.month) - Number(b.month));
-  const labels = sortedSales.map((r) => r.month + "월");
-  const sales = sortedSales.map((r) => util.bmwon(Number(r.sales_price)));
-  let margins = [];
+  const beforeYearMargin = [];
+  beforeYearData
+    .map((r) => r.brand_contribution_margin)
+    .reduce((cur, acc) => {
+      beforeYearMargin.push(Math.round((cur + acc) / 1000000));
+      return cur + acc;
+    }, 0);
 
-  const monthes = sortedSales.map((r) => Number(r.month));
-  for (let month of monthes) {
-    const selectedSales = sortedSales.filter((r) => Number(r.month) == month);
-    const couponFee =
-      selectedSales[0].brand_type == "consignment"
-        ? Number(selectedSales[0].order_coupon)
-        : Number(selectedSales[0].order_coupon) + Number(selectedSales[0].product_coupon);
+  const optionsData = {
+    responsive: true,
+    plugins: {
+      datalabels: {
+        color: "white",
+        display: true,
+        font: {
+          size: 15,
+          family: "Open Sans",
+          style: "normal",
+          lineHeight: 2,
+        },
+      },
+      legend: {
+        labels: {
+          boxWidth: 10,
+          boxHeight: 5,
+        },
+        display: true,
+      },
+    },
+    scales: {
+      y: {
+        grid: {
+          drawBorder: false,
+          display: true,
+          drawOnChartArea: true,
+          drawTicks: false,
+          borderDash: [5, 5],
+        },
+        ticks: {
+          display: false,
+          padding: 10,
+          color: "#b2b9bf",
+          font: {
+            size: 10,
+            family: "Open Sans",
+            style: "normal",
+            lineHeight: 2,
+          },
+        },
+      },
+      x: {
+        grid: {
+          drawBorder: false,
+          display: false,
+          drawOnChartArea: false,
+          drawTicks: false,
+          borderDash: [5, 5],
+        },
+        ticks: {
+          display: true,
+          color: "#b2b9bf",
+          padding: 10,
+          font: {
+            size: 10,
+            family: "Open Sans",
+            style: "normal",
+            lineHeight: 2,
+          },
+        },
+      },
+    },
+  };
 
-    const expense =
-      Number(selectedSales[0].cost) +
-      Number(selectedSales[0].mileage) +
-      couponFee +
-      Number(selectedSales[0].pg_expense);
-
-    const selectedDirectMarketing = directMarketing.filter((r) => Number(r.month) == month);
-    const directMarketingFee =
-      selectedDirectMarketing[0] == null ? 0 : Number(selectedDirectMarketing[0].direct_marketing_fee);
-
-    const selectedIndirectMarketing = indirectMarketing.filter((r) => Number(r.month) == month);
-    const indirectMarketingFee =
-      selectedIndirectMarketing[0] == null ? 0 : Number(selectedIndirectMarketing[0].indirect_marketing_fee);
-
-    const selectedLogistic = logistic.filter((r) => Number(r.month) == month);
-    const logisticFee = selectedLogistic[0] == null ? 0 : Number(selectedLogistic[0].logistic_fee);
-
-    const calculateMargin =
-      selectedSales[0].brand_type == "consignment"
-        ? selectedSales[0].commission - expense - directMarketingFee - indirectMarketingFee
-        : selectedSales[0].sales_price - expense - directMarketingFee - indirectMarketingFee - logisticFee;
-    margins.push(util.bmwon(calculateMargin));
+  const monthlySalesCtx = document.getElementById("monthly-sales-chart").getContext("2d");
+  if (salesChartMonthly) {
+    salesChartMonthly.destroy();
   }
 
-  return {
-    labels,
-    sales,
-    margins,
-  };
+  salesChartMonthly = new Chart(monthlySalesCtx, {
+    plugins: [ChartDataLabels],
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "전년",
+          data: beforeYearSales,
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 8,
+          borderSkipped: false,
+          backgroundColor: ["#BDCDD6"],
+          datalabels: {
+            align: "center",
+            anchor: "center",
+          },
+        },
+        {
+          label: "금년",
+          data: thisYearSales,
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 8,
+          borderSkipped: false,
+          backgroundColor: ["#6096B4"],
+          datalabels: {
+            align: "center",
+            anchor: "center",
+          },
+        },
+      ],
+    },
+    options: optionsData,
+  });
+
+  const monthlyMarginCtx = document.getElementById("monthly-margin-chart").getContext("2d");
+  if (marginChartMonthly) {
+    marginChartMonthly.destroy();
+  }
+
+  marginChartMonthly = new Chart(monthlyMarginCtx, {
+    plugins: [ChartDataLabels],
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "전년",
+          data: beforeYearMargin,
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 8,
+          borderSkipped: false,
+          backgroundColor: ["#D0B8A8"],
+          datalabels: {
+            align: "center",
+            anchor: "center",
+          },
+        },
+        {
+          label: "금년",
+          data: thisYearMargin,
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 8,
+          borderSkipped: false,
+          backgroundColor: ["#85586F"],
+          datalabels: {
+            align: "center",
+            anchor: "center",
+          },
+        },
+      ],
+    },
+    options: optionsData,
+  });
 }
