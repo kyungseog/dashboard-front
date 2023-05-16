@@ -14,6 +14,7 @@ let essentialMarginChart;
 
 const today = DateTime.now().toFormat("yyyy-LL-dd");
 const yesterday = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
+const beforeYesterday = DateTime.now().minus({ days: 2 }).toFormat("yyyy-LL-dd");
 
 (function startFunction() {
   headlines();
@@ -28,9 +29,12 @@ const yesterday = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
 })();
 
 async function headlines() {
-  const todaySalesData = await util.fetchData(`${util.host}/korea/sales?startDay=${today}&endDay=${today}`, "GET");
+  const todaySalesData = await util.fetchData(
+    `${util.host}/korea/sales?startDay=${yesterday}&endDay=${yesterday}`,
+    "GET"
+  );
   const monthlySalesData = await util.fetchData(
-    `${util.host}/korea/sales?startDay=${DateTime.now().startOf("month").toFormat("yyyy-LL-dd")}&endDay=${today}`,
+    `${util.host}/korea/sales?startDay=${DateTime.now().startOf("month").toFormat("yyyy-LL-dd")}&endDay=${yesterday}`,
     "GET"
   );
   document.getElementById("korea-order-count").innerHTML = `${Number(todaySalesData.order_count).toLocaleString(
@@ -63,7 +67,7 @@ async function salesChart() {
   const thisYear = await util.fetchData(
     `${util.host}/korea/sales?sumType=day&startDay=${DateTime.now()
       .minus({ days: 13 })
-      .toFormat("yyyy-LL-dd")}&endDay=${today}`,
+      .toFormat("yyyy-LL-dd")}&endDay=${yesterday}`,
     "GET"
   );
   const beforeYear = await util.fetchData(
@@ -77,7 +81,7 @@ async function salesChart() {
   const thisYearSales = thisYear.map((r) => Math.round(r.sales_price / 1000));
   const beforeYearSales = beforeYear.map((r) => Math.round(r.sales_price / 1000));
   const sumThisYearSales = thisYearSales.reduce((acc, cur) => acc + cur, 0);
-  const sumBeforeYearSales = beforeYearSales.reduce((acc, cur) => acc + cur, 0);
+  const sumBeforeYearSales = beforeYearSales.slice(0, 13).reduce((acc, cur) => acc + cur, 0);
   const ratio = (sumThisYearSales / sumBeforeYearSales).toFixed(2);
 
   const koreaSalesChartSummary = document.getElementById("korea-sales-chart-summary");
@@ -108,18 +112,6 @@ async function salesChart() {
       labels: labelData,
       datasets: [
         {
-          label: "Y" + DateTime.now().toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#cb0c9f",
-          borderWidth: 3,
-          backgroundColor: gradientStroke1,
-          fill: true,
-          data: thisYearSales,
-          maxBarThickness: 6,
-        },
-        {
           label: "Y" + DateTime.now().minus({ years: 1 }).toFormat("yyyy"),
           tension: 0.4,
           borderWidth: 0,
@@ -129,6 +121,18 @@ async function salesChart() {
           backgroundColor: gradientStroke2,
           fill: true,
           data: beforeYearSales,
+          maxBarThickness: 6,
+        },
+        {
+          label: "Y" + DateTime.now().toFormat("yyyy"),
+          tension: 0.4,
+          borderWidth: 0,
+          pointRadius: 0,
+          borderColor: "#cb0c9f",
+          borderWidth: 3,
+          backgroundColor: gradientStroke1,
+          fill: true,
+          data: thisYearSales,
           maxBarThickness: 6,
         },
       ],
@@ -191,111 +195,12 @@ async function salesChart() {
   });
 }
 
-async function weatherChart() {
-  const thisYear = await util.fetchData(
-    `${util.host}/weather/seoul?startDay=${today}&endDay=${DateTime.now().plus({ days: 6 }).toFormat("yyyy-LL-dd")}`,
-    "GET"
-  );
-  const beforeYear = await util.fetchData(
-    `${util.host}/weather/seoul?startDay=${DateTime.now()
-      .minus({ years: 1 })
-      .toFormat("yyyy-LL-dd")}&endDay=${DateTime.now().minus({ years: 1 }).plus({ days: 6 }).toFormat("yyyy-LL-dd")}`,
-    "GET"
-  );
-
-  const thisYearTemp = thisYear.map((r) => [r.Weather_temperature_min, r.Weather_temperature_max]);
-  const beforeYearTemp = beforeYear.map((r) => [r.Weather_temperature_min, r.Weather_temperature_max]);
-
-  const labelData = thisYear.map((r) => DateTime.fromISO(r.Weather_date).toFormat("LL/dd"));
-
-  const ctx = document.getElementById("korea-weather-chart").getContext("2d");
-  const colorCode = ["#696969", "#696969", "#696969", "#696969", "#696969", "#696969", "#696969"];
-
-  if (koreaWeatherChart) {
-    koreaWeatherChart.destroy();
-  }
-
-  koreaWeatherChart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labelData,
-      datasets: [
-        {
-          label: "Y" + DateTime.now().minus({ years: 1 }).toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 4,
-          borderSkipped: false,
-          backgroundColor: "#696969",
-          data: beforeYearTemp,
-          maxBarThickness: 6,
-        },
-        {
-          label: "Y" + DateTime.now().toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 4,
-          borderSkipped: false,
-          backgroundColor: "#fff",
-          data: thisYearTemp,
-          maxBarThickness: 6,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-        },
-      },
-      interaction: {
-        intersect: false,
-        mode: "index",
-      },
-      scales: {
-        y: {
-          grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false,
-          },
-          ticks: {
-            suggestedMin: -10,
-            suggestedMax: 40,
-            beginAtZero: true,
-            padding: 5,
-            font: {
-              size: 12,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-            color: "#fff",
-          },
-        },
-        x: {
-          grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false,
-          },
-          ticks: {
-            display: true,
-            color: colorCode,
-          },
-        },
-      },
-    },
-  });
-}
-
 async function brandSales() {
   const salesData = await util.fetchData(`${util.host}/korea/brand?startDay=${yesterday}&endDay=${yesterday}`, "GET");
-
+  const beforeSalesData = await util.fetchData(
+    `${util.host}/korea/brand?startDay=${beforeYesterday}&endDay=${beforeYesterday}`,
+    "GET"
+  );
   const marketingData = await util.fetchData(
     `${util.host}/korea/brand/marketing?startDay=${yesterday}&endDay=${yesterday}`,
     "GET"
@@ -304,9 +209,28 @@ async function brandSales() {
     `${util.host}/korea/logistic/brand?startDay=${yesterday}&endDay=${yesterday}`,
     "GET"
   );
-  salesData.length = 8;
-  let brandHtml = "";
+
+  let volumeBrandSales = 0;
+  let volumeBrandBeforeSales = 0;
+  let volumeBrandMargin = 0;
+  let fashionBrandSales = 0;
+  let fashionBrandBeforeSales = 0;
+  let fashionBrandMargin = 0;
+  let designBrandSales = 0;
+  let designBrandBeforeSales = 0;
+  let designBrandMargin = 0;
+  let strategicBrandSales = 0;
+  let strategicBrandBeforeSales = 0;
+  let strategicBrandMargin = 0;
+  let buyingBrandSales = 0;
+  let buyingBrandBeforeSales = 0;
+  let buyingBrandMargin = 0;
+  let essentialBrandSales = 0;
+  let essentialBrandBeforeSales = 0;
+  let essentialBrandMargin = 0;
+
   for (let el of salesData) {
+    const filteredData = beforeSalesData.filter((r) => r.brand_id == el.brand_id);
     const couponFee =
       el.brand_type == "consignment" ? Number(el.order_coupon) : Number(el.order_coupon) + Number(el.product_coupon);
     const expense = Number(el.cost) + Number(el.mileage) + couponFee + Number(el.pg_expense);
@@ -326,53 +250,80 @@ async function brandSales() {
       el.brand_type == "consignment"
         ? el.commission - expense - directMarketing - indirectMarketing
         : el.sales_price - expense - directMarketing - indirectMarketing - logistic;
-    const marginRate = Math.round((calculateMargin / el.sales_price) * 100);
 
-    let huddleMarginRate = "";
-    if (el.brand_squad == "위탁SQ") {
-      huddleMarginRate = marginRate < 5 ? "text-danger" : "text-success";
+    if (util.volumeBrands.indexOf(el.brand_id) >= 0) {
+      volumeBrandSales = volumeBrandSales + Number(el.sales_price);
+      volumeBrandMargin = volumeBrandMargin + calculateMargin;
+      volumeBrandBeforeSales =
+        volumeBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
+    } else if (el.brand_squad == "위탁SQ") {
+      if (util.fashionMds.indexOf(el.md_id) >= 0) {
+        fashionBrandSales = fashionBrandSales + Number(el.sales_price);
+        fashionBrandMargin = fashionBrandMargin + calculateMargin;
+        fashionBrandBeforeSales =
+          fashionBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
+      } else {
+        designBrandSales = designBrandSales + Number(el.sales_price);
+        designBrandMargin = designBrandMargin + calculateMargin;
+        designBrandBeforeSales =
+          designBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
+      }
     } else if (el.brand_squad == "전략카테고리SQ") {
-      huddleMarginRate = marginRate < 6 ? "text-danger" : "text-success";
+      strategicBrandSales = strategicBrandSales + Number(el.sales_price);
+      strategicBrandMargin = strategicBrandMargin + calculateMargin;
+      strategicBrandBeforeSales =
+        strategicBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
     } else if (el.brand_squad == "매입SQ") {
-      huddleMarginRate = marginRate < 12 ? "text-danger" : "text-success";
+      buyingBrandSales = buyingBrandSales + Number(el.sales_price);
+      buyingBrandMargin = buyingBrandMargin + calculateMargin;
+      buyingBrandBeforeSales =
+        buyingBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
     } else {
-      huddleMarginRate = marginRate < 22 ? "text-danger" : "text-success";
+      essentialBrandSales = essentialBrandSales + Number(el.sales_price);
+      essentialBrandMargin = essentialBrandMargin + calculateMargin;
+      essentialBrandBeforeSales =
+        essentialBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
     }
-    let html = `
-      <tr>
-        <td>
-          <div class="d-flex px-2 py-1">
-            <div class="d-flex flex-column justify-content-center">
-              <h6 class="mb-0 text-sm">
-                <a href="/brand/${el.brand_id}">${el.brand_name}<a>
-              </h6>
-            </div>
-          </div>
-        </td>
-        <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${Number(el.order_count).toLocaleString("ko-kr")} </span>
-        </td>
-        <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${Number(el.quantity).toLocaleString("ko-kr")} </span>
-        </td>
-        <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(Number(el.sales_price))} </span>
-        </td>
-        <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(expense + logistic)} </span>
-        </td>
-        <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(directMarketing + indirectMarketing)} </span>
-        </td>
-        <td class="align-middle text-center text-sm">
-          <span class="${
-            calculateMargin >= 0 ? "text-success" : "text-danger"
-          } text-xs font-weight-bold"> ${util.chunwon(calculateMargin)} </span>
-       </td>
-      </tr>`;
-    brandHtml = brandHtml + html;
   }
-  document.getElementById("korea-brands-data").innerHTML = brandHtml;
+
+  const brandNames = [
+    "volume-brand",
+    "fashion-brand",
+    "design-brand",
+    "strategic-brand",
+    "buying-brand",
+    "essential-brand",
+  ];
+  const salesNames = [
+    volumeBrandSales,
+    fashionBrandSales,
+    designBrandSales,
+    strategicBrandSales,
+    buyingBrandSales,
+    essentialBrandSales,
+  ];
+  const marginNames = [
+    volumeBrandMargin,
+    fashionBrandMargin,
+    designBrandMargin,
+    strategicBrandMargin,
+    buyingBrandMargin,
+    essentialBrandMargin,
+  ];
+  const rationNames = [
+    Math.round((volumeBrandSales / volumeBrandBeforeSales) * 100),
+    Math.round((fashionBrandSales / fashionBrandBeforeSales) * 100),
+    Math.round((designBrandSales / designBrandBeforeSales) * 100),
+    Math.round((strategicBrandSales / strategicBrandBeforeSales) * 100),
+    Math.round((buyingBrandSales / buyingBrandBeforeSales) * 100),
+    Math.round((essentialBrandSales / essentialBrandBeforeSales) * 100),
+  ];
+  for (let i = 0; i < brandNames.length; i++) {
+    document.getElementById(brandNames[i]).innerHTML = `
+    <h6 class="text-center mb-0">${util.bmwon(Number(salesNames[i]))}백만(전일비 ${rationNames[i]}%)</h6>
+    <span class="text-xs">(공헌이익) ${util.bmwon(marginNames[i])}백만</span>
+    <hr class="horizontal dark my-3">`;
+  }
 }
 
 async function squadChart() {
@@ -721,6 +672,108 @@ async function squadChart() {
       ],
     },
     options: optionsData,
+  });
+}
+
+async function weatherChart() {
+  const thisYear = await util.fetchData(
+    `${util.host}/weather/seoul?startDay=${today}&endDay=${DateTime.now().plus({ days: 6 }).toFormat("yyyy-LL-dd")}`,
+    "GET"
+  );
+  const beforeYear = await util.fetchData(
+    `${util.host}/weather/seoul?startDay=${DateTime.now()
+      .minus({ years: 1 })
+      .toFormat("yyyy-LL-dd")}&endDay=${DateTime.now().minus({ years: 1 }).plus({ days: 6 }).toFormat("yyyy-LL-dd")}`,
+    "GET"
+  );
+
+  const thisYearTemp = thisYear.map((r) => [r.Weather_temperature_min, r.Weather_temperature_max]);
+  const beforeYearTemp = beforeYear.map((r) => [r.Weather_temperature_min, r.Weather_temperature_max]);
+
+  const labelData = thisYear.map((r) => DateTime.fromISO(r.Weather_date).toFormat("LL/dd"));
+
+  const ctx = document.getElementById("korea-weather-chart").getContext("2d");
+  const colorCode = ["#696969", "#696969", "#696969", "#696969", "#696969", "#696969", "#696969"];
+
+  if (koreaWeatherChart) {
+    koreaWeatherChart.destroy();
+  }
+
+  koreaWeatherChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labelData,
+      datasets: [
+        {
+          label: "Y" + DateTime.now().minus({ years: 1 }).toFormat("yyyy"),
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 4,
+          borderSkipped: false,
+          backgroundColor: "#696969",
+          data: beforeYearTemp,
+          maxBarThickness: 6,
+        },
+        {
+          label: "Y" + DateTime.now().toFormat("yyyy"),
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 4,
+          borderSkipped: false,
+          backgroundColor: "#fff",
+          data: thisYearTemp,
+          maxBarThickness: 6,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+        },
+      },
+      interaction: {
+        intersect: false,
+        mode: "index",
+      },
+      scales: {
+        y: {
+          grid: {
+            drawBorder: false,
+            display: false,
+            drawOnChartArea: false,
+            drawTicks: false,
+          },
+          ticks: {
+            suggestedMin: -10,
+            suggestedMax: 40,
+            beginAtZero: true,
+            padding: 5,
+            font: {
+              size: 12,
+              family: "Open Sans",
+              style: "normal",
+              lineHeight: 2,
+            },
+            color: "#fff",
+          },
+        },
+        x: {
+          grid: {
+            drawBorder: false,
+            display: false,
+            drawOnChartArea: false,
+            drawTicks: false,
+          },
+          ticks: {
+            display: true,
+            color: colorCode,
+          },
+        },
+      },
+    },
   });
 }
 

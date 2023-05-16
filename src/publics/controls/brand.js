@@ -183,9 +183,9 @@ async function bestProducts(brandId, startDay, endDay) {
 
 async function weeklySalesChartData(brandId) {
   const thisStartDay = DateTime.now().minus({ days: 14 }).toFormat("yyyy-LL-dd");
-  const thisEndDay = DateTime.now().toFormat("yyyy-LL-dd");
+  const thisEndDay = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
   const beforeStartDay = DateTime.now().minus({ years: 1 }).minus({ days: 14 }).toFormat("yyyy-LL-dd");
-  const beforeEndDay = DateTime.now().minus({ years: 1 }).toFormat("yyyy-LL-dd");
+  const beforeEndDay = DateTime.now().minus({ years: 1 }).minus({ days: 1 }).toFormat("yyyy-LL-dd");
   const thisYearData = await util.fetchData(
     `${util.host}/korea/brand/${brandId}?sumType=day&startDay=${thisStartDay}&endDay=${thisEndDay}`,
     "GET"
@@ -195,7 +195,7 @@ async function weeklySalesChartData(brandId) {
     "GET"
   );
 
-  const labelData = thisYearData.map((r) => DateTime.fromISO(r.payment_date).toFormat("LL/dd"));
+  const labelData = thisYearData.map((r) => DateTime.fromISO(r.payment_date).toFormat("L/d"));
   const thisYearSales = thisYearData.map((r) => Math.round(r.sales_price / 1000));
   const beforeYearSales = beforeYearData.map((r) => Math.round(r.sales_price / 1000));
 
@@ -235,18 +235,6 @@ async function weeklySalesChart(labelData, thisYearSales, beforeYearSales) {
       labels: labelData,
       datasets: [
         {
-          label: "Y" + DateTime.now().toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#cb0c9f",
-          borderWidth: 3,
-          backgroundColor: gradientStroke1,
-          fill: true,
-          data: thisYearSales,
-          maxBarThickness: 6,
-        },
-        {
           label: "Y" + DateTime.now().minus({ years: 1 }).toFormat("yyyy"),
           tension: 0.4,
           borderWidth: 0,
@@ -256,6 +244,18 @@ async function weeklySalesChart(labelData, thisYearSales, beforeYearSales) {
           backgroundColor: gradientStroke2,
           fill: true,
           data: beforeYearSales,
+          maxBarThickness: 6,
+        },
+        {
+          label: "Y" + DateTime.now().toFormat("yyyy"),
+          tension: 0.4,
+          borderWidth: 0,
+          pointRadius: 0,
+          borderColor: "#cb0c9f",
+          borderWidth: 3,
+          backgroundColor: gradientStroke1,
+          fill: true,
+          data: thisYearSales,
           maxBarThickness: 6,
         },
       ],
@@ -354,8 +354,8 @@ async function monthlyChart(brandId) {
       },
       legend: {
         labels: {
-          boxWidth: 10,
-          boxHeight: 5,
+          boxWidth: 30,
+          boxHeight: 10,
         },
         display: true,
       },

@@ -15,7 +15,7 @@ const utility = {
     6: "Sun",
   },
 
-  volumeBrand: [
+  volumeBrands: [
     "B0000CZU",
     "B0000DCM",
     "B0000DFV",
@@ -27,5 +27,7 @@ const utility = {
     "B0000DPV",
     "B0000DWV",
   ], //삠뽀요, 쁘띠뮤, 베베쥬, 월튼키즈, 마리앤모리, 밀크마일, 몰리멜리, 젤리스푼, 헤이미니, 앤디애플
+
+  fashionMds: ["mjhong", "namjjok", "jw.kim", "djjung"],
 };
 export default utility;
