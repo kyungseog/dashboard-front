@@ -125,7 +125,8 @@ async function brandSales(startDay, endDay, mdId) {
         ${commonTD(util.chunwon(el.sales_price))}
         ${commonTD(el.brand_type == "consignment" ? util.chunwon(Number(el.commission)) : "-")}
         ${commonTD(el.brand_type == "consignment" ? "-" : util.chunwon(Number(el.cost)))}
-        ${commonTD(util.chunwon(couponFee))}
+        ${commonTD(util.chunwon(Number(el.order_coupon)))}
+        ${commonTD(util.chunwon(Number(el.product_coupon)))}
         ${commonTD(util.chunwon(Number(el.mileage) + Number(el.pg_expense)))}
         ${commonTD(util.chunwon(Number(directMarketing)))}
         ${commonTD(util.chunwon(indirectMarketing))}
