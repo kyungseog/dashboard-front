@@ -79,4 +79,8 @@ router.get("/pb/today", (req, res) => {
   res.render("pb/essential-today");
 });
 
+router.get("/settings", (req, res) => {
+  res.render("settings");
+});
+
 module.exports = router;

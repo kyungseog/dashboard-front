@@ -164,9 +164,12 @@ async function brandSales(startDay, endDay, mdId) {
   const totalMarginRate = Math.round((totalMargin / totalSales) * 100);
   let sumHtml = `
       <tr class="table-active pb-0">
-        <td class="text-center" colspan="3" width="27%">
+        <td class="text-center" colspan="2" width="21%">
           <h6 class="mb-0 text-sm">합계</h6>
         </td>
+        <td class="text-center" width="6%">
+        <h6 class="mb-0 text-sm"></h6>
+      </td>
         ${commonTD(totalQuantity.toLocaleString("ko-kr"))}
         <td class="align-middle text-center" width="8%">
           <span class="text-xs font-weight-bold"> ${util.chunwon(totalSales)} </span>
