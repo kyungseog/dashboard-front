@@ -4,7 +4,9 @@ const DateTime = luxon.DateTime;
 const marketing = document.querySelector("#marketing");
 marketing.addEventListener("click", async () => {
   const checkStatus = await util.fetchData(`${util.host}/settings/marketing`, "GET");
-  document.querySelector("#marketing-message").innerHTML = checkStatus;
+  document.querySelector(
+    "#marketing-message"
+  ).innerHTML = `<p>${checkStatus.updateMarketing.affectedRows}</p><p>${checkStatus.updateLive.affectedRows}</p>`;
 });
 
 const allocateMarketing = document.querySelector("#allocate-marketing");
