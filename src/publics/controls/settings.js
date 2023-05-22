@@ -3,42 +3,42 @@ const DateTime = luxon.DateTime;
 
 const marketing = document.querySelector("#marketing");
 marketing.addEventListener("click", async () => {
-  const checkStatus = await util.fetchData(`${util.host}/korea/innerdb/marketing`, "GET");
+  const checkStatus = await util.fetchData(`${util.host}/settings/marketing`, "GET");
   document.querySelector("#marketing-message").innerHTML = checkStatus;
 });
 
 const allocateMarketing = document.querySelector("#allocate-marketing");
 allocateMarketing.addEventListener("click", async () => {
-  const checkStatus = await util.fetchData(`${util.host}/korea/innerdb/allocateMarketing`, "GET");
+  const checkStatus = await util.fetchData(`${util.host}/settings/allocateMarketing`, "GET");
   document.querySelector("#marketing-message").innerHTML = checkStatus;
 });
 
 const cost = document.querySelector("#cost");
 cost.addEventListener("click", async () => {
-  const checkStatus = await util.fetchData(`${util.host}/korea/innerdb/cost`, "GET");
+  const checkStatus = await util.fetchData(`${util.host}/settings/cost`, "GET");
   document.querySelector("#cost-message").innerHTML = checkStatus;
 });
 
 const updateCost = document.querySelector("#update-cost");
 updateCost.addEventListener("click", async () => {
-  const checkStatus = await util.fetchData(`${util.host}/korea/innerdb/updateCost`, "GET");
+  const checkStatus = await util.fetchData(`${util.host}/settings/updateCost`, "GET");
   document.querySelector("#cost-message").innerHTML = checkStatus;
 });
 
 const koreaInfomation = document.querySelector("#korea-infomation");
 koreaInfomation.addEventListener("click", async () => {
-  const checkStatus = await util.fetchData(`${util.host}/korea/innerdb/koreaInfomation`, "GET");
+  const checkStatus = await util.fetchData(`${util.host}/settings/koreaInfomation`, "GET");
   document.querySelector("#korea-infomation-message").innerHTML = checkStatus;
 });
 
 const koreaMonthInfomation = document.querySelector("#korea-month-infomation");
 koreaMonthInfomation.addEventListener("click", async () => {
-  const checkStatus = await util.fetchData(`${util.host}/korea/innerdb/koreaMonthInfomation`, "GET");
+  const checkStatus = await util.fetchData(`${util.host}/settings/koreaMonthInfomation`, "GET");
   document.querySelector("#korea-infomation-message").innerHTML = checkStatus;
 });
 
 const marketingPart = document.querySelector("#marketing-part");
 marketingPart.addEventListener("click", async () => {
-  const checkStatus = await util.fetchData(`${util.host}/korea/innerdb/marketingPart`, "GET");
+  const checkStatus = await util.fetchData(`${util.host}/settings/marketingPart`, "GET");
   document.querySelector("#korea-infomation-message").innerHTML = checkStatus;
 });
