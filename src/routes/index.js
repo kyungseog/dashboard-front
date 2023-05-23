@@ -67,6 +67,10 @@ router.get("/squad/:id", (req, res) => {
   res.render("squad");
 });
 
+router.get("/squad-brand/:id", (req, res) => {
+  res.render("korea-squad");
+});
+
 router.get("/today", (req, res) => {
   res.render("today");
 });

@@ -442,237 +442,47 @@ async function squadChart() {
     },
   };
 
-  const consignmentSalesCtx = document.getElementById("consignment-squad-sales-chart").getContext("2d");
-  if (consignmentSalesChart) {
-    consignmentSalesChart.destroy();
-  }
+  const chartArray = [
+    ["consignment-squad-sales-chart", consignmentSalesChart, "실판가매출", salesObj.consignment],
+    ["consignment-squad-margin-chart", consignmentMarginChart, "공헌이익", marginObj.consignment],
+    ["strategic-squad-sales-chart", strategicSalesChart, "실판가매출", salesObj.strategic],
+    ["strategic-squad-margin-chart", strategicMarginChart, "공헌이익", marginObj.strategic],
+    ["buying-squad-sales-chart", buyingSalesChart, "실판가매출", salesObj.buying],
+    ["buying-squad-margin-chart", buyingMarginChart, "공헌이익", marginObj.buying],
+    ["essential-squad-sales-chart", essentialSalesChart, "실판가매출", salesObj.essential],
+    ["essential-squad-margin-chart", essentialMarginChart, "공헌이익", marginObj.essential],
+  ];
 
-  consignmentSalesChart = new Chart(consignmentSalesCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "실판가매출",
-          data: salesObj.consignment,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
+  for (let i = 0; i < chartArray.length; i++) {
+    const ctx = document.getElementById(chartArray[i][0]).getContext("2d");
+    if (chartArray[i][1]) {
+      chartArray[i][1].destroy();
+    }
+
+    chartArray[i][1] = new Chart(ctx, {
+      plugins: [ChartDataLabels],
+      type: "bar",
+      data: {
+        labels: ["예산", "추정"],
+        datasets: [
+          {
+            label: chartArray[i][2],
+            data: chartArray[i][3],
+            tension: 0.4,
+            borderWidth: 0,
+            borderRadius: 8,
+            borderSkipped: false,
+            backgroundColor: ["#37306B", "#66347F"],
+            datalabels: {
+              align: "center",
+              anchor: "center",
+            },
           },
-        },
-      ],
-    },
-    options: optionsData,
-  });
-
-  const consignmentMarginCtx = document.getElementById("consignment-squad-margin-chart").getContext("2d");
-  if (consignmentMarginChart) {
-    consignmentMarginChart.destroy();
+        ],
+      },
+      options: optionsData,
+    });
   }
-
-  consignmentMarginChart = new Chart(consignmentMarginCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "공헌이익",
-          data: marginObj.consignment,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: optionsData,
-  });
-
-  const strategicSalesCtx = document.getElementById("strategic-squad-sales-chart").getContext("2d");
-  if (strategicSalesChart) {
-    strategicSalesChart.destroy();
-  }
-
-  strategicSalesChart = new Chart(strategicSalesCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "실판가매출",
-          data: salesObj.strategic,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: optionsData,
-  });
-
-  const strategicMarginCtx = document.getElementById("strategic-squad-margin-chart").getContext("2d");
-  if (strategicMarginChart) {
-    strategicMarginChart.destroy();
-  }
-
-  strategicMarginChart = new Chart(strategicMarginCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "공헌이익",
-          data: marginObj.strategic,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: optionsData,
-  });
-
-  const buyingSalesCtx = document.getElementById("buying-squad-sales-chart").getContext("2d");
-  if (buyingSalesChart) {
-    buyingSalesChart.destroy();
-  }
-
-  buyingSalesChart = new Chart(buyingSalesCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "실판가매출",
-          data: salesObj.buying,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: optionsData,
-  });
-
-  const buyingMarginCtx = document.getElementById("buying-squad-margin-chart").getContext("2d");
-  if (buyingMarginChart) {
-    buyingMarginChart.destroy();
-  }
-
-  buyingMarginChart = new Chart(buyingMarginCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "공헌이익",
-          data: marginObj.buying,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: optionsData,
-  });
-
-  const essentialSalesCtx = document.getElementById("essential-squad-sales-chart").getContext("2d");
-  if (essentialSalesChart) {
-    essentialSalesChart.destroy();
-  }
-
-  essentialSalesChart = new Chart(essentialSalesCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "실판가매출",
-          data: salesObj.essential,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: optionsData,
-  });
-
-  const essentialMarginCtx = document.getElementById("essential-squad-margin-chart").getContext("2d");
-  if (essentialMarginChart) {
-    essentialMarginChart.destroy();
-  }
-
-  essentialMarginChart = new Chart(essentialMarginCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels: ["예산", "추정"],
-      datasets: [
-        {
-          label: "공헌이익",
-          data: marginObj.essential,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#37306B", "#66347F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: optionsData,
-  });
 }
 
 async function weatherChart() {
