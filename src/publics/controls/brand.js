@@ -339,71 +339,6 @@ async function monthlyChart(brandId) {
   const thisYearMargin = thisYearData.map((r) => util.bmwon(r.brand_contribution_margin));
   const beforeYearMargin = beforeYearData.map((r) => util.bmwon(r.brand_contribution_margin));
 
-  const optionsData = {
-    responsive: true,
-    plugins: {
-      datalabels: {
-        color: "white",
-        display: true,
-        font: {
-          size: 15,
-          family: "Open Sans",
-          style: "normal",
-          lineHeight: 2,
-        },
-      },
-      legend: {
-        labels: {
-          boxWidth: 30,
-          boxHeight: 10,
-        },
-        display: true,
-      },
-    },
-    scales: {
-      y: {
-        grid: {
-          drawBorder: false,
-          display: true,
-          drawOnChartArea: true,
-          drawTicks: false,
-          borderDash: [5, 5],
-        },
-        ticks: {
-          display: false,
-          padding: 10,
-          color: "#b2b9bf",
-          font: {
-            size: 10,
-            family: "Open Sans",
-            style: "normal",
-            lineHeight: 2,
-          },
-        },
-      },
-      x: {
-        grid: {
-          drawBorder: false,
-          display: false,
-          drawOnChartArea: false,
-          drawTicks: false,
-          borderDash: [5, 5],
-        },
-        ticks: {
-          display: true,
-          color: "#b2b9bf",
-          padding: 10,
-          font: {
-            size: 10,
-            family: "Open Sans",
-            style: "normal",
-            lineHeight: 2,
-          },
-        },
-      },
-    },
-  };
-
   const monthlySalesCtx = document.getElementById("monthly-sales-chart").getContext("2d");
   if (salesChartMonthly) {
     salesChartMonthly.destroy();
@@ -443,7 +378,81 @@ async function monthlyChart(brandId) {
         },
       ],
     },
-    options: optionsData,
+    options: {
+      responsive: true,
+      plugins: {
+        datalabels: {
+          color: "white",
+          display: true,
+          font: {
+            size: 15,
+            family: "Open Sans",
+            style: "normal",
+            lineHeight: 2,
+          },
+        },
+        title: {
+          display: true,
+          text: "실판매가",
+          position: "bottom",
+          font: {
+            size: 15,
+            family: "Open Sans",
+            style: "normal",
+            lineHeight: 2,
+          },
+        },
+        legend: {
+          labels: {
+            boxWidth: 30,
+            boxHeight: 10,
+          },
+          display: true,
+        },
+      },
+      scales: {
+        y: {
+          grid: {
+            drawBorder: false,
+            display: true,
+            drawOnChartArea: true,
+            drawTicks: false,
+            borderDash: [5, 5],
+          },
+          ticks: {
+            display: false,
+            padding: 10,
+            color: "#b2b9bf",
+            font: {
+              size: 10,
+              family: "Open Sans",
+              style: "normal",
+              lineHeight: 2,
+            },
+          },
+        },
+        x: {
+          grid: {
+            drawBorder: false,
+            display: false,
+            drawOnChartArea: false,
+            drawTicks: false,
+            borderDash: [5, 5],
+          },
+          ticks: {
+            display: true,
+            color: "#b2b9bf",
+            padding: 10,
+            font: {
+              size: 10,
+              family: "Open Sans",
+              style: "normal",
+              lineHeight: 2,
+            },
+          },
+        },
+      },
+    },
   });
 
   const monthlyMarginCtx = document.getElementById("monthly-margin-chart").getContext("2d");
@@ -485,7 +494,81 @@ async function monthlyChart(brandId) {
         },
       ],
     },
-    options: optionsData,
+    options: {
+      responsive: true,
+      plugins: {
+        datalabels: {
+          color: "white",
+          display: true,
+          font: {
+            size: 15,
+            family: "Open Sans",
+            style: "normal",
+            lineHeight: 2,
+          },
+        },
+        title: {
+          display: true,
+          text: "공헌이익",
+          position: "bottom",
+          font: {
+            size: 15,
+            family: "Open Sans",
+            style: "normal",
+            lineHeight: 2,
+          },
+        },
+        legend: {
+          labels: {
+            boxWidth: 30,
+            boxHeight: 10,
+          },
+          display: true,
+        },
+      },
+      scales: {
+        y: {
+          grid: {
+            drawBorder: false,
+            display: true,
+            drawOnChartArea: true,
+            drawTicks: false,
+            borderDash: [5, 5],
+          },
+          ticks: {
+            display: false,
+            padding: 10,
+            color: "#b2b9bf",
+            font: {
+              size: 10,
+              family: "Open Sans",
+              style: "normal",
+              lineHeight: 2,
+            },
+          },
+        },
+        x: {
+          grid: {
+            drawBorder: false,
+            display: false,
+            drawOnChartArea: false,
+            drawTicks: false,
+            borderDash: [5, 5],
+          },
+          ticks: {
+            display: true,
+            color: "#b2b9bf",
+            padding: 10,
+            font: {
+              size: 10,
+              family: "Open Sans",
+              style: "normal",
+              lineHeight: 2,
+            },
+          },
+        },
+      },
+    },
   });
 }
 

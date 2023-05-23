@@ -327,54 +327,39 @@ async function brandSales() {
 }
 
 async function squadChart() {
-  const data = await util.fetchData(`${util.host}/squads/sales`, "GET");
-  const squadIdList = data[0].map((r) => r.budget_squad_id);
+  const startDay = DateTime.now().minus({ days: 1 }).startOf("month").toFormat("yyyy-LL-dd");
+  const endDay = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
+  const beforeStartDay = DateTime.now().minus({ years: 1, days: 1 }).startOf("month").toFormat("yyyy-LL-dd");
+  const beforeEndDay = DateTime.now().minus({ years: 1, days: 1 }).toFormat("yyyy-LL-dd");
+
+  const budgetData = await util.fetchData(`${util.host}/squads/budget?startDay=${startDay}&endDay=${endDay}`, "GET");
+  const beforeData = await util.fetchData(
+    `${util.host}/squads/sales?sumType=month&startDay=${beforeStartDay}&endDay=${beforeEndDay}`,
+    "GET"
+  );
+  const thisData = await util.fetchData(
+    `${util.host}/squads/sales?sumType=month&startDay=${startDay}&endDay=${endDay}`,
+    "GET"
+  );
+  const squadIdList = budgetData.map((r) => r.budget_squad_id);
 
   let salesObj = {};
   let marginObj = {};
   for (let squad of squadIdList) {
-    const budgetDataArray = data[0].filter((r) => r.budget_squad_id == squad);
+    const budgetDataArray = budgetData.filter((r) => r.budget_squad_id == squad);
     const budgetSales = Math.round(budgetDataArray[0].budget_sale_sales / 1000000);
     const budgetMargin = Math.round(budgetDataArray[0].budget_margin / 1000000);
 
-    let actualSales = 0;
-    let actualMargin = 0;
-    const actualDataArray = data[1].filter((r) => r.squad_id == squad);
-    const directMarketingArray = data[2].filter((r) => r.squad_id == squad);
-    const indirectMarketingArray = data[3].filter((r) => r.squad_id == squad);
-    const liveMarketingArray = data[4].filter((r) => r.squad_id == squad);
-    const logisticArray = data[5].filter((r) => r.squad_id == squad);
+    const beforeDataArray = beforeData.filter((r) => r.squad_id == squad);
+    const beforeSales = Math.round(Number(beforeDataArray[0].sales) / 1000000);
+    const beforeMargin = Math.round(Number(beforeDataArray[0].contribution_margin) / 1000000);
 
-    if (actualDataArray.length != 0) {
-      actualSales = Math.round(Number(actualDataArray[0].sales_price) / 1000000);
-      const cost = Number(actualDataArray[0].cost);
-      const couponFee =
-        squad == "consignment" || squad == "strategic"
-          ? Number(actualDataArray[0].order_coupon)
-          : Number(actualDataArray[0].order_coupon) + Number(actualDataArray[0].product_coupon);
-      const expense = couponFee + Number(actualDataArray[0].mileage) + Number(actualDataArray[0].pg_expense);
-      const marketingFee =
-        Number(directMarketingArray[0] == undefined ? 0 : directMarketingArray[0].cost) +
-        Number(indirectMarketingArray[0] == undefined ? 0 : indirectMarketingArray[0].indirect_marketing_fee) +
-        Number(liveMarketingArray[0] == undefined ? 0 : liveMarketingArray[0].live_fee);
+    const thisDataArray = thisData.filter((r) => r.squad_id == squad);
+    const thisSales = Math.round(Number(thisDataArray[0].sales) / 1000000);
+    const thisMargin = Math.round(Number(thisDataArray[0].contribution_margin) / 1000000);
 
-      const logisticFee =
-        logisticArray[0] == undefined
-          ? 0
-          : squad == "consignment" || squad == "strategic"
-          ? 0
-          : Number(logisticArray[0].logistic_fee);
-
-      let margin = 0;
-      if (squad == "consignment" || squad == "strategic") {
-        margin = actualDataArray[0].commission - expense - marketingFee;
-      } else {
-        margin = actualDataArray[0].sales_price - cost - expense - marketingFee - logisticFee;
-      }
-      actualMargin = Math.round(margin / 1000000);
-    }
-    salesObj[squad] = [budgetSales, actualSales];
-    marginObj[squad] = [budgetMargin, actualMargin];
+    salesObj[squad] = [beforeSales, budgetSales, thisSales];
+    marginObj[squad] = [beforeMargin, budgetMargin, thisMargin];
   }
 
   const optionsData = {
@@ -463,7 +448,7 @@ async function squadChart() {
       plugins: [ChartDataLabels],
       type: "bar",
       data: {
-        labels: ["예산", "추정"],
+        labels: ["전년", "예산", "추정"],
         datasets: [
           {
             label: chartArray[i][2],
@@ -472,7 +457,7 @@ async function squadChart() {
             borderWidth: 0,
             borderRadius: 8,
             borderSkipped: false,
-            backgroundColor: ["#37306B", "#66347F"],
+            backgroundColor: ["#BDCDD6", "#93BFCF", "#6096B4"],
             datalabels: {
               align: "center",
               anchor: "center",
