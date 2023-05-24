@@ -36,9 +36,27 @@ async function brandChart(squadId) {
   if (squadId === "consignmentVolume") {
     thisDataList = thisYear.filter((r) => util.volumeBrands.indexOf(r.brand_id) >= 0);
     beforeDataList = beforeYear.filter((r) => util.volumeBrands.indexOf(r.brand_id) >= 0);
+  } else if (squadId === "consignmentFashion") {
+    thisDataList = thisYear.filter(
+      (r) => util.volumeBrands.indexOf(r.brand_id) < 0 && util.fashionMds.indexOf(r.md_id) >= 0
+    );
+    beforeDataList = beforeYear.filter(
+      (r) => util.volumeBrands.indexOf(r.brand_id) < 0 && util.fashionMds.indexOf(r.md_id) >= 0
+    );
+  } else if (squadId === "consignmentDesign") {
+    thisDataList = thisYear.filter(
+      (r) => util.volumeBrands.indexOf(r.brand_id) < 0 && util.fashionMds.indexOf(r.md_id) < 0
+    );
+    beforeDataList = beforeYear.filter(
+      (r) => util.volumeBrands.indexOf(r.brand_id) < 0 && util.fashionMds.indexOf(r.md_id) < 0
+    );
+  } else {
+    thisDataList = thisYear.filter((r) => r.squad_id == squadId);
+    beforeDataList = beforeYear.filter((r) => r.squad_id == squadId);
   }
+
   const brands = [...new Set(thisDataList.map((r) => r.brand_name))];
-  const labelData = [...new Set(thisDataList.map((r) => r.year_week))];
+  const labelData = [...new Set(thisDataList.map((r) => r.year_week.substring(2) + "주"))];
 
   let cardHtml = "";
   for (let brand of brands) {
@@ -49,7 +67,7 @@ async function brandChart(squadId) {
           <div class="card-header pb-0">
             <div class="row">
               <div class="col-lg-8 col-8">
-                <h6>${brand} 현황</h6>
+                <h6><a href="/brand/${brandId[0].brand_id}">${brand} 현황</a></h6>
               </div>
               <div class="col-lg-4 col-4 my-auto text-end">
                 <p class="text-sm" id="${brandId[0].brand_id}-ratio"></p>
@@ -72,7 +90,7 @@ async function brandChart(squadId) {
     const thisBrandData = thisDataList.filter((r) => r.brand_name == brand);
     const beforeBrandData = beforeDataList.filter((r) => r.brand_name == brand);
     const thisYearSales = thisBrandData.map((r) => Math.round(Number(r.sales) / 1000));
-    console.log(thisYearSales);
+
     const beforeYearSales =
       beforeBrandData.length == 0 ? [] : beforeBrandData.map((r) => Math.round(Number(r.sales) / 1000));
 

@@ -369,7 +369,7 @@ async function squadChart() {
         color: "white",
         display: true,
         font: {
-          size: 15,
+          size: 12,
           family: "Open Sans",
           style: "normal",
           lineHeight: 2,
