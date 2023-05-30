@@ -86,15 +86,13 @@ updateCost.addEventListener("click", async () => {
   Loading...`;
   const checkStatus = await util.fetchData(`${util.host}/settings/updateCost`, "GET");
   if (checkStatus) {
-    marketing.disabled = false;
-    marketing.innerText = `Update`;
-    const marketingModal = document.querySelector("#update-cost-alert");
-    marketingModal.innerHTML = `
+    updateCost.disabled = false;
+    updateCost.innerText = `Update`;
+    const updateCostAlert = document.querySelector("#update-cost-alert");
+    updateCostAlert.innerHTML = `
       <div class="alert alert-danger alert-dismissible" role="alert">
         <div>
-          ${checkStatus.updateMarketing}
-          <br />
-          ${checkStatus.updateLive == undefined ? "error" : "affectedRows: " + checkStatus.updateLive.affectedRows}
+          ${checkStatus.affectedRows == undefined ? "error" : "affectedRows: " + checkStatus.affectedRows}
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>`;
@@ -108,15 +106,33 @@ koreaInfomation.addEventListener("click", async () => {
   Loading...`;
   const checkStatus = await util.fetchData(`${util.host}/settings/koreaInfomation`, "GET");
   if (checkStatus) {
-    marketing.disabled = false;
-    marketing.innerText = `Update`;
-    const marketingModal = document.querySelector("#korea-infomation-alert");
-    marketingModal.innerHTML = `
+    koreaInfomation.disabled = false;
+    koreaInfomation.innerText = `Update`;
+    const koreaInfomationAlert = document.querySelector("#korea-infomation-alert");
+    koreaInfomationAlert.innerHTML = `
       <div class="alert alert-danger alert-dismissible" role="alert">
         <div>
-          ${checkStatus.updateMarketing}
+          ${
+            checkStatus.exchangeRate == undefined
+              ? "exchagne rate error"
+              : "exchange rate affectedRows: " + checkStatus.exchangeRate.affectedRows
+          }
           <br />
-          ${checkStatus.updateLive == undefined ? "error" : "affectedRows: " + checkStatus.updateLive.affectedRows}
+          ${
+            checkStatus.supplier == undefined
+              ? "supplier error"
+              : "supplier affectedRows: " + checkStatus.supplier.affectedRows
+          }
+          <br />
+          ${checkStatus.brand == undefined ? "brand error" : "brand  affectedRows: " + checkStatus.brand.affectedRows}
+          <br />
+          ${
+            checkStatus.customer == undefined
+              ? "customer error"
+              : "customer affectedRows: " + checkStatus.customer.affectedRows
+          }
+          <br />
+          ${checkStatus.stock == undefined ? "stock error" : "stock affectedRows: " + checkStatus.stock.affectedRows}
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>`;
@@ -130,15 +146,17 @@ koreaMonthInfomation.addEventListener("click", async () => {
   Loading...`;
   const checkStatus = await util.fetchData(`${util.host}/settings/koreaMonthInfomation`, "GET");
   if (checkStatus) {
-    marketing.disabled = false;
-    marketing.innerText = `Update`;
-    const marketingModal = document.querySelector("#korea-month-infomation-alert");
-    marketingModal.innerHTML = `
+    koreaMonthInfomation.disabled = false;
+    koreaMonthInfomation.innerText = `Update`;
+    const koreaMonthInfomationAlert = document.querySelector("#korea-month-infomation-alert");
+    koreaMonthInfomationAlert.innerHTML = `
       <div class="alert alert-danger alert-dismissible" role="alert">
         <div>
-          ${checkStatus.updateMarketing}
-          <br />
-          ${checkStatus.updateLive == undefined ? "error" : "affectedRows: " + checkStatus.updateLive.affectedRows}
+          ${
+            checkStatus.raw == undefined
+              ? "monthly infomation update error"
+              : "affectedRows: " + checkStatus.raw.affectedRows
+          }
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>`;
@@ -152,15 +170,17 @@ koreaDayInfomation.addEventListener("click", async () => {
   Loading...`;
   const checkStatus = await util.fetchData(`${util.host}/settings/koreaDayInfomation`, "GET");
   if (checkStatus) {
-    marketing.disabled = false;
-    marketing.innerText = `Update`;
-    const marketingModal = document.querySelector("#korea-day-infomation-alert");
-    marketingModal.innerHTML = `
+    koreaDayInfomation.disabled = false;
+    koreaDayInfomation.innerText = `Update`;
+    const koreaDayInfomationAlert = document.querySelector("#korea-day-infomation-alert");
+    koreaDayInfomationAlert.innerHTML = `
       <div class="alert alert-danger alert-dismissible" role="alert">
         <div>
-          ${checkStatus.updateMarketing}
-          <br />
-          ${checkStatus.updateLive == undefined ? "error" : "affectedRows: " + checkStatus.updateLive.affectedRows}
+          ${
+            checkStatus.raw == undefined
+              ? "daily infomation update error"
+              : "affectedRows: " + checkStatus.raw.affectedRows
+          }
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>`;
