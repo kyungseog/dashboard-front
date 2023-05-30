@@ -7,28 +7,27 @@ marketing.addEventListener("click", async () => {
   marketing.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
   Loading...`;
   const checkStatus = await util.fetchData(`${util.host}/settings/marketing`, "GET");
-  console.log(checkStatus);
   if (checkStatus) {
     marketing.disabled = false;
     marketing.innerText = `Update`;
-    const marketingModal = document.querySelector("#marketing-alert");
-    marketingModal.innerHTML = `
+    const marketingAlert = document.querySelector("#marketing-alert");
+    marketingAlert.innerHTML = `
     <div class="alert alert-danger alert-dismissible" role="alert">
-    <div>
-      ${
-        checkStatus.marketing.raw == undefined
-          ? "marketing update error: " + checkStatus.marketing
-          : "affectedRows: " + checkStatus.marketing.raw.affectedRows
-      }
-      <br />
-      ${
-        checkStatus.live == undefined
-          ? "live update error: " + checkStatus.live
-          : "affectedRows: " + checkStatus.live.length
-      }
-    </div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>`;
+      <div>
+        ${
+          checkStatus.marketing.raw == undefined
+            ? "marketing update error: " + checkStatus.marketing
+            : "affectedRows: " + checkStatus.marketing.raw.affectedRows
+        }
+        <br />
+        ${
+          checkStatus.live.raw == undefined
+            ? "live update error: " + checkStatus.live
+            : "affectedRows: " + checkStatus.live.raw.affectedRows
+        }
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>`;
   }
 });
 
@@ -38,28 +37,27 @@ allocateMarketing.addEventListener("click", async () => {
   allocateMarketing.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
   Loading...`;
   const checkStatus = await util.fetchData(`${util.host}/settings/allocateExpense`, "GET");
-  console.log(checkStatus);
   if (checkStatus) {
-    marketing.disabled = false;
-    marketing.innerText = `Update`;
-    const marketingModal = document.querySelector("#allocate-expense-alert");
-    marketingModal.innerHTML = `
-      <div class="alert alert-danger alert-dismissible" role="alert">
-        <div>
-          ${
-            checkStatus.marketing.raw == undefined
-              ? "marketing update error: " + checkStatus.marketing
-              : "affectedRows: " + checkStatus.marketing.raw.affectedRows
-          }
-          <br />
-          ${
-            checkStatus.live.raw == undefined
-              ? "live update error: " + checkStatus.live
-              : "affectedRows: " + checkStatus.live.raw.affectedRows
-          }
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>`;
+    allocateMarketing.disabled = false;
+    allocateMarketing.innerText = `Update`;
+    const allocateExpenseAlert = document.querySelector("#allocate-expense-alert");
+    allocateExpenseAlert.innerHTML = `
+    <div class="alert alert-danger alert-dismissible" role="alert">
+      <div>
+        ${
+          checkStatus.marketing.raw == undefined
+            ? "marketing allocation error: " + checkStatus.marketing
+            : "affectedRows: " + checkStatus.marketing.raw.affectedRows
+        }
+        <br />
+        ${
+          checkStatus.logistic.raw == undefined
+            ? "logistic allocation error: " + checkStatus.logistic
+            : "affectedRows: " + checkStatus.logistic.raw.affectedRows
+        }
+      </div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>`;
   }
 });
 
@@ -70,16 +68,12 @@ cost.addEventListener("click", async () => {
   Loading...`;
   const checkStatus = await util.fetchData(`${util.host}/settings/cost`, "GET");
   if (checkStatus) {
-    marketing.disabled = false;
-    marketing.innerText = `Update`;
-    const marketingModal = document.querySelector("#cost-alert");
-    marketingModal.innerHTML = `
+    cost.disabled = false;
+    cost.innerText = `Check`;
+    const costAlert = document.querySelector("#cost-alert");
+    costAlert.innerHTML = `
       <div class="alert alert-danger alert-dismissible" role="alert">
-        <div>
-          ${checkStatus.updateMarketing}
-          <br />
-          ${checkStatus.updateLive == undefined ? "error" : "affectedRows: " + checkStatus.updateLive.affectedRows}
-        </div>
+        <div>google sheet update ${checkStatus.statusText}</div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>`;
   }
