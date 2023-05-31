@@ -139,6 +139,30 @@ koreaInfomation.addEventListener("click", async () => {
   }
 });
 
+const addProductInfomation = document.querySelector("#add-product-infomation");
+addProductInfomation.addEventListener("click", async () => {
+  addProductInfomation.disabled = true;
+  addProductInfomation.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+  Loading...`;
+  const checkStatus = await util.fetchData(`${util.host}/settings/addProductInfomation`, "GET");
+  if (checkStatus) {
+    addProductInfomation.disabled = false;
+    addProductInfomation.innerText = `Update`;
+    const addProductInfomationAlert = document.querySelector("#add-product-infomation-alert");
+    addProductInfomationAlert.innerHTML = `
+      <div class="alert alert-danger alert-dismissible" role="alert">
+        <div>
+          ${
+            checkStatus.raw == undefined
+              ? "monthly infomation update error"
+              : "affectedRows: " + checkStatus.raw.affectedRows
+          }
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>`;
+  }
+});
+
 const koreaMonthInfomation = document.querySelector("#korea-month-infomation");
 koreaMonthInfomation.addEventListener("click", async () => {
   koreaMonthInfomation.disabled = true;
@@ -194,10 +218,10 @@ marketingPart.addEventListener("click", async () => {
   Loading...`;
   const checkStatus = await util.fetchData(`${util.host}/settings/marketingPart`, "GET");
   if (checkStatus) {
-    marketing.disabled = false;
-    marketing.innerText = `Update`;
-    const marketingModal = document.querySelector("#marketing-part-alert");
-    marketingModal.innerHTML = `
+    marketingPart.disabled = false;
+    marketingPart.innerText = `Update`;
+    const marketingPartAlert = document.querySelector("#marketing-part-alert");
+    marketingPartAlert.innerHTML = `
       <div class="alert alert-danger alert-dismissible" role="alert">
         <div>
           ${checkStatus.updateMarketing}
