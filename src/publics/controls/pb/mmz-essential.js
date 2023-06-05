@@ -36,7 +36,7 @@ async function dailySalesChart() {
     .filter((r) => r.payment_date <= DateTime.now().minus({ years: 1, days: 1 }).toFormat("yyyy-LL-dd"))
     .map((r) => Number(r.sales))
     .reduce((cur, acc) => cur + acc, 0);
-  const ratio = Math.round(sumThisYearSales / sumBeforeYearSales);
+  const ratio = sumThisYearSales / sumBeforeYearSales;
 
   const labelData = beforeYear.map((r) => DateTime.fromISO(r.payment_date).toFormat("LL/dd"));
   const thisYearSales = thisYear.map((r) => Math.round(Number(r.sales) / 1000));
@@ -46,7 +46,7 @@ async function dailySalesChart() {
   weeklySalesChartSummary.innerHTML = `<i class="fa ${
     ratio > 1 ? "fa-arrow-up text-success" : "fa-arrow-down text-danger"
   }"></i> 
-  <span class="font-weight-bold">전년대비 ${ratio * 100}%</span>`;
+  <span class="font-weight-bold">전년대비 ${Math.round(ratio * 100)}%</span>`;
 
   const ctx = document.getElementById("daily-sales-chart").getContext("2d");
 
@@ -170,7 +170,7 @@ async function weeklySalesChart() {
 
   const sumThisYearSales = thisYear.map((r) => Number(r.sales)).reduce((cur, acc) => cur + acc, 0);
   const sumBeforeYearSales = beforeYear.map((r) => Number(r.sales)).reduce((cur, acc) => cur + acc, 0);
-  const ratio = Math.round(sumThisYearSales / sumBeforeYearSales);
+  const ratio = sumThisYearSales / sumBeforeYearSales;
 
   const labelData = thisYear.map((r) => r.year_week.substring(2) + "주");
   const thisYearSales = thisYear.map((r) => Math.round(Number(r.sales) / 1000));
@@ -180,7 +180,7 @@ async function weeklySalesChart() {
   weeklySalesChartSummary.innerHTML = `<i class="fa ${
     ratio > 1 ? "fa-arrow-up text-success" : "fa-arrow-down text-danger"
   }"></i> 
-  <span class="font-weight-bold">전년대비 ${ratio * 100}%</span>`;
+  <span class="font-weight-bold">전년대비 ${Math.round(ratio * 100)}%</span>`;
 
   const ctx = document.getElementById("weekly-sales-chart").getContext("2d");
 
@@ -369,62 +369,25 @@ async function poorItems() {
 }
 
 async function categorySales() {
-  const salesData = await util.fetchData(`${util.host}/korea/brand?startDay=${yesterday}&endDay=${yesterday}`, "GET");
-  const marketingData = await util.fetchData(
-    `${util.host}/korea/brand/marketing?startDay=${yesterday}&endDay=${yesterday}`,
+  const startDay = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd hh:mm:ss");
+  const endDay = DateTime.now().toFormat("yyyy-LL-dd hh:mm:ss");
+  const categoryData = await util.fetchData(
+    `${util.host}/mmz-essential/category?startDay=${startDay}&endDay=${endDay}`,
     "GET"
   );
-  const logisticData = await util.fetchData(
-    `${util.host}/korea/logistic/brand?startDay=${yesterday}&endDay=${yesterday}`,
-    "GET"
-  );
-  salesData.length = 8;
-  let brandHtml = "";
-  for (let el of salesData) {
-    const couponFee =
-      el.brand_type == "consignment" ? Number(el.order_coupon) : Number(el.order_coupon) + Number(el.product_coupon);
-    const expense = Number(el.cost) + Number(el.mileage) + couponFee + Number(el.pg_expense);
 
-    const directList = marketingData.direct.filter((r) => r.brand_id == el.brand_id);
-    const directMarketing =
-      directList[0] == undefined || directList[0] == null ? 0 : Number(directList[0].direct_marketing_fee);
+  const kidsData = categoryData.filter((r) => r.age === "kids");
+  const babyData = categoryData.filter((r) => r.age === "baby");
 
-    const indirectList = marketingData.indirect.filter((r) => r.brand_id == el.brand_id);
-    const indirectMarketing =
-      indirectList[0] == undefined || indirectList[0] == null ? 0 : Number(indirectList[0].indirect_marketing_fee);
-
-    const logisticList = logisticData.filter((r) => r.brand_id == el.brand_id);
-    const logistic = logisticList[0] == undefined || logisticList[0] == null ? 0 : Number(logisticList[0].logistic_fee);
-
-    const calculateMargin =
-      el.brand_type == "consignment"
-        ? el.commission - expense - directMarketing - indirectMarketing
-        : el.sales_price - expense - directMarketing - indirectMarketing - logistic;
-    const marginRate = Math.round((calculateMargin / el.sales_price) * 100);
-
-    let huddleMarginRate = "";
-    if (el.brand_squad == "위탁SQ") {
-      huddleMarginRate = marginRate < 5 ? "text-danger" : "text-success";
-    } else if (el.brand_squad == "전략카테고리SQ") {
-      huddleMarginRate = marginRate < 6 ? "text-danger" : "text-success";
-    } else if (el.brand_squad == "매입SQ") {
-      huddleMarginRate = marginRate < 12 ? "text-danger" : "text-success";
-    } else {
-      huddleMarginRate = marginRate < 22 ? "text-danger" : "text-success";
-    }
+  let kidsHtml = "";
+  for (let el of kidsData) {
     let html = `
       <tr>
-        <td>
-          <div class="d-flex px-2 py-1">
-            <div class="d-flex flex-column justify-content-center">
-              <h6 class="mb-0 text-sm">
-                <a href="/brand/${el.brand_id}">${el.brand_name}<a>
-              </h6>
-            </div>
-          </div>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${el.age} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${Number(el.order_count).toLocaleString("ko-kr")} </span>
+          <span class="text-xs font-weight-bold"> ${el.category} </span>
         </td>
         <td class="align-middle text-center text-sm">
           <span class="text-xs font-weight-bold"> ${Number(el.quantity).toLocaleString("ko-kr")} </span>
@@ -433,20 +396,42 @@ async function categorySales() {
           <span class="text-xs font-weight-bold"> ${util.chunwon(Number(el.sales_price))} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(expense + logistic)} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(Number(el.sales_price - el.cost))} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(directMarketing + indirectMarketing)} </span>
+          <span class="text-xs font-weight-bold"> ${el.quantity} </span>
         </td>
-        <td class="align-middle text-center text-sm">
-          <span class="${
-            calculateMargin >= 0 ? "text-success" : "text-danger"
-          } text-xs font-weight-bold"> ${util.chunwon(calculateMargin)} </span>
-       </td>
       </tr>`;
-    brandHtml = brandHtml + html;
+    kidsHtml = kidsHtml + html;
   }
-  document.getElementById("korea-brands-data").innerHTML = brandHtml;
+
+  let babyHtml = "";
+  for (let el of babyData) {
+    let html = `
+      <tr>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${el.age} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${el.category} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${Number(el.quantity).toLocaleString("ko-kr")} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(Number(el.sales_price))} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${util.chunwon(Number(el.sales_price - el.cost))} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${el.quantity} </span>
+        </td>
+      </tr>`;
+    babyHtml = babyHtml + html;
+  }
+
+  document.getElementById("category-sales-data").innerHTML = kidsHtml + babyHtml;
 }
 
 async function productSales() {
