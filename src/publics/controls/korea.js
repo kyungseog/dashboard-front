@@ -542,7 +542,7 @@ async function weatherChart() {
             drawTicks: false,
           },
           ticks: {
-            suggestedMin: -10,
+            suggestedMin: 10,
             suggestedMax: 40,
             beginAtZero: true,
             padding: 5,

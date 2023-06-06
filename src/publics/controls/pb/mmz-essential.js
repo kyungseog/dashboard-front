@@ -4,17 +4,38 @@ const DateTime = luxon.DateTime;
 let daySalesChart;
 let weekSalesChart;
 
-const today = DateTime.now().toFormat("yyyy-LL-dd");
-const yesterday = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
+const spinner = `
+<div class="d-flex justify-content-center">
+  <div class="spinner-border" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>`;
 
-(function startFunction() {
+onceFunction();
+startFunction();
+// setInterval(startFunction, 1 * 60 * 1000);
+
+async function onceFunction() {
   dailySalesChart();
   weeklySalesChart();
   poorItems();
-  categorySales();
-  productSales();
-  userSaleType();
-})();
+}
+
+async function startFunction() {
+  const startDayList = {
+    hour: DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd hh:mm:ss"),
+    day: DateTime.now().minus({ days: 7 }).toFormat("yyyy-LL-dd hh:mm:ss"),
+    month: DateTime.now().minus({ days: 30 }).toFormat("yyyy-LL-dd hh:mm:ss"),
+  };
+  const pickList = ["hour", "day", "month"];
+  const pick = pickList[Number(DateTime.now().toFormat("mm")) % 3];
+  document.getElementById(pick).checked = true;
+  const startDay = startDayList[pick];
+  const endDay = DateTime.now().toFormat("yyyy-LL-dd hh:mm:ss");
+
+  categorySales(startDay, endDay);
+  productSales(startDay, endDay);
+}
 
 async function dailySalesChart() {
   const thisStartDay = DateTime.now().minus({ days: 13 }).toFormat("yyyy-LL-dd");
@@ -288,59 +309,39 @@ async function weeklySalesChart() {
 }
 
 async function poorItems() {
-  const salesData = await util.fetchData(`${util.host}/korea/brand?startDay=${yesterday}&endDay=${yesterday}`, "GET");
-  const marketingData = await util.fetchData(
-    `${util.host}/korea/brand/marketing?startDay=${yesterday}&endDay=${yesterday}`,
-    "GET"
-  );
-  const logisticData = await util.fetchData(
-    `${util.host}/korea/logistic/brand?startDay=${yesterday}&endDay=${yesterday}`,
-    "GET"
-  );
-  salesData.length = 8;
+  const season = "Summer";
+  const salesData = await util.fetchData(`${util.host}/mmz-essential/season?planYear=2023&season=${season}`, "GET");
+  let dataArray = [];
+  salesData.forEach((el) => {
+    const firstDay = DateTime.fromISO(el.payment_date);
+    const checkDay = DateTime.now();
+    const duringDiff = checkDay.diff(firstDay, "days").toObject();
+    const rowData = {
+      customCostId: el.custom_cost_id,
+      age: el.age,
+      item: el.product_name,
+      color: el.color,
+      firstSalesDay: DateTime.fromISO(el.payment_date).toFormat("LL-dd"),
+      duringDiff: Number(duringDiff.days),
+      inQuantity: Number(el.in_quantity),
+      salesQuantity: Number(el.in_quantity) - Number(el.usable_quantity),
+      actualSalesQuantity: Number(el.quantity),
+      stockQuantity: Number(el.usable_quantity),
+      salesRatio: Math.round(((Number(el.in_quantity) - Number(el.usable_quantity)) / Number(el.in_quantity)) * 100),
+      checkPoorItem:
+        Math.round(((Number(el.in_quantity) - Number(el.usable_quantity)) / Number(el.in_quantity)) * 100) -
+        Number(duringDiff.days),
+    };
+    dataArray.push(rowData);
+  });
+  console.log(dataArray);
+
   let brandHtml = "";
   for (let el of salesData) {
-    const couponFee =
-      el.brand_type == "consignment" ? Number(el.order_coupon) : Number(el.order_coupon) + Number(el.product_coupon);
-    const expense = Number(el.cost) + Number(el.mileage) + couponFee + Number(el.pg_expense);
-
-    const directList = marketingData.direct.filter((r) => r.brand_id == el.brand_id);
-    const directMarketing =
-      directList[0] == undefined || directList[0] == null ? 0 : Number(directList[0].direct_marketing_fee);
-
-    const indirectList = marketingData.indirect.filter((r) => r.brand_id == el.brand_id);
-    const indirectMarketing =
-      indirectList[0] == undefined || indirectList[0] == null ? 0 : Number(indirectList[0].indirect_marketing_fee);
-
-    const logisticList = logisticData.filter((r) => r.brand_id == el.brand_id);
-    const logistic = logisticList[0] == undefined || logisticList[0] == null ? 0 : Number(logisticList[0].logistic_fee);
-
-    const calculateMargin =
-      el.brand_type == "consignment"
-        ? el.commission - expense - directMarketing - indirectMarketing
-        : el.sales_price - expense - directMarketing - indirectMarketing - logistic;
-    const marginRate = Math.round((calculateMargin / el.sales_price) * 100);
-
-    let huddleMarginRate = "";
-    if (el.brand_squad == "위탁SQ") {
-      huddleMarginRate = marginRate < 5 ? "text-danger" : "text-success";
-    } else if (el.brand_squad == "전략카테고리SQ") {
-      huddleMarginRate = marginRate < 6 ? "text-danger" : "text-success";
-    } else if (el.brand_squad == "매입SQ") {
-      huddleMarginRate = marginRate < 12 ? "text-danger" : "text-success";
-    } else {
-      huddleMarginRate = marginRate < 22 ? "text-danger" : "text-success";
-    }
     let html = `
       <tr>
-        <td>
-          <div class="d-flex px-2 py-1">
-            <div class="d-flex flex-column justify-content-center">
-              <h6 class="mb-0 text-sm">
-                <a href="/brand/${el.brand_id}">${el.brand_name}<a>
-              </h6>
-            </div>
-          </div>
+        <td class="align-middle text-center text-sm">
+          <span class="text-xs font-weight-bold"> ${Number(el.order_count).toLocaleString("ko-kr")} </span>
         </td>
         <td class="align-middle text-center text-sm">
           <span class="text-xs font-weight-bold"> ${Number(el.order_count).toLocaleString("ko-kr")} </span>
@@ -365,22 +366,55 @@ async function poorItems() {
       </tr>`;
     brandHtml = brandHtml + html;
   }
-  document.getElementById("korea-brands-data").innerHTML = brandHtml;
+  document.getElementById("poor-items").innerHTML = brandHtml;
 }
 
-async function categorySales() {
-  const startDay = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd hh:mm:ss");
-  const endDay = DateTime.now().toFormat("yyyy-LL-dd hh:mm:ss");
+async function categorySales(startDay, endDay) {
+  const categorySalesData = document.getElementById("category-sales-data");
+  categorySalesData.innerHTML = spinner;
+
   const categoryData = await util.fetchData(
     `${util.host}/mmz-essential/category?startDay=${startDay}&endDay=${endDay}`,
     "GET"
   );
 
-  const kidsData = categoryData.filter((r) => r.age === "kids");
-  const babyData = categoryData.filter((r) => r.age === "baby");
+  const kidsData = categoryData.filter((r) => r.age === "kids").sort((a, b) => b.sales_price - a.sales_price);
+  const babyData = categoryData.filter((r) => r.age === "baby").sort((a, b) => b.sales_price - a.sales_price);
 
-  let kidsHtml = "";
-  for (let el of kidsData) {
+  const kidsHtml = tableTr(kidsData);
+  const babyHtml = tableTr(babyData);
+  categorySalesData.innerHTML = kidsHtml + babyHtml;
+}
+
+async function productSales(startDay, endDay) {
+  const kidsProductsData = document.getElementById("kids-products-data");
+  const babyProductsData = document.getElementById("baby-products-data");
+
+  kidsProductsData.innerHTML = spinner;
+  babyProductsData.innerHTML = spinner;
+
+  const productData = await util.fetchData(
+    `${util.host}/mmz-essential/product?startDay=${startDay}&endDay=${endDay}`,
+    "GET"
+  );
+
+  const kidsData = productData.filter((r) => r.age == "kids");
+  kidsData.length = 6;
+  const kidsProductHtml = itemDiv(kidsData);
+  kidsProductsData.innerHTML = "<h6>Kids</h6>" + kidsProductHtml;
+
+  const babyData = productData.filter((r) => r.age == "baby");
+  babyData.length = 6;
+  const babyProductHtml = itemDiv(babyData);
+  babyProductsData.innerHTML = "<h6>Baby</h6>" + babyProductHtml;
+}
+
+function tableTr(data) {
+  let dataHtml = "";
+  let totalQuantity = 0;
+  let totalSales = 0;
+  let totalCost = 0;
+  for (let el of data) {
     let html = `
       <tr>
         <td class="align-middle text-center text-sm">
@@ -402,44 +436,33 @@ async function categorySales() {
           <span class="text-xs font-weight-bold"> ${el.quantity} </span>
         </td>
       </tr>`;
-    kidsHtml = kidsHtml + html;
+    totalQuantity = totalQuantity + Number(el.quantity);
+    totalSales = totalSales + Number(el.sales_price);
+    totalCost = totalCost + Number(el.cost);
+    dataHtml = dataHtml + html;
   }
-
-  let babyHtml = "";
-  for (let el of babyData) {
-    let html = `
-      <tr>
-        <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${el.age} </span>
+  let totalHtml = `
+      <tr class="table-active pb-0">
+        <td class="align-middle text-center text-sm" colspan = "2">
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${el.category} </span>
+          <span class="text-xs font-weight-bold"> ${totalQuantity.toLocaleString("ko-kr")} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${Number(el.quantity).toLocaleString("ko-kr")} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(totalSales)} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(Number(el.sales_price))} </span>
+          <span class="text-xs font-weight-bold"> ${util.chunwon(totalSales - totalCost)} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(Number(el.sales_price - el.cost))} </span>
-        </td>
-        <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${el.quantity} </span>
+          <span class="text-xs font-weight-bold"> ${totalQuantity} </span>
         </td>
       </tr>`;
-    babyHtml = babyHtml + html;
-  }
-
-  document.getElementById("category-sales-data").innerHTML = kidsHtml + babyHtml;
+  return dataHtml + totalHtml;
 }
 
-async function productSales() {
-  const URL = `${util.host}/mmz-essential/product/${brandId}/${dateText}`;
-  const data = await util.fetchData(URL, "GET");
-  data.length = 6;
-  let kidsProductHtml = "";
-  let babyProductHtml = "";
+function itemDiv(data) {
+  let dataHtml = "";
   for (let item of data) {
     let html = `
     <div class="col-md-4 col-xl-2 mb-2">
@@ -450,101 +473,12 @@ async function productSales() {
           </a>
         </div>
         <div class="card-body px-1 pt-2">
-          <h5 class="text-sm">${item.product_name}</h5>
-          <p class="mb-4 text-sm">판매수량 ${item.quantity}개<br>실판매가 ${util.chunwon(item.sales_price)}천원</p>
+          <h5 class="text-xs">${item.product_name}</h5>
+          <p class="mb-4 text-xs">수량 ${item.quantity}개<br>실판가 ${util.chunwon(item.sales_price)}천원</p>
         </div>
       </div>
     </div>`;
-    kidsProductHtml = kidsProductHtml + html;
+    dataHtml = dataHtml + html;
   }
-  document.getElementById("kids-products-data").innerHTML = "<h6>Kids</h6>" + kidsProductHtml;
-  for (let item of data) {
-    let html = `
-    <div class="col-md-4 col-xl-2 mb-2">
-      <div class="card card-blog card-plain">
-        <div class="position-relative">
-          <a class="d-block shadow-xl border-radius-xl">
-            <img src="${item.image}" alt="img-blur-shadow" class="img-fluid shadow border-radius-xl">
-          </a>
-        </div>
-        <div class="card-body px-1 pt-2">
-          <h5 class="text-sm">${item.product_name}</h5>
-          <p class="mb-4 text-sm">판매수량 ${item.quantity}개<br>실판매가 ${util.chunwon(item.sales_price)}천원</p>
-        </div>
-      </div>
-    </div>`;
-    babyProductHtml = babyProductHtml + html;
-  }
-  document.getElementById("baby-products-data").innerHTML = "<h6>Baby</h6>" + babyProductHtml;
-}
-
-async function userSaleType() {
-  const URL = `${util.host}/korea/user-sale-type`;
-  const data = await util.fetchData(URL, "GET");
-
-  const firstSale = data[0].filter((r) => r.is_first == "y");
-  document.getElementById("first-order-count").innerText = `${Number(firstSale[0].user_count).toLocaleString(
-    "ko-KR"
-  )} 명`;
-  document.getElementById("first-order-sales").innerText = `${util.bmwon(Number(firstSale[0].sales_price))} 백만원`;
-  document.getElementById("first-average-sales").innerText = `${Math.round(
-    Number(firstSale[0].sales_price) / Number(firstSale[0].user_count)
-  ).toLocaleString("ko-kr")} 원`;
-  document.getElementById("first-average-quantity").innerText = `${(
-    Number(firstSale[0].quantity) / Number(firstSale[0].user_count)
-  ).toFixed(2)} pcs`;
-
-  const secondSale = data[0].filter((r) => r.is_first == "n");
-  document.getElementById("second-order-count").innerText = `${Number(secondSale[0].user_count).toLocaleString(
-    "ko-KR"
-  )} 명`;
-  document.getElementById("second-order-sales").innerText = `${util.bmwon(Number(secondSale[0].sales_price))} 백만원`;
-  document.getElementById("second-average-sales").innerText = `${Math.round(
-    Number(secondSale[0].sales_price) / Number(secondSale[0].user_count)
-  ).toLocaleString("ko-kr")} 원`;
-  document.getElementById("second-average-quantity").innerText = `${(
-    Number(secondSale[0].quantity) / Number(secondSale[0].user_count)
-  ).toFixed(2)} pcs`;
-
-  const firstSaleBrand = data[1].filter((r) => r.is_first == "y");
-  const sortFirstSaleBrand = firstSaleBrand.sort((a, b) => b.sales_price - a.sales_price);
-  sortFirstSaleBrand.length = 5;
-  let firstSaleBrandHtml = "";
-  for (let i = 0; i < sortFirstSaleBrand.length; i++) {
-    const countUser = Number(sortFirstSaleBrand[i].user_count).toLocaleString("ko-KR");
-    const quantity = Number(sortFirstSaleBrand[i].quantity).toLocaleString("ko-KR");
-    const salePrice = util.chunwon(Number(sortFirstSaleBrand[i].sales_price));
-    let html = `
-      <tr>
-        <td class="align-middle text-center">
-          <h6 class="mb-0 text-xs">${sortFirstSaleBrand[i].brand_name}</h6>
-        </td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${countUser} </span></td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${quantity} </span></td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${salePrice} </span></td>
-      </tr>`;
-    firstSaleBrandHtml = firstSaleBrandHtml + html;
-  }
-  document.getElementById("korea-user-first-sale").innerHTML = firstSaleBrandHtml;
-
-  const secondSaleBrand = data[1].filter((r) => r.is_first == "n");
-  const sortSecondSaleBrand = secondSaleBrand.sort((a, b) => b.sales_price - a.sales_price);
-  sortSecondSaleBrand.length = 5;
-  let secondSaleBrandHtml = "";
-  for (let i = 0; i < sortSecondSaleBrand.length; i++) {
-    const countUser = Number(sortSecondSaleBrand[i].user_count).toLocaleString("ko-KR");
-    const quantity = Number(sortSecondSaleBrand[i].quantity).toLocaleString("ko-KR");
-    const salePrice = Math.round(Number(sortSecondSaleBrand[i].sales_price) / 1000).toLocaleString("ko-KR");
-    let html = `
-      <tr>
-        <td class="align-middle text-center">
-          <h6 class="mb-0 text-xs">${sortSecondSaleBrand[i].brand_name}</h6>
-        </td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${countUser} </span></td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${quantity} </span></td>
-        <td class="align-middle text-center text-sm"><span class="text-xs font-weight-bold"> ${salePrice} </span></td>
-      </tr>`;
-    secondSaleBrandHtml = secondSaleBrandHtml + html;
-  }
-  document.getElementById("korea-user-second-sale").innerHTML = secondSaleBrandHtml;
+  return dataHtml;
 }
