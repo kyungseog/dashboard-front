@@ -4,6 +4,9 @@ const DateTime = luxon.DateTime;
 let daySalesChart;
 let weekSalesChart;
 
+const startDayPicker = new Datepicker(document.querySelector("#datepicker1"), { format: "yyyy-mm-dd" });
+const endDayPicker = new Datepicker(document.querySelector("#datepicker2"), { format: "yyyy-mm-dd" });
+
 const spinner = `
 <div class="d-flex justify-content-center">
   <div class="spinner-border" role="status">
@@ -11,31 +14,27 @@ const spinner = `
   </div>
 </div>`;
 
-onceFunction();
 startFunction();
-// setInterval(startFunction, 1 * 60 * 1000);
 
-async function onceFunction() {
+async function startFunction() {
+  const setDay = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
+  startDayPicker.setDate(setDay);
+  endDayPicker.setDate(setDay);
+
   dailySalesChart();
   weeklySalesChart();
   poorItems();
+  categorySales(setDay, setDay);
+  productSales(setDay, setDay);
 }
 
-async function startFunction() {
-  const startDayList = {
-    hour: DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd hh:mm:ss"),
-    day: DateTime.now().minus({ days: 7 }).toFormat("yyyy-LL-dd hh:mm:ss"),
-    month: DateTime.now().minus({ days: 30 }).toFormat("yyyy-LL-dd hh:mm:ss"),
-  };
-  const pickList = ["hour", "day", "month"];
-  const pick = pickList[Number(DateTime.now().toFormat("mm")) % 3];
-  document.getElementById(pick).checked = true;
-  const startDay = startDayList[pick];
-  const endDay = DateTime.now().toFormat("yyyy-LL-dd hh:mm:ss");
-
+const submit = document.querySelector("#submit");
+submit.addEventListener("click", () => {
+  const startDay = startDayPicker.getDate("yyyy-mm-dd");
+  const endDay = endDayPicker.getDate("yyyy-mm-dd");
   categorySales(startDay, endDay);
   productSales(startDay, endDay);
-}
+});
 
 async function dailySalesChart() {
   const thisStartDay = DateTime.now().minus({ days: 13 }).toFormat("yyyy-LL-dd");
@@ -311,9 +310,10 @@ async function weeklySalesChart() {
 async function poorItems() {
   const season = "Summer";
   const salesData = await util.fetchData(`${util.host}/mmz-essential/season?planYear=2023&season=${season}`, "GET");
+
   let dataArray = [];
   salesData.forEach((el) => {
-    const firstDay = DateTime.fromISO(el.payment_date);
+    const firstDay = DateTime.fromISO(el.first_sale_date);
     const checkDay = DateTime.now();
     const duringDiff = checkDay.diff(firstDay, "days").toObject();
     const rowData = {
@@ -321,27 +321,26 @@ async function poorItems() {
       age: el.age,
       item: el.product_name,
       color: el.color,
-      firstSalesDay: DateTime.fromISO(el.payment_date).toFormat("LL-dd"),
-      duringDiff: Number(duringDiff.days),
+      firstSalesDay: DateTime.fromISO(el.first_sale_date).toFormat("LL-dd"),
+      duringDiff: Math.round(Number(duringDiff.days)),
       inQuantity: Number(el.in_quantity),
       salesQuantity: Number(el.in_quantity) - Number(el.usable_quantity),
-      actualSalesQuantity: Number(el.quantity),
       stockQuantity: Number(el.usable_quantity),
       salesRatio: Math.round(((Number(el.in_quantity) - Number(el.usable_quantity)) / Number(el.in_quantity)) * 100),
       checkPoorItem:
         Math.round(((Number(el.in_quantity) - Number(el.usable_quantity)) / Number(el.in_quantity)) * 100) -
-        Number(duringDiff.days),
+        Math.round(Number(duringDiff.days)),
     };
     dataArray.push(rowData);
   });
   console.log(dataArray);
 
-  let brandHtml = "";
-  for (let el of salesData) {
+  let itemHtml = "";
+  for (let el of dataArray) {
     let html = `
       <tr>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${Number(el.order_count).toLocaleString("ko-kr")} </span>
+          <span class="text-xs font-weight-bold"> ${el.item} </span>
         </td>
         <td class="align-middle text-center text-sm">
           <span class="text-xs font-weight-bold"> ${Number(el.order_count).toLocaleString("ko-kr")} </span>
@@ -364,14 +363,13 @@ async function poorItems() {
           } text-xs font-weight-bold"> ${util.chunwon(calculateMargin)} </span>
        </td>
       </tr>`;
-    brandHtml = brandHtml + html;
+    itemHtml = itemHtml + html;
   }
-  document.getElementById("poor-items").innerHTML = brandHtml;
+  document.getElementById("poor-items").innerHTML = itemHtml;
 }
 
 async function categorySales(startDay, endDay) {
   const categorySalesData = document.getElementById("category-sales-data");
-  categorySalesData.innerHTML = spinner;
 
   const categoryData = await util.fetchData(
     `${util.host}/mmz-essential/category?startDay=${startDay}&endDay=${endDay}`,
@@ -391,7 +389,6 @@ async function productSales(startDay, endDay) {
   const babyProductsData = document.getElementById("baby-products-data");
 
   kidsProductsData.innerHTML = spinner;
-  babyProductsData.innerHTML = spinner;
 
   const productData = await util.fetchData(
     `${util.host}/mmz-essential/product?startDay=${startDay}&endDay=${endDay}`,
