@@ -23,7 +23,7 @@ async function startFunction() {
 
   dailySalesChart();
   weeklySalesChart();
-  poorItems();
+  getPoorItems("kids", "Summer");
   categorySales(setDay, setDay);
   productSales(setDay, setDay);
 }
@@ -34,6 +34,19 @@ submit.addEventListener("click", () => {
   const endDay = endDayPicker.getDate("yyyy-mm-dd");
   categorySales(startDay, endDay);
   productSales(startDay, endDay);
+});
+
+const poorItemSubmit = document.querySelector("#poor-item-submit");
+poorItemSubmit.addEventListener("click", () => {
+  poorItemSubmit.innerHTML = spinner;
+  let season;
+  let ages;
+  const checkAges = document.querySelector("#kids");
+  const checkSeasons = document.querySelector("#spring");
+  checkAges.checked ? (ages = "kids") : (ages = "baby");
+  checkSeasons.checked ? (season = "Spring") : (season = "Summer");
+  console.log(ages, season);
+  getPoorItems(ages, season);
 });
 
 async function dailySalesChart() {
@@ -69,108 +82,10 @@ async function dailySalesChart() {
   <span class="font-weight-bold">전년대비 ${Math.round(ratio * 100)}%</span>`;
 
   const ctx = document.getElementById("daily-sales-chart").getContext("2d");
-
-  const gradientStroke1 = ctx.createLinearGradient(0, 230, 0, 50);
-  gradientStroke1.addColorStop(1, "rgba(203,12,159,0.2)");
-  gradientStroke1.addColorStop(0.2, "rgba(72,72,176,0.0)");
-  gradientStroke1.addColorStop(0, "rgba(203,12,159,0)");
-
-  const gradientStroke2 = ctx.createLinearGradient(0, 230, 0, 50);
-  gradientStroke2.addColorStop(1, "rgba(20,23,39,0.2)");
-  gradientStroke2.addColorStop(0.2, "rgba(72,72,176,0.0)");
-  gradientStroke2.addColorStop(0, "rgba(20,23,39,0)");
-
   if (daySalesChart) {
     daySalesChart.destroy();
   }
-
-  daySalesChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labelData,
-      datasets: [
-        {
-          label: "Y" + DateTime.now().toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#cb0c9f",
-          borderWidth: 3,
-          backgroundColor: gradientStroke1,
-          fill: true,
-          data: thisYearSales,
-          maxBarThickness: 6,
-        },
-        {
-          label: "Y" + DateTime.now().minus({ years: 1 }).toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#3A416F",
-          borderWidth: 3,
-          backgroundColor: gradientStroke2,
-          fill: true,
-          data: beforeYearSales,
-          maxBarThickness: 6,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-        },
-      },
-      interaction: {
-        intersect: false,
-        mode: "index",
-      },
-      scales: {
-        y: {
-          grid: {
-            drawBorder: false,
-            display: true,
-            drawOnChartArea: true,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: true,
-            padding: 10,
-            color: "#b2b9bf",
-            font: {
-              size: 11,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-        x: {
-          grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: true,
-            color: "#b2b9bf",
-            padding: 20,
-            font: {
-              size: 11,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-      },
-    },
-  });
+  daySalesChart = new TwoLineChart(ctx, labelData, thisYearSales, beforeYearSales);
 }
 
 async function weeklySalesChart() {
@@ -203,112 +118,13 @@ async function weeklySalesChart() {
   <span class="font-weight-bold">전년대비 ${Math.round(ratio * 100)}%</span>`;
 
   const ctx = document.getElementById("weekly-sales-chart").getContext("2d");
-
-  const gradientStroke1 = ctx.createLinearGradient(0, 230, 0, 50);
-  gradientStroke1.addColorStop(1, "rgba(203,12,159,0.2)");
-  gradientStroke1.addColorStop(0.2, "rgba(72,72,176,0.0)");
-  gradientStroke1.addColorStop(0, "rgba(203,12,159,0)");
-
-  const gradientStroke2 = ctx.createLinearGradient(0, 230, 0, 50);
-  gradientStroke2.addColorStop(1, "rgba(20,23,39,0.2)");
-  gradientStroke2.addColorStop(0.2, "rgba(72,72,176,0.0)");
-  gradientStroke2.addColorStop(0, "rgba(20,23,39,0)");
-
   if (weekSalesChart) {
     weekSalesChart.destroy();
   }
-
-  weekSalesChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labelData,
-      datasets: [
-        {
-          label: "Y" + DateTime.now().toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#cb0c9f",
-          borderWidth: 3,
-          backgroundColor: gradientStroke1,
-          fill: true,
-          data: thisYearSales,
-          maxBarThickness: 6,
-        },
-        {
-          label: "Y" + DateTime.now().minus({ years: 1 }).toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#3A416F",
-          borderWidth: 3,
-          backgroundColor: gradientStroke2,
-          fill: true,
-          data: beforeYearSales,
-          maxBarThickness: 6,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-        },
-      },
-      interaction: {
-        intersect: false,
-        mode: "index",
-      },
-      scales: {
-        y: {
-          grid: {
-            drawBorder: false,
-            display: true,
-            drawOnChartArea: true,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: true,
-            padding: 10,
-            color: "#b2b9bf",
-            font: {
-              size: 11,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-        x: {
-          grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: true,
-            color: "#b2b9bf",
-            padding: 20,
-            font: {
-              size: 11,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-      },
-    },
-  });
+  weekSalesChart = new TwoLineChart(ctx, labelData, thisYearSales, beforeYearSales);
 }
 
-async function poorItems() {
-  const season = "Summer";
+async function getPoorItems(ages, season) {
   const salesData = await util.fetchData(`${util.host}/mmz-essential/season?planYear=2023&season=${season}`, "GET");
 
   let dataArray = [];
@@ -318,6 +134,7 @@ async function poorItems() {
     const duringDiff = checkDay.diff(firstDay, "days").toObject();
     const rowData = {
       customCostId: el.custom_cost_id,
+      image: el.image,
       age: el.age,
       item: el.product_name,
       color: el.color,
@@ -333,38 +150,51 @@ async function poorItems() {
     };
     dataArray.push(rowData);
   });
-  console.log(dataArray);
+
+  let poorItems;
+  ages == "kids"
+    ? (poorItems = dataArray.filter((r) => r.age === "kids"))
+    : (poorItems = dataArray.filter((r) => r.age === "baby"));
+  poorItems.sort((a, b) => a.checkPoorItem - b.checkPoorItem);
+  poorItems.length = 10;
 
   let itemHtml = "";
-  for (let el of dataArray) {
+  for (let el of poorItems) {
     let html = `
       <tr>
-        <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${el.item} </span>
+        <td class="text-center">
+        <div class="d-flex px-2 py-1">
+          <div><img src="${el.image}" class="avatar avatar-sm me-3" alt="xd"></div>
+          <div class="d-flex flex-column justify-content-center text-truncate">
+            <h6 class="mb-0 text-sm">${el.item}</h6>
+          </div>
+        </div>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${Number(el.order_count).toLocaleString("ko-kr")} </span>
+          <span class="text-xs font-weight-bold"> ${el.color} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${Number(el.quantity).toLocaleString("ko-kr")} </span>
+          <span class="text-xs font-weight-bold"> ${el.firstSalesDay}일 </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(Number(el.sales_price))} </span>
+          <span class="text-xs font-weight-bold"> ${el.duringDiff}일 </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(expense + logistic)} </span>
+          <span class="text-xs font-weight-bold"> ${el.inQuantity.toLocaleString("ko-KR")} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="text-xs font-weight-bold"> ${util.chunwon(directMarketing + indirectMarketing)} </span>
+          <span class="text-xs font-weight-bold"> ${el.salesQuantity.toLocaleString("ko-KR")} </span>
         </td>
         <td class="align-middle text-center text-sm">
-          <span class="${
-            calculateMargin >= 0 ? "text-success" : "text-danger"
-          } text-xs font-weight-bold"> ${util.chunwon(calculateMargin)} </span>
-       </td>
+          <span class="text-xs font-weight-bold"> ${el.stockQuantity.toLocaleString("ko-KR")} </span>
+        </td>
+        <td class="align-middle text-center text-sm">
+        <span class="text-xs font-weight-bold"> ${el.salesRatio}% </span>
+      </td>
       </tr>`;
     itemHtml = itemHtml + html;
   }
+  poorItemSubmit.innerText = "조회";
   document.getElementById("poor-items").innerHTML = itemHtml;
 }
 
@@ -478,4 +308,104 @@ function itemDiv(data) {
     dataHtml = dataHtml + html;
   }
   return dataHtml;
+}
+
+function TwoLineChart(ctx, labelData, thisYearSales, beforeYearSales) {
+  const gradientStroke1 = ctx.createLinearGradient(0, 230, 0, 50);
+  gradientStroke1.addColorStop(1, "rgba(203,12,159,0.2)");
+  gradientStroke1.addColorStop(0.2, "rgba(72,72,176,0.0)");
+  gradientStroke1.addColorStop(0, "rgba(203,12,159,0)");
+
+  const gradientStroke2 = ctx.createLinearGradient(0, 230, 0, 50);
+  gradientStroke2.addColorStop(1, "rgba(20,23,39,0.2)");
+  gradientStroke2.addColorStop(0.2, "rgba(72,72,176,0.0)");
+  gradientStroke2.addColorStop(0, "rgba(20,23,39,0)");
+
+  return new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: labelData,
+      datasets: [
+        {
+          label: "Y" + DateTime.now().toFormat("yyyy"),
+          tension: 0.4,
+          borderWidth: 0,
+          pointRadius: 0,
+          borderColor: "#cb0c9f",
+          borderWidth: 3,
+          backgroundColor: gradientStroke1,
+          fill: true,
+          data: thisYearSales,
+          maxBarThickness: 6,
+        },
+        {
+          label: "Y" + DateTime.now().minus({ years: 1 }).toFormat("yyyy"),
+          tension: 0.4,
+          borderWidth: 0,
+          pointRadius: 0,
+          borderColor: "#3A416F",
+          borderWidth: 3,
+          backgroundColor: gradientStroke2,
+          fill: true,
+          data: beforeYearSales,
+          maxBarThickness: 6,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+        },
+      },
+      interaction: {
+        intersect: false,
+        mode: "index",
+      },
+      scales: {
+        y: {
+          grid: {
+            drawBorder: false,
+            display: true,
+            drawOnChartArea: true,
+            drawTicks: false,
+            borderDash: [5, 5],
+          },
+          ticks: {
+            display: true,
+            padding: 10,
+            color: "#b2b9bf",
+            font: {
+              size: 11,
+              family: "Open Sans",
+              style: "normal",
+              lineHeight: 2,
+            },
+          },
+        },
+        x: {
+          grid: {
+            drawBorder: false,
+            display: false,
+            drawOnChartArea: false,
+            drawTicks: false,
+            borderDash: [5, 5],
+          },
+          ticks: {
+            display: true,
+            color: "#b2b9bf",
+            padding: 20,
+            font: {
+              size: 11,
+              family: "Open Sans",
+              style: "normal",
+              lineHeight: 2,
+            },
+          },
+        },
+      },
+    },
+  });
 }
