@@ -1,6 +1,11 @@
 import util from "./utility.js";
 const DateTime = luxon.DateTime;
 
+const submit = document.querySelector("#submit");
+submit.addEventListener("click", () => {
+  startFunction();
+});
+
 (function startFunction() {
   const URL = window.location.href;
   const squadId = URL.substring(URL.indexOf("/", URL.indexOf("squad-brand")) + 1);
@@ -83,7 +88,27 @@ async function brandChart(squadId) {
       </div>`;
     cardHtml = cardHtml + addHtml;
   }
-  document.getElementById("brands-chart-list").innerHTML = cardHtml;
+  const firstCardHtml = `
+  <div class="col-xl-3 col-sm-6 mb-2">
+    <div class="card h-100 text-bg-secondary">
+      <div class="card-header text-bg-secondary pb-0">
+        <div class="row">
+          <div class="col-lg-8 col-8">
+            <h6>합계</h6>
+          </div>
+          <div class="col-lg-4 col-4 my-auto text-end">
+            <p class="text-sm" id="${squadId}-ratio"></p>
+          </div>
+        </div>
+      </div>
+      <div class="card-body p-3">
+        <div class="chart">
+          <canvas id="${squadId}-chart" class="chart-canvas" height="350"></canvas>
+        </div>
+      </div>        
+    </div>
+  </div>`;
+  document.getElementById("brands-chart-list").innerHTML = firstCardHtml + cardHtml;
 
   for (let brand of brands) {
     let brandChart;
