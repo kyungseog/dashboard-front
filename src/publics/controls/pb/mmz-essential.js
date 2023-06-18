@@ -20,11 +20,9 @@ async function startFunction() {
   const setDay = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
   startDayPicker.setDate(setDay);
   endDayPicker.setDate(setDay);
-
   dailySalesChart();
   weeklySalesChart();
-  getPoorItems("kids", "Summer");
-  categorySales(setDay, setDay);
+  getPoorItems("kids_summer");
   productSales(setDay, setDay);
 }
 
@@ -32,21 +30,15 @@ const submit = document.querySelector("#submit");
 submit.addEventListener("click", () => {
   const startDay = startDayPicker.getDate("yyyy-mm-dd");
   const endDay = endDayPicker.getDate("yyyy-mm-dd");
-  categorySales(startDay, endDay);
   productSales(startDay, endDay);
 });
 
 const poorItemSubmit = document.querySelector("#poor-item-submit");
+const agesSeasonSelection = document.querySelector("#ages_season");
 poorItemSubmit.addEventListener("click", () => {
   poorItemSubmit.innerHTML = spinner;
-  let season;
-  let ages;
-  const checkAges = document.querySelector("#kids");
-  const checkSeasons = document.querySelector("#spring");
-  checkAges.checked ? (ages = "kids") : (ages = "baby");
-  checkSeasons.checked ? (season = "Spring") : (season = "Summer");
-  console.log(ages, season);
-  getPoorItems(ages, season);
+  const agesSeason = agesSeasonSelection.options[agesSeasonSelection.selectedIndex].value;
+  getPoorItems(agesSeason);
 });
 
 async function dailySalesChart() {
@@ -124,8 +116,8 @@ async function weeklySalesChart() {
   weekSalesChart = new TwoLineChart(ctx, labelData, thisYearSales, beforeYearSales);
 }
 
-async function getPoorItems(ages, season) {
-  const salesData = await util.fetchData(`${util.host}/mmz-essential/season?planYear=2023&season=${season}`, "GET");
+async function getPoorItems(agesSeason) {
+  const salesData = await util.fetchData(`${util.host}/mmz-essential/product?sumType=stock`, "GET");
 
   let dataArray = [];
   salesData.forEach((el) => {
@@ -198,45 +190,38 @@ async function getPoorItems(ages, season) {
   document.getElementById("poor-items").innerHTML = itemHtml;
 }
 
-async function categorySales(startDay, endDay) {
-  const categorySalesData = document.getElementById("category-sales-data");
-
-  const categoryData = await util.fetchData(
-    `${util.host}/mmz-essential/category?startDay=${startDay}&endDay=${endDay}`,
-    "GET"
-  );
-
-  const kidsData = categoryData.filter((r) => r.age === "kids").sort((a, b) => b.sales_price - a.sales_price);
-  const babyData = categoryData.filter((r) => r.age === "baby").sort((a, b) => b.sales_price - a.sales_price);
-
-  const kidsHtml = tableTr(kidsData);
-  const babyHtml = tableTr(babyData);
-  categorySalesData.innerHTML = kidsHtml + babyHtml;
-}
-
 async function productSales(startDay, endDay) {
-  const kidsProductsData = document.getElementById("kids-products-data");
-  const babyProductsData = document.getElementById("baby-products-data");
-
-  kidsProductsData.innerHTML = spinner;
-
   const productData = await util.fetchData(
     `${util.host}/mmz-essential/product?startDay=${startDay}&endDay=${endDay}`,
     "GET"
   );
 
+  const categorySalesData = document.getElementById("category-sales-data");
+  const kidsProductsData = document.getElementById("kids-products-data");
+  const babyProductsData = document.getElementById("baby-products-data");
+
+  kidsProductsData.innerHTML = spinner;
+
+  const kidsCategoryData = productData.filter((r) => r.age === "kids").sort((a, b) => b.sales_price - a.sales_price);
+  const babyCategoryData = productData.filter((r) => r.age === "baby").sort((a, b) => b.sales_price - a.sales_price);
+
+  const kidsHtml = makeTableTr(kidsCategoryData);
+  const babyHtml = makeTableTr(babyCategoryData);
+
   const kidsData = productData.filter((r) => r.age == "kids");
   kidsData.length = 6;
-  const kidsProductHtml = itemDiv(kidsData);
-  kidsProductsData.innerHTML = "<h6>Kids</h6>" + kidsProductHtml;
+  const kidsProductHtml = makeItemDiv(kidsData);
 
   const babyData = productData.filter((r) => r.age == "baby");
   babyData.length = 6;
-  const babyProductHtml = itemDiv(babyData);
+  const babyProductHtml = makeItemDiv(babyData);
+
+  categorySalesData.innerHTML = kidsHtml + babyHtml;
+  kidsProductsData.innerHTML = "<h6>Kids</h6>" + kidsProductHtml;
   babyProductsData.innerHTML = "<h6>Baby</h6>" + babyProductHtml;
 }
 
-function tableTr(data) {
+function makeTableTr(data) {
   let dataHtml = "";
   let totalQuantity = 0;
   let totalSales = 0;
@@ -288,7 +273,7 @@ function tableTr(data) {
   return dataHtml + totalHtml;
 }
 
-function itemDiv(data) {
+function makeItemDiv(data) {
   let dataHtml = "";
   for (let item of data) {
     let html = `
