@@ -1,5 +1,7 @@
 import util from "./utility.js";
+import { TwoLineChart, TwoBlueBarChart, TwoBrownBarChart } from "./graph.js";
 const DateTime = luxon.DateTime;
+
 let salesChartWeekly;
 let salesChartMonthly;
 let marginChartMonthly;
@@ -209,113 +211,11 @@ async function weeklySalesChartData(brandId) {
   }"></i> 
   <span class="font-weight-bold">전년대비 ${ratio}%</span>`;
 
-  weeklySalesChart(labelData, thisYearSales, beforeYearSales);
-}
-
-async function weeklySalesChart(labelData, thisYearSales, beforeYearSales) {
-  var ctx2 = document.getElementById("weekly-sales-chart").getContext("2d");
-
-  var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
-  gradientStroke1.addColorStop(1, "rgba(203,12,159,0.2)");
-  gradientStroke1.addColorStop(0.2, "rgba(72,72,176,0.0)");
-  gradientStroke1.addColorStop(0, "rgba(203,12,159,0)");
-
-  var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
-  gradientStroke2.addColorStop(1, "rgba(20,23,39,0.2)");
-  gradientStroke2.addColorStop(0.2, "rgba(72,72,176,0.0)");
-  gradientStroke2.addColorStop(0, "rgba(20,23,39,0)");
-
+  const ctx = document.getElementById("weekly-sales-chart").getContext("2d");
   if (salesChartWeekly) {
     salesChartWeekly.destroy();
   }
-
-  salesChartWeekly = new Chart(ctx2, {
-    type: "line",
-    data: {
-      labels: labelData,
-      datasets: [
-        {
-          label: "Y" + DateTime.now().minus({ years: 1 }).toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#3A416F",
-          borderWidth: 3,
-          backgroundColor: gradientStroke2,
-          fill: true,
-          data: beforeYearSales,
-          maxBarThickness: 6,
-        },
-        {
-          label: "Y" + DateTime.now().toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#cb0c9f",
-          borderWidth: 3,
-          backgroundColor: gradientStroke1,
-          fill: true,
-          data: thisYearSales,
-          maxBarThickness: 6,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-        },
-      },
-      interaction: {
-        intersect: false,
-        mode: "index",
-      },
-      scales: {
-        y: {
-          grid: {
-            drawBorder: false,
-            display: true,
-            drawOnChartArea: true,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: true,
-            padding: 10,
-            color: "#b2b9bf",
-            font: {
-              size: 11,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-        x: {
-          grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: true,
-            color: "#b2b9bf",
-            padding: 20,
-            font: {
-              size: 11,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-      },
-    },
-  });
+  salesChartWeekly = new TwoLineChart(ctx, labelData, thisYearSales, beforeYearSales);
 }
 
 async function monthlyChart(brandId) {
@@ -339,237 +239,13 @@ async function monthlyChart(brandId) {
   const thisYearMargin = thisYearData.map((r) => util.bmwon(r.brand_contribution_margin));
   const beforeYearMargin = beforeYearData.map((r) => util.bmwon(r.brand_contribution_margin));
 
-  const monthlySalesCtx = document.getElementById("monthly-sales-chart").getContext("2d");
-  if (salesChartMonthly) {
-    salesChartMonthly.destroy();
-  }
+  const salesCtx = document.getElementById("monthly-sales-chart").getContext("2d");
+  if (salesChartMonthly) salesChartMonthly.destroy();
+  salesChartMonthly = new TwoBlueBarChart(salesCtx, labels, beforeYearSales, thisYearSales, true, "실판매가");
 
-  salesChartMonthly = new Chart(monthlySalesCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "전년",
-          data: beforeYearSales,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#BDCDD6"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-        {
-          label: "금년",
-          data: thisYearSales,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#6096B4"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        datalabels: {
-          color: "white",
-          display: true,
-          font: {
-            size: 15,
-            family: "Open Sans",
-            style: "normal",
-            lineHeight: 2,
-          },
-        },
-        title: {
-          display: true,
-          text: "실판매가",
-          position: "bottom",
-          font: {
-            size: 15,
-            family: "Open Sans",
-            style: "normal",
-            lineHeight: 2,
-          },
-        },
-        legend: {
-          labels: {
-            boxWidth: 30,
-            boxHeight: 10,
-          },
-          display: true,
-        },
-      },
-      scales: {
-        y: {
-          grid: {
-            drawBorder: false,
-            display: true,
-            drawOnChartArea: true,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: false,
-            padding: 10,
-            color: "#b2b9bf",
-            font: {
-              size: 10,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-        x: {
-          grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: true,
-            color: "#b2b9bf",
-            padding: 10,
-            font: {
-              size: 10,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  const monthlyMarginCtx = document.getElementById("monthly-margin-chart").getContext("2d");
-  if (marginChartMonthly) {
-    marginChartMonthly.destroy();
-  }
-
-  marginChartMonthly = new Chart(monthlyMarginCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "전년",
-          data: beforeYearMargin,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#D0B8A8"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-        {
-          label: "금년",
-          data: thisYearMargin,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#85586F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        datalabels: {
-          color: "white",
-          display: true,
-          font: {
-            size: 15,
-            family: "Open Sans",
-            style: "normal",
-            lineHeight: 2,
-          },
-        },
-        title: {
-          display: true,
-          text: "공헌이익",
-          position: "bottom",
-          font: {
-            size: 15,
-            family: "Open Sans",
-            style: "normal",
-            lineHeight: 2,
-          },
-        },
-        legend: {
-          labels: {
-            boxWidth: 30,
-            boxHeight: 10,
-          },
-          display: true,
-        },
-      },
-      scales: {
-        y: {
-          grid: {
-            drawBorder: false,
-            display: true,
-            drawOnChartArea: true,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: false,
-            padding: 10,
-            color: "#b2b9bf",
-            font: {
-              size: 10,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-        x: {
-          grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: true,
-            color: "#b2b9bf",
-            padding: 10,
-            font: {
-              size: 10,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-      },
-    },
-  });
+  const marginCtx = document.getElementById("monthly-margin-chart").getContext("2d");
+  if (marginChartMonthly) marginChartMonthly.destroy();
+  marginChartMonthly = new TwoBrownBarChart(marginCtx, labels, thisYearMargin, beforeYearMargin, true, "공헌이익");
 }
 
 async function monthlyCumulatedChart(brandId) {
@@ -578,194 +254,58 @@ async function monthlyCumulatedChart(brandId) {
   const thisYearEndDay = DateTime.now().minus({ days: 1 }).toFormat("yyyy-LL-dd");
   const beforeYearEndDay = DateTime.now().minus({ years: 1 }).minus({ days: 1 }).toFormat("yyyy-LL-dd");
 
-  const thisYearData = await util.fetchData(
-    `${util.host}/korea/brand/month?startDay=${thisYearStartDay}&endDay=${thisYearEndDay}&brandId=${brandId}`,
+  const thisYear = await getCumulatedData(thisYearStartDay, thisYearEndDay, brandId);
+  const beforeYear = await getCumulatedData(beforeYearStartDay, beforeYearEndDay, brandId);
+
+  const salesCtx = document.getElementById("monthly-sales-chart").getContext("2d");
+  if (salesChartMonthly) salesChartMonthly.destroy();
+  salesChartMonthly = new TwoBlueBarChart(
+    salesCtx,
+    thisYear.labels,
+    beforeYear.sales,
+    thisYear.sales,
+    true,
+    "실판매가"
+  );
+
+  const marginCtx = document.getElementById("monthly-margin-chart").getContext("2d");
+  if (marginChartMonthly) marginChartMonthly.destroy();
+  marginChartMonthly = new TwoBrownBarChart(
+    marginCtx,
+    thisYear.labels,
+    beforeYear.margins,
+    thisYear.margins,
+    true,
+    "공헌이익"
+  );
+}
+
+async function getCumulatedData(startDay, endDay, brandId) {
+  const data = await util.fetchData(
+    `${util.host}/korea/brand/month?startDay=${startDay}&endDay=${endDay}&brandId=${brandId}`,
     "GET"
   );
-  const beforeYearData = await util.fetchData(
-    `${util.host}/korea/brand/month?startDay=${beforeYearStartDay}&endDay=${beforeYearEndDay}&brandId=${brandId}`,
-    "GET"
-  );
 
-  const labels = thisYearData.map((r) => r.brand_payment_month + "월");
-  const thisYearSales = [];
-  thisYearData
+  const labels = data.map((r) => r.brand_payment_month + "월");
+  const sales = [];
+  data
     .map((r) => r.brand_sales)
     .reduce((cur, acc) => {
-      thisYearSales.push(Math.round((cur + acc) / 1000000));
+      sales.push(Math.round((cur + acc) / 1000000));
       return cur + acc;
     }, 0);
 
-  const beforeYearSales = [];
-  beforeYearData
-    .map((r) => r.brand_sales)
-    .reduce((cur, acc) => {
-      beforeYearSales.push(Math.round((cur + acc) / 1000000));
-      return cur + acc;
-    }, 0);
-
-  const thisYearMargin = [];
-  thisYearData
+  const margins = [];
+  data
     .map((r) => r.brand_contribution_margin)
     .reduce((cur, acc) => {
-      thisYearMargin.push(Math.round((cur + acc) / 1000000));
+      margins.push(Math.round((cur + acc) / 1000000));
       return cur + acc;
     }, 0);
 
-  const beforeYearMargin = [];
-  beforeYearData
-    .map((r) => r.brand_contribution_margin)
-    .reduce((cur, acc) => {
-      beforeYearMargin.push(Math.round((cur + acc) / 1000000));
-      return cur + acc;
-    }, 0);
-
-  const optionsData = {
-    responsive: true,
-    plugins: {
-      datalabels: {
-        color: "white",
-        display: true,
-        font: {
-          size: 15,
-          family: "Open Sans",
-          style: "normal",
-          lineHeight: 2,
-        },
-      },
-      legend: {
-        labels: {
-          boxWidth: 10,
-          boxHeight: 5,
-        },
-        display: true,
-      },
-    },
-    scales: {
-      y: {
-        grid: {
-          drawBorder: false,
-          display: true,
-          drawOnChartArea: true,
-          drawTicks: false,
-          borderDash: [5, 5],
-        },
-        ticks: {
-          display: false,
-          padding: 10,
-          color: "#b2b9bf",
-          font: {
-            size: 10,
-            family: "Open Sans",
-            style: "normal",
-            lineHeight: 2,
-          },
-        },
-      },
-      x: {
-        grid: {
-          drawBorder: false,
-          display: false,
-          drawOnChartArea: false,
-          drawTicks: false,
-          borderDash: [5, 5],
-        },
-        ticks: {
-          display: true,
-          color: "#b2b9bf",
-          padding: 10,
-          font: {
-            size: 10,
-            family: "Open Sans",
-            style: "normal",
-            lineHeight: 2,
-          },
-        },
-      },
-    },
+  return {
+    labels,
+    sales,
+    margins,
   };
-
-  const monthlySalesCtx = document.getElementById("monthly-sales-chart").getContext("2d");
-  if (salesChartMonthly) {
-    salesChartMonthly.destroy();
-  }
-
-  salesChartMonthly = new Chart(monthlySalesCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "전년",
-          data: beforeYearSales,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#BDCDD6"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-        {
-          label: "금년",
-          data: thisYearSales,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#6096B4"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: optionsData,
-  });
-
-  const monthlyMarginCtx = document.getElementById("monthly-margin-chart").getContext("2d");
-  if (marginChartMonthly) {
-    marginChartMonthly.destroy();
-  }
-
-  marginChartMonthly = new Chart(monthlyMarginCtx, {
-    plugins: [ChartDataLabels],
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "전년",
-          data: beforeYearMargin,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#D0B8A8"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-        {
-          label: "금년",
-          data: thisYearMargin,
-          tension: 0.4,
-          borderWidth: 0,
-          borderRadius: 8,
-          borderSkipped: false,
-          backgroundColor: ["#85586F"],
-          datalabels: {
-            align: "center",
-            anchor: "center",
-          },
-        },
-      ],
-    },
-    options: optionsData,
-  });
 }

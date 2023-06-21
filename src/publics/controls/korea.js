@@ -1,4 +1,5 @@
 import util from "./utility.js";
+import { TwoLineChart } from "./graph.js";
 const DateTime = luxon.DateTime;
 
 let koreaSalesChart;
@@ -91,108 +92,11 @@ async function salesChart() {
   <span class="font-weight-bold">전년대비 ${ratio * 100}%</span>`;
 
   const ctx = document.getElementById("korea-sales-chart").getContext("2d");
-
-  const gradientStroke1 = ctx.createLinearGradient(0, 230, 0, 50);
-  gradientStroke1.addColorStop(1, "rgba(203,12,159,0.2)");
-  gradientStroke1.addColorStop(0.2, "rgba(72,72,176,0.0)");
-  gradientStroke1.addColorStop(0, "rgba(203,12,159,0)");
-
-  const gradientStroke2 = ctx.createLinearGradient(0, 230, 0, 50);
-  gradientStroke2.addColorStop(1, "rgba(20,23,39,0.2)");
-  gradientStroke2.addColorStop(0.2, "rgba(72,72,176,0.0)");
-  gradientStroke2.addColorStop(0, "rgba(20,23,39,0)");
-
   if (koreaSalesChart) {
     koreaSalesChart.destroy();
   }
 
-  koreaSalesChart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: labelData,
-      datasets: [
-        {
-          label: "Y" + DateTime.now().minus({ years: 1 }).toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#3A416F",
-          borderWidth: 3,
-          backgroundColor: gradientStroke2,
-          fill: true,
-          data: beforeYearSales,
-          maxBarThickness: 6,
-        },
-        {
-          label: "Y" + DateTime.now().toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#cb0c9f",
-          borderWidth: 3,
-          backgroundColor: gradientStroke1,
-          fill: true,
-          data: thisYearSales,
-          maxBarThickness: 6,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-        },
-      },
-      interaction: {
-        intersect: false,
-        mode: "index",
-      },
-      scales: {
-        y: {
-          grid: {
-            drawBorder: false,
-            display: true,
-            drawOnChartArea: true,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: true,
-            padding: 10,
-            color: "#b2b9bf",
-            font: {
-              size: 11,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-        x: {
-          grid: {
-            drawBorder: false,
-            display: false,
-            drawOnChartArea: false,
-            drawTicks: false,
-            borderDash: [5, 5],
-          },
-          ticks: {
-            display: true,
-            color: "#b2b9bf",
-            padding: 20,
-            font: {
-              size: 11,
-              family: "Open Sans",
-              style: "normal",
-              lineHeight: 2,
-            },
-          },
-        },
-      },
-    },
-  });
+  koreaSalesChart = new TwoLineChart(ctx, labelData, thisYearSales, beforeYearSales);
 }
 
 async function brandSales() {
@@ -544,7 +448,7 @@ async function weatherChart() {
           ticks: {
             suggestedMin: 10,
             suggestedMax: 40,
-            beginAtZero: true,
+            beginAtZero: false,
             padding: 5,
             font: {
               size: 12,
