@@ -81,22 +81,22 @@ async function salesChart() {
   const labelData = beforeYear.map((r) => DateTime.fromISO(r.payment_date).toFormat("LL/dd"));
   const thisYearSales = thisYear.map((r) => Math.round(r.sales_price / 1000));
   const beforeYearSales = beforeYear.map((r) => Math.round(r.sales_price / 1000));
-  const sumThisYearSales = thisYearSales.reduce((acc, cur) => acc + cur, 0);
-  const sumBeforeYearSales = beforeYearSales.slice(0, 13).reduce((acc, cur) => acc + cur, 0);
-  const ratio = (sumThisYearSales / sumBeforeYearSales).toFixed(2);
+  const sumThisYearSales = Number(thisYearSales.reduce((acc, cur) => acc + cur, 0));
+  const sumBeforeYearSales = Number(beforeYearSales.slice(0, 13).reduce((acc, cur) => acc + cur, 0));
+  const ratio = ((sumThisYearSales / sumBeforeYearSales) * 100).toFixed();
 
   const koreaSalesChartSummary = document.getElementById("korea-sales-chart-summary");
   koreaSalesChartSummary.innerHTML = `<i class="fa ${
-    ratio > 1 ? "fa-arrow-up text-success" : "fa-arrow-down text-danger"
+    ratio > 100 ? "fa-arrow-up text-success" : "fa-arrow-down text-danger"
   }"></i> 
-  <span class="font-weight-bold">전년대비 ${ratio * 100}%</span>`;
+  <span class="font-weight-bold">전년비 ${ratio}%</span>`;
 
   const ctx = document.getElementById("korea-sales-chart").getContext("2d");
   if (koreaSalesChart) {
     koreaSalesChart.destroy();
   }
-
-  koreaSalesChart = new TwoLineChart(ctx, labelData, thisYearSales, beforeYearSales);
+  const titleData = { display: false, text: "" };
+  koreaSalesChart = new TwoLineChart(ctx, labelData, thisYearSales, beforeYearSales, titleData);
 }
 
 async function brandSales() {

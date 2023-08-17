@@ -1,15 +1,15 @@
 const DateTime = luxon.DateTime;
 
-function TwoLineChart(ctx, labelData, thisYearData, beforeYearData) {
+function TwoLineChart(ctx, labelData, thisYearData, beforeYearData, optionData) {
   const gradientStroke1 = ctx.createLinearGradient(0, 230, 0, 50);
-  gradientStroke1.addColorStop(1, "rgba(203,12,159,0.2)");
+  gradientStroke1.addColorStop(1, "rgba(20,23,39,0.2)");
   gradientStroke1.addColorStop(0.2, "rgba(72,72,176,0.0)");
-  gradientStroke1.addColorStop(0, "rgba(203,12,159,0)");
+  gradientStroke1.addColorStop(0, "rgba(20,23,39,0)");
 
   const gradientStroke2 = ctx.createLinearGradient(0, 230, 0, 50);
-  gradientStroke2.addColorStop(1, "rgba(20,23,39,0.2)");
+  gradientStroke2.addColorStop(1, "rgba(203,12,159,0.2)");
   gradientStroke2.addColorStop(0.2, "rgba(72,72,176,0.0)");
-  gradientStroke2.addColorStop(0, "rgba(20,23,39,0)");
+  gradientStroke2.addColorStop(0, "rgba(203,12,159,0)");
 
   return new Chart(ctx, {
     type: "line",
@@ -17,27 +17,27 @@ function TwoLineChart(ctx, labelData, thisYearData, beforeYearData) {
       labels: labelData,
       datasets: [
         {
-          label: "Y" + DateTime.now().toFormat("yyyy"),
-          tension: 0.4,
-          borderWidth: 0,
-          pointRadius: 0,
-          borderColor: "#cb0c9f",
-          borderWidth: 3,
-          backgroundColor: gradientStroke1,
-          fill: true,
-          data: thisYearData,
-          maxBarThickness: 6,
-        },
-        {
           label: "Y" + DateTime.now().minus({ years: 1 }).toFormat("yyyy"),
           tension: 0.4,
           borderWidth: 0,
           pointRadius: 0,
           borderColor: "#3A416F",
           borderWidth: 3,
-          backgroundColor: gradientStroke2,
+          backgroundColor: gradientStroke1,
           fill: true,
           data: beforeYearData,
+          maxBarThickness: 6,
+        },
+        {
+          label: "Y" + DateTime.now().toFormat("yyyy"),
+          tension: 0.4,
+          borderWidth: 0,
+          pointRadius: 0,
+          borderColor: "#cb0c9f",
+          borderWidth: 3,
+          backgroundColor: gradientStroke2,
+          fill: true,
+          data: thisYearData,
           maxBarThickness: 6,
         },
       ],
@@ -46,8 +46,19 @@ function TwoLineChart(ctx, labelData, thisYearData, beforeYearData) {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
+        title: {
+          display: optionData.display ?? false,
+          align: "start",
+          font: {
+            size: 15,
+            family: "Open Sans",
+            style: "normal",
+            lineHeight: 2,
+          },
+          text: optionData.text ?? "",
+        },
         legend: {
-          display: true,
+          display: optionData.legend ?? true,
         },
       },
       interaction: {

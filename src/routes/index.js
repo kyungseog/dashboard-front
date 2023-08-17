@@ -87,4 +87,8 @@ router.get("/settings", (req, res) => {
   res.render("settings");
 });
 
+router.get("/dashboard", (req, res) => {
+  res.render("dashboard");
+});
+
 module.exports = router;
