@@ -36,20 +36,20 @@ async function headlines() {
     `${util.host}/korea/users?startDay=${yesterday}&endDay=${yesterday}`,
     "GET"
   );
+  document.getElementById("korea-new-user").innerHTML = `${Number(yesterdayUserData.count_users).toLocaleString(
+    "ko-KR"
+  )} 명`;
+
   const monthlyUserData = await util.fetchData(
     `${util.host}/korea/users?startDay=${DateTime.now().startOf("month").toFormat("yyyy-LL-dd")}&endDay=${today}`,
     "GET"
   );
-  const totalUserData = await util.fetchData(`${util.host}/korea/users?startDay=2020-02-01&endDay=${today}`, "GET");
-  document.getElementById("korea-new-user").innerHTML = `${Number(yesterdayUserData.count_users).toLocaleString(
-    "ko-KR"
-  )} 명`;
   document.getElementById("korea-monthly-user").innerHTML = `${Number(monthlyUserData.count_users).toLocaleString(
     "ko-KR"
   )} 명`;
-  document.getElementById("korea-total-user").innerHTML = `${util
-    .chunwon(totalUserData.count_users)
-    .toLocaleString("ko-KR")} 천명`;
+
+  const totalUserData = await util.fetchData(`${util.host}/korea/users?startDay=2020-02-01&endDay=${today}`, "GET");
+  document.getElementById("korea-total-user").innerHTML = `확인중`;
 }
 
 async function dailyChart() {
@@ -67,8 +67,8 @@ async function dailyChart() {
   );
 
   const labelData = beforeYear.map((r) => DateTime.fromISO(r.payment_date).toFormat("LL/dd"));
-  const thisYearSales = thisYear.map((r) => Math.round(r.sales_price / 1000));
-  const beforeYearSales = beforeYear.map((r) => Math.round(r.sales_price / 1000));
+  const thisYearSales = thisYear.map((r) => Math.round(r.sales_price / 1000000));
+  const beforeYearSales = beforeYear.map((r) => Math.round(r.sales_price / 1000000));
 
   const ctx = document.getElementById("daily-sales-chart").getContext("2d");
   if (dailySalesChart) {
@@ -79,22 +79,24 @@ async function dailyChart() {
 }
 
 async function weeklyChart() {
+  const thisYearStartDay = DateTime.now().minus({ weeks: 5 }).startOf("week").toFormat("yyyy-LL-dd");
   const thisYear = await util.fetchData(
-    `${util.host}/korea/sales?sumType=day&startDay=${DateTime.now()
-      .minus({ days: 10 })
-      .toFormat("yyyy-LL-dd")}&endDay=${yesterday}`,
-    "GET"
-  );
-  const beforeYear = await util.fetchData(
-    `${util.host}/korea/sales?sumType=day&startDay=${DateTime.now()
-      .minus({ years: 1, days: 10 })
-      .toFormat("yyyy-LL-dd")}&endDay=${DateTime.now().minus({ years: 1 }).plus({ days: 6 }).toFormat("yyyy-LL-dd")}`,
+    `${util.host}/korea/sales?sumType=day&startDay=${thisYearStartDay}&endDay=${yesterday}`,
     "GET"
   );
 
-  const labelData = beforeYear.map((r) => DateTime.fromISO(r.payment_date).toFormat("LL/dd"));
-  const thisYearSales = thisYear.map((r) => Math.round(r.sales_price / 1000));
-  const beforeYearSales = beforeYear.map((r) => Math.round(r.sales_price / 1000));
+  const beforeYearStartDay = DateTime.now().minus({ years: 1, weeks: 5 }).startOf("week").toFormat("yyyy-LL-dd");
+  const beforeYearEndDay = DateTime.now().minus({ years: 1 }).plus({ weeks: 4 }).endOf("week").toFormat("yyyy-LL-dd");
+  const beforeYear = await util.fetchData(
+    `${util.host}/korea/sales?sumType=day&startDay=${beforeYearStartDay}&endDay=${beforeYearEndDay}`,
+    "GET"
+  );
+
+  const labelData = [...new Set(beforeYear.map((row) => row.weeks))].map((r) => r + "주차");
+  const thisYearSalesData = getPartialSum(thisYear, "weeks", "sales_price");
+  const thisYearSales = thisYearSalesData.map((data) => util.bmwon(data.sumF));
+  const beforeYearSalesData = getPartialSum(beforeYear, "weeks", "sales_price");
+  const beforeYearSales = beforeYearSalesData.map((data) => util.bmwon(data.sumF));
 
   const ctx = document.getElementById("weekly-sales-chart").getContext("2d");
   if (weeklySalesChart) {
@@ -105,133 +107,35 @@ async function weeklyChart() {
 }
 
 async function brandSales() {
-  const salesData = await util.fetchData(`${util.host}/korea/brand?startDay=${yesterday}&endDay=${yesterday}`, "GET");
-  const beforeSalesData = await util.fetchData(
-    `${util.host}/korea/brand?startDay=${beforeYesterday}&endDay=${beforeYesterday}`,
+  const dailySales = await util.fetchData(`${util.host}/korea/brand?startDay=${yesterday}&endDay=${yesterday}`, "GET");
+  const weeklySales = await util.fetchData(
+    `${util.host}/korea/brand?sumType=day&startDay=${DateTime.now()
+      .minus({ days: 7 })
+      .toFormat("yyyy-LL-dd")}&endDay=${yesterday}`,
     "GET"
   );
-  const marketingData = await util.fetchData(
-    `${util.host}/korea/brand/marketing?startDay=${yesterday}&endDay=${yesterday}`,
-    "GET"
-  );
-  const logisticData = await util.fetchData(
-    `${util.host}/korea/logistic/brand?startDay=${yesterday}&endDay=${yesterday}`,
+  const monthlySales = await util.fetchData(
+    `${util.host}/korea/brand?startDay=${DateTime.now().toFormat("yyyy-LL-01")}&endDay=${yesterday}`,
     "GET"
   );
 
-  let volumeBrandSales = 0;
-  let volumeBrandBeforeSales = 0;
-  let volumeBrandMargin = 0;
-  let fashionBrandSales = 0;
-  let fashionBrandBeforeSales = 0;
-  let fashionBrandMargin = 0;
-  let designBrandSales = 0;
-  let designBrandBeforeSales = 0;
-  let designBrandMargin = 0;
-  let strategicBrandSales = 0;
-  let strategicBrandBeforeSales = 0;
-  let strategicBrandMargin = 0;
-  let buyingBrandSales = 0;
-  let buyingBrandBeforeSales = 0;
-  let buyingBrandMargin = 0;
-  let essentialBrandSales = 0;
-  let essentialBrandBeforeSales = 0;
-  let essentialBrandMargin = 0;
-
-  for (let el of salesData) {
-    const filteredData = beforeSalesData.filter((r) => r.brand_id == el.brand_id);
-    const couponFee =
-      el.brand_type == "consignment" ? Number(el.order_coupon) : Number(el.order_coupon) + Number(el.product_coupon);
-    const expense = Number(el.cost) + Number(el.mileage) + couponFee + Number(el.pg_expense);
-
-    const directList = marketingData.direct.filter((r) => r.brand_id == el.brand_id);
-    const directMarketing =
-      directList[0] == undefined || directList[0] == null ? 0 : Number(directList[0].direct_marketing_fee);
-
-    const indirectList = marketingData.indirect.filter((r) => r.brand_id == el.brand_id);
-    const indirectMarketing =
-      indirectList[0] == undefined || indirectList[0] == null ? 0 : Number(indirectList[0].indirect_marketing_fee);
-
-    const logisticList = logisticData.filter((r) => r.brand_id == el.brand_id);
-    const logistic = logisticList[0] == undefined || logisticList[0] == null ? 0 : Number(logisticList[0].logistic_fee);
-
-    const calculateMargin =
-      el.brand_type == "consignment"
-        ? el.commission - expense - directMarketing - indirectMarketing
-        : el.sales_price - expense - directMarketing - indirectMarketing - logistic;
-
-    if (util.volumeBrands.indexOf(el.brand_id) >= 0) {
-      volumeBrandSales = volumeBrandSales + Number(el.sales_price);
-      volumeBrandMargin = volumeBrandMargin + calculateMargin;
-      volumeBrandBeforeSales =
-        volumeBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
-    } else if (el.brand_squad == "위탁SQ") {
-      if (util.fashionMds.indexOf(el.md_id) >= 0) {
-        fashionBrandSales = fashionBrandSales + Number(el.sales_price);
-        fashionBrandMargin = fashionBrandMargin + calculateMargin;
-        fashionBrandBeforeSales =
-          fashionBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
-      } else {
-        designBrandSales = designBrandSales + Number(el.sales_price);
-        designBrandMargin = designBrandMargin + calculateMargin;
-        designBrandBeforeSales =
-          designBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
-      }
-    } else if (el.brand_squad == "전략카테고리SQ") {
-      strategicBrandSales = strategicBrandSales + Number(el.sales_price);
-      strategicBrandMargin = strategicBrandMargin + calculateMargin;
-      strategicBrandBeforeSales =
-        strategicBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
-    } else if (el.brand_squad == "매입SQ") {
-      buyingBrandSales = buyingBrandSales + Number(el.sales_price);
-      buyingBrandMargin = buyingBrandMargin + calculateMargin;
-      buyingBrandBeforeSales =
-        buyingBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
-    } else {
-      essentialBrandSales = essentialBrandSales + Number(el.sales_price);
-      essentialBrandMargin = essentialBrandMargin + calculateMargin;
-      essentialBrandBeforeSales =
-        essentialBrandBeforeSales + Number(filteredData[0] == undefined ? 0 : filteredData[0].sales_price);
-    }
-  }
-
-  const brandNames = ["전략", "매스", "HYPE", "내셔널/수입", "용품", "매입", "에센셜", "미지정"];
-  const salesNames = [
-    volumeBrandSales,
-    fashionBrandSales,
-    designBrandSales,
-    strategicBrandSales,
-    buyingBrandSales,
-    essentialBrandSales,
-  ];
-  const marginNames = [
-    volumeBrandMargin,
-    fashionBrandMargin,
-    designBrandMargin,
-    strategicBrandMargin,
-    buyingBrandMargin,
-    essentialBrandMargin,
-  ];
-  const rationNames = [
-    Math.round((volumeBrandSales / volumeBrandBeforeSales) * 100),
-    Math.round((fashionBrandSales / fashionBrandBeforeSales) * 100),
-    Math.round((designBrandSales / designBrandBeforeSales) * 100),
-    Math.round((strategicBrandSales / strategicBrandBeforeSales) * 100),
-    Math.round((buyingBrandSales / buyingBrandBeforeSales) * 100),
-    Math.round((essentialBrandSales / essentialBrandBeforeSales) * 100),
-  ];
+  const dailySalesData = getPartialSum(dailySales, "profit_cell", "sales_price");
+  const monthlySalesData = getPartialSum(monthlySales, "profit_cell", "sales_price");
 
   let brandSalesData = "";
-  for (let i = 0; i < brandNames.length; i++) {
+  for (let i = 0; i < monthlySalesData.length; i++) {
+    const daily = dailySalesData.filter((row) => row.keyF === monthlySalesData[i].keyF);
+    // const weekly = weeklySales.filter((data) => data.profit_cell == monthlySalesData[i].keyF);
+    // const html ="<svg width="110" height="30"><rect x="${5 * i + 2 * i}" y="${max / heightFactor - d / heightFactor}" width="5" height="${d / heightFactor}" style="fill:#f72a2a;"></rect></svg>""
+    const max = Math.max.apply(null);
     let data = `<div class="col-md-6 mb-2">
       <div class="card">
         <div class="card-body pt-0 p-3 text-center">
-          <p>${brandNames[i]}</p>
-          <h4><span class="text-sm">${util.bmwon(Number(salesNames[i]))}백만</span> / ${util.bmwon(
-      Number(salesNames[i])
+          <p>${monthlySalesData[i].keyF == "PB" ? "에센셜" : monthlySalesData[i].keyF}</p>
+          <h4><span class="fs-5 text-secondary">${util.bmwon(Number(daily[0].sumF))}백만</span> / ${util.bmwon(
+      monthlySalesData[i].sumF
     )}백만</h4>
           <hr class="horizontal dark my-3">
-          <span class="text-xs">(공헌이익) ${util.bmwon(marginNames[i])}백만</span>
         </div>
       </div>
     </div>`;
@@ -264,4 +168,13 @@ async function productSales(brandId, dateText) {
     productHtml = productHtml + html;
   }
   document.getElementById("brand-products-data").innerHTML = productHtml;
+}
+
+function getPartialSum(apiData, keyFactor, sumFactor) {
+  const factor = [...new Set(apiData.map((row) => row[keyFactor]))];
+  const partialSums = factor.map((row) => ({
+    keyF: row,
+    sumF: Math.round(apiData.filter((r) => r[keyFactor] == row).reduce((acc, cur) => acc + Number(cur[sumFactor]), 0)),
+  }));
+  return partialSums;
 }
