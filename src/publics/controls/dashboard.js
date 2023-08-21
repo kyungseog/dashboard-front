@@ -132,9 +132,9 @@ async function brandSales() {
       <div class="card">
         <div class="card-body pt-0 p-3 text-center">
           <p>${monthlySalesData[i].keyF == "PB" ? "에센셜" : monthlySalesData[i].keyF}</p>
-          <h4><span class="fs-5 text-secondary">${util.bmwon(Number(daily[0].sumF))}백만</span> / ${util.bmwon(
-      monthlySalesData[i].sumF
-    )}백만</h4>
+          <h4><span class="fs-5 text-secondary">${util.bmwon(
+            Number(daily[0] == undefined ? 0 : daily[0].sumF)
+          )}백만</span> / ${util.bmwon(monthlySalesData[i].sumF)}백만</h4>
           <hr class="horizontal dark my-3">
         </div>
       </div>
