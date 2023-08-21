@@ -2,9 +2,7 @@ import util from "./utility.js";
 const DateTime = luxon.DateTime;
 let liveTimeChart;
 
-(function startFunction() {
-  getLives();
-})();
+getLives();
 
 async function getLives() {
   const start_date = DateTime.now().toFormat("yyyy-LL-dd") + " 11:00:00";
@@ -15,8 +13,7 @@ async function getLives() {
   if (data.statusCode === 404) {
     return console.log(res);
   }
-
-  document.getElementById("live-title").innerText = data.live_name;
+  document.getElementById("live-title").innerText = data.live_live_name;
 
   //Shoplive JS Files
   window.onload = (function (s, h, o, p, l, i, v, e) {
@@ -83,8 +80,8 @@ async function getLives() {
 }
 
 async function getSales(brand_id, start_date, end_date) {
-  const URL = `${util.host}/live-commerces/sales?brand_id=${brand_id}&start_datetime=${start_date}&end_datetime=${end_date}`;
-  const data = await util.fetchData(URL, "GET");
+  const URL = `${util.host}/live/sales?brand_id=${brand_id}&start_datetime=${start_date}&end_datetime=${end_date}`;
+  const orderData = await util.fetchData(URL, "GET");
 
   const salePrice = orderData.reduce((acc, cur) => acc + cur.order_sale_price, 0);
   const discountPrice = orderData.reduce((acc, cur) => acc + cur.order_discount_price, 0);
@@ -104,7 +101,7 @@ async function getSales(brand_id, start_date, end_date) {
       product_id: r,
       product_name: data[0].product_name,
       product_image: data[0].product_image,
-      brand_name: data[0].product_brand_id,
+      brand_name: data[0].brand_brand_name,
       quantity: productQuantity,
       sale_price: productSalePrice,
       discount_price: productDiscountPrice,
@@ -124,12 +121,13 @@ async function getSales(brand_id, start_date, end_date) {
 
   const liveOrderCount = document.getElementById("live-order-count");
   const liveSales = document.getElementById("live-sales");
-  const liveDiscount = document.getElementById("live-discount");
-  const liveEarning = document.getElementById("live-earning");
   const productsData = document.getElementById("products_data");
 
-  liveOrderCount.innerText = orderCount + " 건";
-  liveSales.innerText = Math.round(salePrice - discountPrice).toLocaleString("ko-KR") + " 원";
+  liveOrderCount.innerHTML = '<span class="fs-5 text-secondary me-3">주문건수</span>' + orderCount + " 건";
+  liveSales.innerHTML =
+    '<span class="fs-5 text-secondary me-3">실판매가</span>' +
+    Math.round((salePrice - discountPrice) / 1000).toLocaleString("ko-KR") +
+    " 천원";
   const liveProductHtml = productsHtml(productArray);
   productsData.innerHTML = liveProductHtml;
   liveChart();
@@ -147,16 +145,12 @@ function productsHtml(productArray) {
         </a>
       </div>
       <div class="card-body px-1 pb-0">
-        <p class="text-gradient text-dark mb-2 text-sm">
-          ${productArray[i].brand_name}
-        </p>
-        <a href="javascript:;">
-          <h7>${productArray[i].product_name}</h7>
-        </a>
+        <p class="mb-2 text-sm">${productArray[i].brand_name}</p>
+        <p class="text-sm">${productArray[i].product_name}</p>
         <p class="mt-2 text-sm">
-          판매수량 ${productArray[i].quantity.toLocaleString("ko-KR")}개
-          <br>실판매가 ${(productArray[i].sale_price - productArray[i].discount_price).toLocaleString("ko-KR")}원
-          <br>공헌이익 원
+          ${productArray[i].quantity.toLocaleString("ko-KR")}개 | ${Math.round(
+      (productArray[i].sale_price - productArray[i].discount_price) / 1000
+    ).toLocaleString("ko-KR")}천원
         </p>
       </div>
     </div>
@@ -183,12 +177,12 @@ function liveChart() {
   }
 
   liveTimeChart = new Chart(ctx2, {
-    type: "line",
+    type: "bar",
     data: {
       labels: ["11:00", "11:10", "11:20", "11:30", "11:40", "11:50", "12:00", "12:10", "12:20"],
       datasets: [
         {
-          label: "sales",
+          label: "실판매",
           tension: 0.4,
           borderWidth: 0,
           pointRadius: 0,
@@ -196,12 +190,13 @@ function liveChart() {
           borderWidth: 3,
           backgroundColor: gradientStroke1,
           fill: true,
+          type: "line",
           data: [0, 40, 100, 100, 150, 250, 400, 500, 500],
           maxBarThickness: 6,
           yAxisID: "y",
         },
         {
-          label: "orders",
+          label: "주문수",
           tension: 0.4,
           borderWidth: 0,
           pointRadius: 0,
@@ -220,7 +215,7 @@ function liveChart() {
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          display: false,
+          display: true,
         },
       },
       interaction: {
