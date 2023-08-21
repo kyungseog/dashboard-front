@@ -83,9 +83,13 @@ async function getSales(brand_id, start_date, end_date) {
   const URL = `${util.host}/live/sales?brand_id=${brand_id}&start_datetime=${start_date}&end_datetime=${end_date}`;
   const orderData = await util.fetchData(URL, "GET");
 
+  const intervalSales = await util.fetchData(
+    `${util.host}/live/interval-sales?brand_id=${brand_id}&start_datetime=${start_date}&end_datetime=${end_date}`,
+    "GET"
+  );
+
   const salePrice = orderData.reduce((acc, cur) => acc + cur.order_sale_price, 0);
   const discountPrice = orderData.reduce((acc, cur) => acc + cur.order_discount_price, 0);
-  const quantity = orderData.reduce((acc, cur) => acc + cur.order_quantity, 0);
 
   const orderDataSet = new Set(orderData.map((r) => r.order_id));
   const productDataSet = new Set(orderData.map((r) => r.product_id));
@@ -130,7 +134,7 @@ async function getSales(brand_id, start_date, end_date) {
     " 천원";
   const liveProductHtml = productsHtml(productArray);
   productsData.innerHTML = liveProductHtml;
-  liveChart();
+  liveChart(intervalSales);
 }
 
 function productsHtml(productArray) {
@@ -160,7 +164,10 @@ function productsHtml(productArray) {
   return returnData;
 }
 
-function liveChart() {
+function liveChart(intervalSales) {
+  const sales = intervalSales.map((sale) => sale.sales_price);
+  const orders = intervalSales.map((order) => order.order_count);
+
   const ctx2 = document.getElementById("chart-line").getContext("2d");
   const gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
   gradientStroke1.addColorStop(1, "rgba(203,12,159,0.2)");
@@ -179,7 +186,20 @@ function liveChart() {
   liveTimeChart = new Chart(ctx2, {
     type: "bar",
     data: {
-      labels: ["11:00", "11:10", "11:20", "11:30", "11:40", "11:50", "12:00", "12:10", "12:20"],
+      labels: [
+        "11:00",
+        "11:10",
+        "11:20",
+        "11:30",
+        "11:40",
+        "11:50",
+        "12:00",
+        "12:10",
+        "12:20",
+        "12:30",
+        "12:40",
+        "12:50",
+      ],
       datasets: [
         {
           label: "실판매",
@@ -191,7 +211,7 @@ function liveChart() {
           backgroundColor: gradientStroke1,
           fill: true,
           type: "line",
-          data: [0, 40, 100, 100, 150, 250, 400, 500, 500],
+          data: sales,
           maxBarThickness: 6,
           yAxisID: "y",
         },
@@ -204,7 +224,7 @@ function liveChart() {
           borderWidth: 3,
           backgroundColor: gradientStroke2,
           fill: true,
-          data: [0, 20, 40, 100, 150, 200, 300, 300, 400],
+          data: orders,
           maxBarThickness: 6,
           yAxisID: "y1",
         },
