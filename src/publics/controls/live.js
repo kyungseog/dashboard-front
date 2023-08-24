@@ -73,7 +73,7 @@ async function getLives() {
   let timerId = setTimeout(function tick() {
     const end_date = DateTime.now().toFormat("yyyy-LL-dd HH:mm:ss");
     getSales(data.brand_id, start_date, end_date);
-    timerId = setTimeout(tick, 5 * 60 * 1000);
+    timerId = setTimeout(tick, 2 * 60 * 1000);
   });
 
   // if(DateTime.now().toFormat('HH:mm:ss') > '13:00:00') { clearTimeout(timerId) };

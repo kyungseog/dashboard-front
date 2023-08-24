@@ -121,13 +121,33 @@ async function brandSales() {
 
   const dailySalesData = getPartialSum(dailySales, "profit_cell", "sales_price");
   const monthlySalesData = getPartialSum(monthlySales, "profit_cell", "sales_price");
+  const dateArray = [...new Set(weeklySales.map((date) => date.payment_date))].sort();
 
   let brandSalesData = "";
   for (let i = 0; i < monthlySalesData.length; i++) {
     const daily = dailySalesData.filter((row) => row.keyF === monthlySalesData[i].keyF);
-    // const weekly = weeklySales.filter((data) => data.profit_cell == monthlySalesData[i].keyF);
-    // const html ="<svg width="110" height="30"><rect x="${5 * i + 2 * i}" y="${max / heightFactor - d / heightFactor}" width="5" height="${d / heightFactor}" style="fill:#f72a2a;"></rect></svg>""
-    const max = Math.max.apply(null);
+
+    let weeklySumArray = [];
+    const weeklySalesData = weeklySales.filter((data) => data.profit_cell == monthlySalesData[i].keyF);
+    dateArray.forEach((data) => {
+      const sales = weeklySalesData
+        .filter((r) => r.payment_date == data)
+        .reduce((acc, cur) => acc + Number(cur.sales_price), 0);
+      weeklySumArray.push(sales);
+    });
+
+    const max = Math.max.apply(null, weeklySumArray);
+    const heightFactor = max / 30;
+
+    let htmlArray = "";
+    weeklySumArray.forEach((d, i) => {
+      const html = `<rect x="${10 * i + 4 * i}" y="${max / heightFactor - d / heightFactor}" width="10" height="${
+        d / heightFactor
+      }" style="fill:#BDBDBD;"></rect>`;
+      htmlArray = htmlArray + html;
+    });
+    const weeklyHtml = `<svg width="220" height="30">${htmlArray}</svg>`;
+
     let data = `<div class="col-md-6 mb-2">
       <div class="card">
         <div class="card-body pt-0 p-3 text-center">
@@ -136,6 +156,7 @@ async function brandSales() {
             Number(daily[0] == undefined ? 0 : daily[0].sumF)
           )}백만</span> / ${util.bmwon(monthlySalesData[i].sumF)}백만</h4>
           <hr class="horizontal dark my-3">
+          ${weeklyHtml}
         </div>
       </div>
     </div>`;
