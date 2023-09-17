@@ -141,12 +141,12 @@ async function brandSales() {
 
     let htmlArray = "";
     weeklySumArray.forEach((d, i) => {
-      const html = `<rect x="${10 * i + 4 * i}" y="${max / heightFactor - d / heightFactor}" width="10" height="${
+      const html = `<rect x="${20 * i + 4 * i}" y="${max / heightFactor - d / heightFactor}" width="20" height="${
         d / heightFactor
       }" style="fill:#BDBDBD;"></rect>`;
       htmlArray = htmlArray + html;
     });
-    const weeklyHtml = `<svg width="220" height="30">${htmlArray}</svg>`;
+    const weeklyHtml = `<svg width="188" height="30">${htmlArray}</svg>`;
 
     let data = `<div class="col-md-6 mb-2">
       <div class="card">

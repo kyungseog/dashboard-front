@@ -4,7 +4,7 @@ const express = require("express");
 const router = express.Router();
 
 router.get("/", (req, res) => {
-  res.render("korea");
+  res.render("dashboard");
 });
 
 router.get("/sign-in", (req, res) => {
